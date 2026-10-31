@@ -702,6 +702,8 @@ exit:
 static void
 nv_module_exit(nv_stack_t *sp)
 {
+    extern void l2_record_exit(void);
+    l2_record_exit();
     nv_module_state_exit(sp);
 
     rm_shutdown_rm(sp);
@@ -717,6 +719,8 @@ nv_module_exit(nv_stack_t *sp)
 static int __init
 nv_module_init(nv_stack_t **sp)
 {
+    extern int l2_record_init(void);
+    if (l2_record_init()) return -ENOMEM;
     int rc;
 
     rc = nv_module_resources_init(sp);

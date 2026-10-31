@@ -1,3 +1,5 @@
+
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -330,6 +332,7 @@ GspMsgQueuesInit
 
     *ppMQCollection             = pMQCollection;
     pMQCollection->sharedMemPA  = pPageTbl[0];
+    l2_record(5, pPageTbl[0], (void *)pVaKernel, sharedBufSize);
 
 done:
     return nvStatus;

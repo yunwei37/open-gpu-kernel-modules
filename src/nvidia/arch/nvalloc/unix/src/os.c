@@ -1,3 +1,5 @@
+
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1999-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -1904,6 +1906,7 @@ void osDevWriteReg008(
     }
 
     NV_PRIV_REG_WR08(pMapping->gpuNvAddr, thisAddress, thisValue);
+    l2_record(4, thisAddress, &thisValue, sizeof(thisValue));
 }
 
 void osDevWriteReg016(
@@ -1920,6 +1923,7 @@ void osDevWriteReg016(
     }
 
     NV_PRIV_REG_WR16(pMapping->gpuNvAddr, thisAddress, thisValue);
+    l2_record(4, thisAddress, &thisValue, sizeof(thisValue));
 }
 
 void osDevWriteReg032(
@@ -1944,6 +1948,7 @@ void osDevWriteReg032(
     }
 
     NV_PRIV_REG_WR32(pMapping->gpuNvAddr, thisAddress, thisValue);
+    l2_record(4, thisAddress, &thisValue, sizeof(thisValue));
 }
 
 NvU8 osDevReadReg008(
@@ -1961,6 +1966,7 @@ NvU8 osDevReadReg008(
     else
         retval = NV_PRIV_REG_RD08(pMapping->gpuNvAddr, thisAddress);
 
+    l2_record(3, thisAddress, &retval, sizeof(retval));
     return retval;
 }
 
@@ -1979,6 +1985,7 @@ NvU16 osDevReadReg016(
     else
         retval = NV_PRIV_REG_RD16(pMapping->gpuNvAddr, thisAddress);
 
+    l2_record(3, thisAddress, &retval, sizeof(retval));
     return retval;
 }
 
@@ -1994,7 +2001,8 @@ NvU32 osDevReadReg032(
     retval = vgpuDevReadReg032(pGpu, thisAddress, &vgpuHandled);
     if (vgpuHandled)
     {
-        return retval;
+        l2_record(3, thisAddress, &retval, sizeof(retval));
+    return retval;
     }
 
     if (thisAddress >= pMapping->gpuNvLength)
@@ -2004,6 +2012,7 @@ NvU32 osDevReadReg032(
     else
         retval = NV_PRIV_REG_RD32(pMapping->gpuNvAddr, thisAddress);
 
+    l2_record(3, thisAddress, &retval, sizeof(retval));
     return retval;
 }
 
