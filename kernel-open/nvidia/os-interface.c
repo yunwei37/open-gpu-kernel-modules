@@ -536,7 +536,7 @@ NV_STATUS NV_API_CALL os_memcpy_from_user(
     NvU32       n
 )
 {
-    return (copy_from_user(to, from, n) ? NV_ERR_INVALID_ADDRESS : NV_OK);
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 NV_STATUS NV_API_CALL os_memcpy_to_user(
@@ -545,7 +545,7 @@ NV_STATUS NV_API_CALL os_memcpy_to_user(
     NvU32       n
 )
 {
-    return (copy_to_user(to, from, n) ? NV_ERR_INVALID_ADDRESS : NV_OK);
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 void* NV_API_CALL os_mem_set(

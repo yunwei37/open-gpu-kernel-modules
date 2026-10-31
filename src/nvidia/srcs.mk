@@ -1100,3 +1100,6 @@ SRCS += src/libraries/utils/nvassert.c
 SRCS += ../common/uproc/os/libos-v3.1.0/lib/libdwarf.c
 SRCS += ../common/uproc/os/libos-v3.1.0/lib/libelf.c
 SRCS += ../common/uproc/os/libos-v3.1.0/lib/liblogdecode.c
+
+# ModelOS trusted kernel RM entry, no fd/ioctl transport.
+SRCS += arch/nvalloc/unix/src/modelos-rm.c

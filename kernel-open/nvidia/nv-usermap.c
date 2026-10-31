@@ -35,97 +35,7 @@ NV_STATUS NV_API_CALL nv_add_mapping_context_to_file(
     NvU32       fd
 )
 {
-    NV_STATUS status = NV_OK;
-    nv_alloc_mapping_context_t *nvamc = NULL;
-    nv_file_private_t *nvfp = NULL;
-    nv_linux_file_private_t *nvlfp = NULL;
-    nv_alloc_mapping_list_node_t **pfile_mapping_list = NULL;
-    nv_alloc_mapping_list_node_t *pNewNode = NULL;
-    nv_linux_state_t *nvl = NV_GET_NVL_FROM_NV_STATE(nv);
-    void *priv = NULL;
-
-    nvfp = nv_get_file_private(fd, NV_IS_CTL_DEVICE(nv), &priv);
-    if (nvfp == NULL)
-        return NV_ERR_INVALID_ARGUMENT;
-
-    nvlfp = nv_get_nvlfp_from_nvfp(nvfp);
-
-    status = os_alloc_mem((void**) &pNewNode, sizeof(nv_alloc_mapping_list_node_t));
-    if (status != NV_OK)
-    {
-        goto done;
-    }
-
-    nvamc = &pNewNode->context;
-    
-    os_mem_set((void*) pNewNode, 0, sizeof(nv_alloc_mapping_list_node_t));
-
-    if (NV_IS_CTL_DEVICE(nv))
-    {
-        nvamc->alloc = pAllocPriv;
-        nvamc->page_index = pageIndex;
-    }
-    else
-    {
-        if (NV_STATE_PTR(nvlfp->nvptr) != nv)
-        {
-            status = NV_ERR_INVALID_ARGUMENT;
-            goto done;
-        }
-
-        status = os_alloc_mem((void**) &nvamc->memArea.pRanges,
-            sizeof(MemoryRange) * nvuap->memArea.numRanges);
-
-        if (status != NV_OK)
-        {
-            os_free_mem(pNewNode);
-            nvamc->memArea.pRanges = NULL;
-            goto done;
-        }
-        nvamc->memArea.numRanges = nvuap->memArea.numRanges;
-        os_mem_copy(nvamc->memArea.pRanges, nvuap->memArea.pRanges,
-            sizeof(MemoryRange) * nvuap->memArea.numRanges);
-
-        if (nv_get_numa_status(nvl) == NV_NUMA_STATUS_ONLINE)
-        {
-            nvamc->page_array = nvuap->page_array;
-            nvamc->num_pages = nvuap->num_pages;
-        }
-        nvamc->access_start = nvuap->access_start;
-        nvamc->access_size = nvuap->access_size;
-    }
-
-    nvamc->prot = prot;
-    nvamc->valid = NV_TRUE;
-    nvamc->caching = nvuap->caching;
-
-    pfile_mapping_list = nv_acquire_file_va(nvfp, NV_TRUE);
-
-    if (*pfile_mapping_list == NULL)
-    {
-        *pfile_mapping_list = pNewNode;
-        if (NV_IS_CTL_DEVICE(nv))
-        {
-            nv_alloc_t *at = (nv_alloc_t *) nvamc->alloc;
-            atomic64_inc(&at->usage_count);
-        }
-    }
-    else
-    {
-        if (nvamc->memArea.pRanges != NULL)
-        {
-            os_free_mem(nvamc->memArea.pRanges);
-        }
-        os_free_mem(pNewNode);
-        status = NV_ERR_STATE_IN_USE;
-    }
-
-    nv_release_file_va(nvfp, NV_TRUE);
-
-done:
-    nv_put_file_private(priv);
-
-    return status;
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 NV_STATUS NV_API_CALL nv_alloc_user_mapping(
@@ -139,14 +49,7 @@ NV_STATUS NV_API_CALL nv_alloc_user_mapping(
     void      **ppPrivate
 )
 {
-    nv_alloc_t *at = pAllocPrivate;
-
-    if (at->flags.contig)
-        *pUserAddress = (at->page_table[0].phys_addr + (pageIndex * PAGE_SIZE) + pageOffset);
-    else
-        *pUserAddress = (at->page_table[pageIndex].phys_addr + pageOffset);
-
-    return NV_OK;
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 void NV_API_CALL nv_free_user_mapping(
@@ -156,4 +59,109 @@ void NV_API_CALL nv_free_user_mapping(
     void       *pPrivate
 )
 {
+
 }
+
+/* Kernel page cache attributes, independent of user VMAs. */
+int nv_encode_caching(
+    pgprot_t *prot,
+    NvU32     cache_type,
+    nv_memory_type_t memory_type
+)
+{
+    pgprot_t tmp;
+
+    if (prot == NULL)
+    {
+        tmp = __pgprot(0);
+        prot = &tmp;
+    }
+
+    switch (cache_type)
+    {
+        case NV_MEMORY_UNCACHED_WEAK:
+#if defined(NV_PGPROT_UNCACHED_WEAK)
+            *prot = NV_PGPROT_UNCACHED_WEAK(*prot);
+            break;
+#endif
+        case NV_MEMORY_UNCACHED:
+            *prot = (memory_type == NV_MEMORY_TYPE_SYSTEM) ?
+                    NV_PGPROT_UNCACHED(*prot) :
+                    NV_PGPROT_UNCACHED_DEVICE(*prot);
+            break;
+#if defined(NV_PGPROT_WRITE_COMBINED)
+        case NV_MEMORY_DEFAULT:
+        case NV_MEMORY_WRITECOMBINED:
+            if (NV_ALLOW_WRITE_COMBINING(memory_type))
+            {
+                *prot = NV_PGPROT_WRITE_COMBINED(*prot);
+                break;
+            }
+
+            /*
+             * If WC support is unavailable, we need to return an error
+             * code to the caller, but need not print a warning.
+             *
+             * For frame buffer memory, callers are expected to use the
+             * UC- memory type if we report WC as unsupported, which
+             * translates to the effective memory type WC if a WC MTRR
+             * exists or else UC.
+             */
+            return 1;
+#endif
+        case NV_MEMORY_CACHED:
+            if (!NV_ALLOW_CACHING(memory_type))
+            {
+                nv_printf(NV_DBG_ERRORS,
+                    "NVRM: VM: memory type %d does not allow caching!\n",
+                    memory_type);
+                return 1;
+            }
+            break;
+
+        default:
+            nv_printf(NV_DBG_ERRORS,
+                "NVRM: VM: cache type %d not supported for memory type %d!\n",
+                cache_type, memory_type);
+            return 1;
+    }
+    return 0;
+}
+
+void NV_API_CALL nv_acquire_mmap_lock(
+    nv_state_t *nv
+)
+{
+    nv_linux_state_t *nvl = NV_GET_NVL_FROM_NV_STATE(nv);
+    down(&nvl->mmap_lock);
+}
+
+void NV_API_CALL nv_release_mmap_lock(
+    nv_state_t *nv
+)
+{
+    nv_linux_state_t *nvl = NV_GET_NVL_FROM_NV_STATE(nv);
+    up(&nvl->mmap_lock);
+}
+
+NvBool NV_API_CALL nv_get_all_mappings_revoked_locked(
+    nv_state_t *nv
+)
+{
+    nv_linux_state_t *nvl = NV_GET_NVL_FROM_NV_STATE(nv);
+
+    // Caller must hold nvl->mmap_lock for all decisions based on this
+    return nvl->all_mappings_revoked;
+}
+
+
+/* No file-backed user mappings exist. Kernel mappings are explicitly owned. */
+NV_STATUS NV_API_CALL nv_revoke_gpu_mappings(nv_state_t *nv)
+{
+    nv_acquire_mmap_lock(nv);
+    NV_GET_NVL_FROM_NV_STATE(nv)->all_mappings_revoked = NV_TRUE;
+    nv_release_mmap_lock(nv);
+    return NV_OK;
+}
+void NV_API_CALL nv_set_safe_to_mmap_locked(nv_state_t *nv, NvBool safe)
+{ NV_GET_NVL_FROM_NV_STATE(nv)->safe_to_mmap = safe; }

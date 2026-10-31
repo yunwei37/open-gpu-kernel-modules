@@ -170,10 +170,8 @@ static DECLARE_BITMAP(nv_linux_minor_bitmap, NV_MINOR_DEVICE_NUMBER_REGULAR_MAX 
 nv_linux_state_t nv_ctl_device = { { 0 } };
 
 // cdev covering the region of regular (non-control) devices
-static struct cdev nv_linux_devices_cdev;
 
 // cdev covering the control device
-static struct cdev nv_linux_control_device_cdev;
 
 extern NvU32 nv_dma_remap_peer_mmio;
 
@@ -242,31 +240,13 @@ static int          nvos_free_alloc(nv_alloc_t *);
 
 static irqreturn_t   nvidia_isr_common_bh   (void *);
 static void          nvidia_isr_bh_unlocked (void *);
-static int           nvidia_ctl_open        (struct inode *, struct file *);
-static int           nvidia_ctl_close       (struct inode *, struct file *);
 
 const char *nv_device_name = MODULE_NAME;
 static const char *nvidia_stack_cache_name = MODULE_NAME "_stack_cache";
 static const char *nvidia_p2p_page_cache_name = MODULE_NAME "_p2p_page_cache";
 
-static int           nvidia_open           (struct inode *, struct file *);
-static int           nvidia_close          (struct inode *, struct file *);
-static unsigned int  nvidia_poll           (struct file *, poll_table *);
-static int           nvidia_ioctl          (struct inode *, struct file *, unsigned int, unsigned long);
-static long          nvidia_unlocked_ioctl (struct file *, unsigned int, unsigned long);
 
 /* character device entry points*/
-static struct file_operations nvidia_fops = {
-    .owner     = THIS_MODULE,
-    .poll      = nvidia_poll,
-    .unlocked_ioctl = nvidia_unlocked_ioctl,
-#if NVCPU_IS_X86_64 || NVCPU_IS_AARCH64
-    .compat_ioctl = nvidia_unlocked_ioctl,
-#endif
-    .mmap      = nvidia_mmap,
-    .open      = nvidia_open,
-    .release   = nvidia_close,
-};
 
 #if defined(CONFIG_PM)
 static int           nv_pmops_suspend          (struct device *dev);
@@ -531,35 +511,13 @@ exit:
 static void
 nvlink_drivers_exit(void)
 {
-#if NVCPU_IS_64_BITS
-    nvswitch_exit();
-#endif
-
     nvlink_core_exit();
 }
 
 static int __init
 nvlink_drivers_init(void)
 {
-    int rc = 0;
-
-    rc = nvlink_core_init();
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_INFO, "NVRM: NVLink core init failed.\n");
-        return rc;
-    }
-
-#if NVCPU_IS_64_BITS
-    rc = nvswitch_init();
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_INFO, "NVRM: NVSwitch init failed.\n");
-        nvlink_core_exit();
-    }
-#endif
-
-    return rc;
+    return nvlink_core_init();
 }
 
 static void
@@ -709,7 +667,7 @@ nv_module_exit(nv_stack_t *sp)
     nv_destroy_rsync_info();
     nvlink_drivers_exit();
 
-    nv_cap_drv_exit();
+
 
     nv_module_resources_exit(sp);
 }
@@ -725,12 +683,6 @@ nv_module_init(nv_stack_t **sp)
         return rc;
     }
 
-    rc = nv_cap_drv_init();
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: nv-cap-drv init failed.\n");
-        goto cap_drv_exit;
-    }
 
     rc = nvlink_drivers_init();
     if (rc < 0)
@@ -764,7 +716,7 @@ nvlink_exit:
     nvlink_drivers_exit();
 
 cap_drv_exit:
-    nv_cap_drv_exit();
+
     nv_module_resources_exit(*sp);
 
     return rc;
@@ -807,59 +759,13 @@ nv_assert_not_in_gpu_exclusion_list(
     return;
 }
 
-static int __init nv_caps_root_init(void)
-{
-    nvidia_caps_root = os_nv_cap_init("driver/" MODULE_NAME);
 
-    return (nvidia_caps_root == NULL) ? -ENOENT : 0;
-}
 
-static void nv_caps_root_exit(void)
-{
-    os_nv_cap_destroy_entry(nvidia_caps_root);
-    nvidia_caps_root = NULL;
-}
 
-static int nv_register_chrdev(
-    unsigned int minor,
-    unsigned int count,
-    struct cdev *cdev,
-    const char *name,
-    struct file_operations *fops
-)
-{
-    int rc;
 
-    rc = register_chrdev_region(MKDEV(NV_MAJOR_DEVICE_NUMBER, minor),
-            count, name);
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: register_chrdev_region() failed for %s!\n", name);
-        return rc;
-    }
 
-    cdev_init(cdev, fops);
-    rc = cdev_add(cdev, MKDEV(NV_MAJOR_DEVICE_NUMBER, minor), count);
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: cdev_add() failed for %s!\n", name);
-        unregister_chrdev_region(MKDEV(NV_MAJOR_DEVICE_NUMBER, minor), count);
-        return rc;
-    }
 
-    return rc;
-}
 
-static void nv_unregister_chrdev(
-    unsigned int minor,
-    unsigned int count,
-    struct cdev *cdev
-)
-{
-    cdev_del(cdev);
-    unregister_chrdev_region(MKDEV(NV_MAJOR_DEVICE_NUMBER, minor), count);
-}
 
 /*!
  * @brief Detect whether CDMM mode should be enabled based on
@@ -912,287 +818,29 @@ nv_detect_cdmm_mode(nvidia_stack_t *sp)
 
 static int __init nvidia_init_module(void)
 {
-    int rc;
-    NvU32 count;
-    NvBool warn_unprobed = NV_FALSE;
-    nvidia_stack_t *sp = NULL;
-    const NvBool is_nvswitch_present = os_is_nvswitch_present();
-    int num_pci_devices = 0, num_platform_devices = 0;
-
+    nv_stack_t *sp = NULL;
+    int rc, pci_count = 0, platform_count = 0;
     nv_memdbg_init();
-
-    rc = nv_procfs_init();
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: failed to initialize procfs.\n");
-        return rc;
+    if (!nvos_count_devices(&pci_count, &platform_count)) {
+        nv_printf(NV_DBG_ERRORS, "MODELOS_NVIDIA: built-in RM, no GPU in this VM\n");
+        return -ENODEV;
     }
-
-#if defined(CONFIG_PM)
-    if (NVreg_UseKernelSuspendNotifiers)
-    {
-        /* Register PM notifier for automatic suspend/resume */
-        rc = register_pm_notifier(&nv_pm_nb);
-        if (rc != 0)
-        {
-            nv_printf(NV_DBG_ERRORS, "NVRM: Failed to register PM notifier\n");
-            goto procfs_exit;
-        }
-    }
-#endif
-
-    rc = nv_caps_root_init();
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: failed to initialize capabilities.\n");
-        goto pm_notifier_exit;
-    }
-
-    rc = nv_caps_imex_init();
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: failed to initialize IMEX channels.\n");
-        goto caps_root_exit;
-    }
-
     rc = nv_module_init(&sp);
-    if (rc < 0)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: failed to initialize module.\n");
-        goto caps_imex_exit;
-    }
-
-    count = nvos_count_devices(&num_pci_devices, &num_platform_devices);
-    if ((count == 0) && (!is_nvswitch_present))
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: No NVIDIA GPU found.\n");
-        rc = -ENODEV;
-        goto module_exit;
-    }
-
+    if (rc < 0) return rc;
     nv_detect_cdmm_mode(sp);
-
-#if defined(NV_UVM_ENABLE)
-    rc = nv_uvm_init();
-    if (rc != 0)
-    {
-        goto module_exit;
-    }
-#endif
-
     nv_global_registry_keys_init(sp);
-
     rc = nv_drivers_init();
-    if (rc < 0)
-    {
-        goto uvm_exit;
-    }
-
-    warn_unprobed = (atomic_read(&num_probed_nv_devices) != count);
-    WARN_ON(atomic_read(&num_probed_nv_devices) > count);
-
-    if (num_platform_devices > 0 &&
-        !NV_SUPPORTS_PLATFORM_DISPLAY_DEVICE)
-    {
-        // RM was configured for tegra display but some conftests failed
-        nv_printf(NV_DBG_WARNINGS,
-            "NVRM: Failed to probe Tegra Display platform device.\n");
-        nv_printf(NV_DBG_WARNINGS,
-            "NVRM: This kernel is not compatible with Tegra Display.\n");
-
-        // Warn if any PCI GPUs weren't probed
-       if (count > atomic_read(&num_probed_nv_devices))
-            warn_unprobed = (count - atomic_read(&num_probed_nv_devices) != num_platform_devices);
-    }
-
-    if (warn_unprobed)
-    {
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: The NVIDIA probe routine was not called for %d device(s).\n",
-            count - atomic_read(&num_probed_nv_devices));
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: This can occur when another driver was loaded and \n"
-            "NVRM: obtained ownership of the NVIDIA device(s).\n");
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: Try unloading the conflicting kernel module (and/or\n"
-            "NVRM: reconfigure your kernel without the conflicting\n"
-            "NVRM: driver(s)), then try loading the NVIDIA kernel module\n"
-            "NVRM: again.\n");
-    }
-
-    if ((atomic_read(&num_probed_nv_devices) == 0) && (!is_nvswitch_present))
-    {
-        rc = -ENODEV;
-        nv_printf(NV_DBG_ERRORS, "NVRM: No NVIDIA devices probed.\n");
-        goto drivers_exit;
-    }
-
-    /*
-     * No locking needed: all probes have completed by this point
-     * (synchronous, or async with wait_for_device_probe() barrier above).
-     */
-    if (atomic_read(&num_probed_nv_devices) != atomic_read(&num_nv_devices))
-    {
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: The NVIDIA probe routine failed for %d device(s).\n",
-            atomic_read(&num_probed_nv_devices) - atomic_read(&num_nv_devices));
-    }
-
-    if ((atomic_read(&num_nv_devices) == 0) && (!is_nvswitch_present))
-    {
-        rc = -ENODEV;
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: None of the NVIDIA devices were initialized.\n");
-        goto drivers_exit;
-    }
-
-    nv_report_applied_patches();
-
-    nv_printf(NV_DBG_ERRORS, "NVRM: loading %s\n", pNVRM_ID);
-
-    /*
-     * Register char devices for both the region of regular devices
-     * as well as the control device.
-     *
-     * NOTE: THIS SHOULD BE DONE LAST.
-     */
-    rc = nv_register_chrdev(0, NV_MINOR_DEVICE_NUMBER_REGULAR_MAX + 1,
-            &nv_linux_devices_cdev, "nvidia", &nvidia_fops);
-    if (rc < 0)
-    {
-        goto drivers_exit;
-    }
-
-    rc = nv_register_chrdev(NV_MINOR_DEVICE_NUMBER_CONTROL_DEVICE, 1,
-            &nv_linux_control_device_cdev, "nvidiactl", &nvidia_fops);
-    if (rc < 0)
-    {
-        goto partial_chrdev_exit;
-    }
-
+    if (rc) { nv_module_exit(sp); return rc; }
     __nv_init_sp = sp;
-
+    nv_printf(NV_DBG_ERRORS, "MODELOS_NVIDIA: RM/PCI ready, no character devices\n");
     return 0;
-
-partial_chrdev_exit:
-    nv_unregister_chrdev(0, NV_MINOR_DEVICE_NUMBER_REGULAR_MAX + 1,
-        &nv_linux_devices_cdev);
-
-drivers_exit:
-    nv_drivers_exit();
-
-uvm_exit:
-#if defined(NV_UVM_ENABLE)
-    nv_uvm_exit();
-#endif
-
-module_exit:
-    nv_module_exit(sp);
-
-caps_imex_exit:
-    nv_caps_imex_exit();
-
-caps_root_exit:
-    nv_caps_root_exit();
-
-pm_notifier_exit:
-#if defined(CONFIG_PM)
-    if (NVreg_UseKernelSuspendNotifiers)
-    {
-        unregister_pm_notifier(&nv_pm_nb);
-    }
-
-procfs_exit:
-#endif
-    nv_procfs_exit();
-
-    return rc;
 }
 
-static void __exit nvidia_exit_module(void)
-{
-    nvidia_stack_t *sp = __nv_init_sp;
 
-    nv_unregister_chrdev(NV_MINOR_DEVICE_NUMBER_CONTROL_DEVICE, 1,
-        &nv_linux_control_device_cdev);
-    nv_unregister_chrdev(0, NV_MINOR_DEVICE_NUMBER_REGULAR_MAX + 1,
-        &nv_linux_devices_cdev);
 
-#if defined(NV_UVM_ENABLE)
-    nv_uvm_exit();
-#endif
 
-    nv_drivers_exit();
 
-    nv_module_exit(sp);
 
-    nv_caps_imex_exit();
-
-    nv_caps_root_exit();
-
-#if defined(CONFIG_PM)
-    if (NVreg_UseKernelSuspendNotifiers)
-    {
-        unregister_pm_notifier(&nv_pm_nb);
-    }
-#endif
-
-    nv_procfs_exit();
-
-    nv_memdbg_exit();
-}
-
-static void *nv_alloc_file_private(void)
-{
-    nv_linux_file_private_t *nvlfp;
-
-    NV_KZALLOC(nvlfp, sizeof(nv_linux_file_private_t));
-    if (!nvlfp)
-        return NULL;
-
-    init_waitqueue_head(&nvlfp->waitqueue);
-    NV_SPIN_LOCK_INIT(&nvlfp->fp_lock);
-
-    init_rwsem(&nvlfp->fileVaLock);
-    nvlfp->file_mapping_list = NULL;
-
-    return nvlfp;
-}
-
-static void nv_free_file_private(nv_linux_file_private_t *nvlfp)
-{
-    nvidia_event_t *nvet;
-
-    if (nvlfp == NULL)
-        return;
-
-    // Event teardown can race in-flight posts that still use nvfp.
-    while (READ_ONCE(nvlfp->nvfp.event_posting_refcount) != 0)
-        cond_resched();
-
-    for (nvet = nvlfp->event_data_head; nvet != NULL; nvet = nvlfp->event_data_head)
-    {
-        nvlfp->event_data_head = nvlfp->event_data_head->next;
-        NV_KFREE(nvet, sizeof(nvidia_event_t));
-    }
-
-    while (nvlfp->file_mapping_list != NULL)
-    {
-        nv_alloc_mapping_list_node_t *pNode = nvlfp->file_mapping_list;
-        nvlfp->file_mapping_list = pNode->pNext;
-        if (pNode->context.page_array != NULL)
-        {
-            os_free_mem(pNode->context.page_array);
-        }
-        if (pNode->context.memArea.pRanges != NULL)
-        {
-            os_free_mem(pNode->context.memArea.pRanges);
-        }
-        os_free_mem(pNode);
-    }
-
-    NV_KFREE(nvlfp, sizeof(nv_linux_file_private_t));
-}
 
 /*
  * Find the nv device with the given minor device number in the nv_linux_devices list.
@@ -1200,43 +848,13 @@ static void nv_free_file_private(nv_linux_file_private_t *nvlfp)
  * function does not automatically take nvl->ldata_lock, so the caller must do
  * that if required.
  */
-static nv_linux_state_t *find_minor_locked(NvU32 minor)
-{
-    nv_linux_state_t *nvl;
 
-    for (nvl = nv_linux_devices; nvl != NULL; nvl = nvl->next)
-    {
-        if (nvl->minor_num == minor)
-        {
-            return nvl;
-        }
-    }
-
-    return NULL;
-}
 
 /*
  * Find the nv device with the given minor device number in the nv_linux_devices list.
  * If found, nvl is returned with nvl->ldata_lock taken.
  */
-static nv_linux_state_t *find_minor(NvU32 minor)
-{
-    nv_linux_state_t *nvl;
 
-    if (minor > NV_MINOR_DEVICE_NUMBER_REGULAR_MAX)
-        return NULL;
-
-    LOCK_NV_LINUX_DEVICES();
-
-    nvl = find_minor_locked(minor);
-    if (nvl != NULL)
-    {
-        down(&nvl->ldata_lock);
-    }
-
-    UNLOCK_NV_LINUX_DEVICES();
-    return nvl;
-}
 
 /*
  * Search the global list of nv devices for the one with the given gpu_id.
@@ -1868,88 +1486,18 @@ static int nv_open_device(nv_state_t *nv, nvidia_stack_t *sp)
     return 0;
 }
 
-static void nv_init_mapping_revocation(nv_linux_state_t *nvl,
-                                       struct file *file,
-                                       nv_linux_file_private_t *nvlfp,
-                                       struct inode *inode)
-{
-    /* Set up struct address_space for use with unmap_mapping_range() */
-    address_space_init_once(&nvlfp->mapping);
-    nvlfp->mapping.host = inode;
-    nvlfp->mapping.a_ops = inode->i_mapping->a_ops;
-    file->f_mapping = &nvlfp->mapping;
-}
+
 
 /* Adds nvlfp to list of open files for mapping revocation */
-static void nv_add_open_file(nv_linux_state_t *nvl,
-                             nv_linux_file_private_t *nvlfp)
-{
-    nvlfp->nvptr = nvl;
 
-    /*
-     * nvl->open_files and other mapping revocation members in nv_linux_state_t
-     * are protected by nvl->mmap_lock instead of nvl->ldata_lock.
-     */
-    down(&nvl->mmap_lock);
-    list_add(&nvlfp->entry, &nvl->open_files);
-    up(&nvl->mmap_lock);
-}
 
 /*
  * Like nv_open_device but stores rc and adapter status in the given nvlfp.
  * Assumes nvl->ldata_lock is held.
  */
-static int nv_open_device_for_nvlfp(
-    nv_state_t *nv,
-    nvidia_stack_t *sp,
-    nv_linux_file_private_t *nvlfp
-)
-{
-    nvlfp->open_rc = nv_open_device(nv, sp);
 
-    if (nvlfp->open_rc == 0)
-    {
-        nvlfp->adapter_status = NV_OK;
-    }
-    else
-    {
-        nvlfp->adapter_status = rm_get_adapter_status_external(sp, nv);
-    }
 
-    return nvlfp->open_rc;
-}
 
-static void nvidia_open_deferred(void *nvlfp_raw)
-{
-    nv_linux_file_private_t *nvlfp = (nv_linux_file_private_t *) nvlfp_raw;
-    nv_linux_state_t *nvl = nvlfp->deferred_open_nvl;
-    int rc;
-
-    /*
-     * Deferred opens and device removal are synchronized via
-     * nvl->is_accepting_opens and nvl->open_q flushes so that nvl is
-     * guaranteed to outlive any pending open operation.
-     *
-     * So, it is safe to take nvl->ldata_lock here without holding
-     * any refcount or larger lock.
-     *
-     * Deferred opens and system suspend are synchronized by an explicit
-     * nvl->open_q flush before suspending.
-     *
-     * So, it is safe to proceed without nv_system_pm_lock here (in fact, it
-     * must not be taken to ensure nvl->open_q can make forward progress).
-     */
-    down(&nvl->ldata_lock);
-    rc = nv_open_device_for_nvlfp(NV_STATE_PTR(nvl), nvlfp->sp, nvlfp);
-
-    /* Only add open file tracking where nvl->usage_count is incremented */
-    if (rc == 0)
-        nv_add_open_file(nvl, nvlfp);
-
-    up(&nvl->ldata_lock);
-
-    complete_all(&nvlfp->open_complete);
-}
 
 /*
  * Tries to prepare (by taking nvl->ldata_lock) for an open in the foreground
@@ -1963,181 +1511,14 @@ static void nvidia_open_deferred(void *nvlfp_raw)
  * Returns 0 with nvl->ldata_lock taken if open can occur in the foreground.
  * Otherwise, returns non-zero (without nvl->ldata_lock taken).
  */
-static int nv_try_lock_foreground_open(
-    struct file *file,
-    nv_linux_state_t *nvl
-)
-{
-    nv_state_t *nv = NV_STATE_PTR(nvl);
 
-    if (NVreg_EnableNonblockingOpen && (file->f_flags & O_NONBLOCK))
-    {
-        if (down_trylock(&nvl->ldata_lock) == 0)
-        {
-            if (nv->flags & NV_FLAG_INITIALIZED)
-            {
-                /* device already initialized */
-                return 0;
-            }
-            else
-            {
-                /* device not initialized yet */
-                up(&nvl->ldata_lock);
-                return -EWOULDBLOCK;
-            }
-        }
-        else
-        {
-            /* unable to check nv->flags safely without blocking */
-            return -EWOULDBLOCK;
-        }
-    }
-
-    /* O_NONBLOCK not passed or non-blocking opens are disabled */
-    down(&nvl->ldata_lock);
-    return 0;
-}
 
 /*
 ** nvidia_open
 **
 ** nv driver open entry point.  Sessions are created here.
 */
-int
-nvidia_open(
-    struct inode *inode,
-    struct file *file
-)
-{
-    nv_state_t *nv = NULL;
-    nv_linux_state_t *nvl = NULL;
-    int rc = 0;
-    nv_linux_file_private_t *nvlfp = NULL;
-    nvidia_stack_t *sp = NULL;
 
-    nv_printf(NV_DBG_INFO, "NVRM: nvidia_open...\n");
-
-    nvlfp = nv_alloc_file_private();
-    if (nvlfp == NULL)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: failed to allocate file private!\n");
-        return -ENOMEM;
-    }
-
-    rc = nv_kmem_cache_alloc_stack(&sp);
-    if (rc != 0)
-    {
-        nv_free_file_private(nvlfp);
-        return rc;
-    }
-
-    NV_SET_FILE_PRIVATE(file, nvlfp);
-    nvlfp->sp = sp;
-
-    /* for control device, just jump to its open routine */
-    /* after setting up the private data */
-    if (nv_is_control_device(inode))
-    {
-        rc = nvidia_ctl_open(inode, file);
-        if (rc != 0)
-            goto failed;
-        return rc;
-    }
-
-    rc = nv_down_read_interruptible(&nv_system_pm_lock);
-    if (rc < 0)
-        goto failed;
-
-    /* nvptr will get set to actual nvl upon successful open */
-    nvlfp->nvptr = NULL;
-
-    init_completion(&nvlfp->open_complete);
-
-    LOCK_NV_LINUX_DEVICES();
-
-    nvl = find_minor_locked(NV_DEVICE_MINOR_NUMBER(inode));
-    if (nvl == NULL)
-    {
-        rc = -ENODEV;
-        UNLOCK_NV_LINUX_DEVICES();
-        up_read(&nv_system_pm_lock);
-        goto failed;
-    }
-
-    nv = NV_STATE_PTR(nvl);
-    nv_init_mapping_revocation(nvl, file, nvlfp, inode);
-
-    if (nv_try_lock_foreground_open(file, nvl) == 0)
-    {
-        /* Proceed in foreground */
-        /* nvl->ldata_lock is already taken at this point */
-
-        UNLOCK_NV_LINUX_DEVICES();
-
-        rc = nv_open_device_for_nvlfp(nv, nvlfp->sp, nvlfp);
-
-        /* Only add open file tracking where nvl->usage_count is incremented */
-        if (rc == 0)
-            nv_add_open_file(nvl, nvlfp);
-
-        up(&nvl->ldata_lock);
-
-        complete_all(&nvlfp->open_complete);
-    }
-    else
-    {
-        /* Defer to background kthread */
-        int item_scheduled = 0;
-
-        /*
-         * Take nvl->open_q_lock in order to check nvl->is_accepting_opens and
-         * schedule work items on nvl->open_q.
-         *
-         * Continue holding nv_linux_devices_lock (LOCK_NV_LINUX_DEVICES)
-         * until the work item gets onto nvl->open_q in order to ensure the
-         * lifetime of nvl.
-         */
-        down(&nvl->open_q_lock);
-
-        if (!nvl->is_accepting_opens)
-        {
-            /* Background kthread is not accepting opens, bail! */
-            rc = -EBUSY;
-            goto nonblock_end;
-        }
-
-        nvlfp->deferred_open_nvl = nvl;
-        nv_kthread_q_item_init(&nvlfp->open_q_item,
-                               nvidia_open_deferred,
-                               nvlfp);
-
-        item_scheduled = nv_kthread_q_schedule_q_item(
-                &nvl->open_q, &nvlfp->open_q_item);
-
-        if (!item_scheduled)
-        {
-            WARN_ON(!item_scheduled);
-            rc = -EBUSY;
-        }
-
-nonblock_end:
-        up(&nvl->open_q_lock);
-        UNLOCK_NV_LINUX_DEVICES();
-    }
-
-    up_read(&nv_system_pm_lock);
-failed:
-    if (rc != 0)
-    {
-        if (nvlfp != NULL)
-        {
-            nv_free_file_private(nvlfp);
-            NV_SET_FILE_PRIVATE(file, NULL);
-        }
-    }
-
-    return rc;
-}
 
 void nv_shutdown_adapter(nvidia_stack_t *sp,
                          nv_state_t *nv,
@@ -2311,186 +1692,13 @@ static void nv_close_device(nv_state_t *nv, nvidia_stack_t *sp)
 ** Primary driver close entry point.
 */
 
-static void
-nvidia_close_callback(
-   nv_linux_file_private_t *nvlfp
-)
-{
-    nv_linux_state_t *nvl;
-    nv_state_t *nv;
-    nvidia_stack_t *sp = nvlfp->sp;
-    NvBool bRemove = NV_FALSE;
 
-    nvl = nvlfp->nvptr;
-    if (nvl == NULL)
-    {
-        /*
-         * If nvlfp has no associated nvl device (meaning the open operation
-         * failed), then there is no state outside of nvlfp to cleanup.
-         */
 
-        nv_free_file_private(nvlfp);
-        nv_kmem_cache_free_stack(sp);
-        return;
-    }
 
-    nv = NV_STATE_PTR(nvl);
 
-    rm_cleanup_file_private(sp, nv, &nvlfp->nvfp);
 
-    down(&nvl->mmap_lock);
-    list_del(&nvlfp->entry);
-    up(&nvl->mmap_lock);
 
-    down(&nvl->ldata_lock);
-    nv_close_device(nv, sp);
 
-    bRemove = (!NV_IS_DEVICE_IN_SURPRISE_REMOVAL(nv)) &&
-              (atomic64_read(&nvl->usage_count) == 0) &&
-              rm_get_device_remove_flag(sp, nv->gpu_id);
-
-    nv_free_file_private(nvlfp);
-
-    /*
-     * In case of surprise removal of device, we have 2 cases as below:
-     *
-     * 1> When nvidia_pci_remove is scheduled prior to nvidia_close.
-     * nvidia_pci_remove will not destroy linux layer locks & nv linux state
-     * struct but will set variable nv->removed for nvidia_close.
-     * Once all the clients are closed, last nvidia_close will clean up linux
-     * layer locks and nv linux state struct.
-     *
-     * 2> When nvidia_close is scheduled prior to nvidia_pci_remove.
-     * This will be treated as normal working case. nvidia_close will not do
-     * any cleanup related to linux layer locks and nv linux state struct.
-     * nvidia_pci_remove when scheduled will do necessary cleanup.
-     */
-    if ((atomic64_read(&nvl->usage_count) == 0) && nv->removed)
-    {
-        nv_lock_destroy_locks(sp, nv);
-        NV_KFREE(nvl, sizeof(nv_linux_state_t));
-    }
-    else
-    {
-        up(&nvl->ldata_lock);
-
-        if (bRemove)
-        {
-            pci_stop_and_remove_bus_device(nvl->pci_dev);
-        }
-    }
-
-    nv_kmem_cache_free_stack(sp);
-}
-
-static void nvidia_close_deferred(void *data)
-{
-    nv_linux_file_private_t *nvlfp = data;
-
-    nv_wait_open_complete(nvlfp);
-
-    down_read(&nv_system_pm_lock);
-
-    nvidia_close_callback(nvlfp);
-
-    up_read(&nv_system_pm_lock);
-}
-
-int
-nvidia_close(
-    struct inode *inode,
-    struct file *file
-)
-{
-    int rc;
-    nv_linux_file_private_t *nvlfp = NV_GET_LINUX_FILE_PRIVATE(file);
-
-    nv_printf(NV_DBG_INFO,
-              "NVRM: nvidia_close on GPU with minor number %d\n",
-              NV_DEVICE_MINOR_NUMBER(inode));
-
-    if (nv_is_control_device(inode))
-    {
-        return nvidia_ctl_close(inode, file);
-    }
-
-    NV_SET_FILE_PRIVATE(file, NULL);
-
-    rc = nv_wait_open_complete_interruptible(nvlfp);
-    if (rc == 0)
-    {
-        rc = nv_down_read_interruptible(&nv_system_pm_lock);
-    }
-
-    if (rc == 0)
-    {
-        nvidia_close_callback(nvlfp);
-        up_read(&nv_system_pm_lock);
-    }
-    else
-    {
-        nv_kthread_q_item_init(&nvlfp->deferred_close_q_item,
-                               nvidia_close_deferred,
-                               nvlfp);
-        rc = nv_kthread_q_schedule_q_item(&nv_deferred_close_kthread_q,
-                                          &nvlfp->deferred_close_q_item);
-        WARN_ON(rc == 0);
-    }
-
-    return 0;
-}
-
-unsigned int
-nvidia_poll(
-    struct file *file,
-    poll_table  *wait
-)
-{
-    unsigned int mask = 0;
-    nv_linux_file_private_t *nvlfp = NV_GET_LINUX_FILE_PRIVATE(file);
-    unsigned long eflags;
-    nv_linux_state_t *nvl;
-    nv_state_t *nv;
-    NV_STATUS status;
-
-    if (!nv_is_control_device(NV_FILE_INODE(file)))
-    {
-        if (!nv_is_open_complete(nvlfp))
-        {
-            return POLLERR;
-        }
-    }
-
-    nvl = nvlfp->nvptr;
-    if (nvl == NULL)
-    {
-        return POLLERR;
-    }
-
-    nv = NV_STATE_PTR(nvl);
-
-    status = nv_check_gpu_state(nv);
-    if (status == NV_ERR_GPU_IS_LOST)
-    {
-        NV_DEV_PRINTF(NV_DBG_INFO, nv, "GPU is lost, skipping nvidia_poll\n");
-        return POLLHUP;
-    }
-
-    if ((file->f_flags & O_NONBLOCK) == 0)
-        poll_wait(file, &nvlfp->waitqueue, wait);
-
-    NV_SPIN_LOCK_IRQSAVE(&nvlfp->fp_lock, eflags);
-
-    if ((nvlfp->event_data_head != NULL) || nvlfp->dataless_event_pending)
-    {
-        mask = (POLLPRI | POLLIN);
-        nvlfp->dataless_event_pending = NV_FALSE;
-    }
-
-    NV_SPIN_UNLOCK_IRQRESTORE(&nvlfp->fp_lock, eflags);
-
-    return mask;
-}
 
 #define NV_CTL_DEVICE_ONLY(nv)                 \
 {                                              \
@@ -2514,507 +1722,15 @@ nvidia_poll(
  * Fills the ci array with the state of num_entries devices. Returns -EINVAL if
  * num_entries isn't big enough to hold all available devices.
  */
-static int nvidia_read_card_info(nv_ioctl_card_info_t *ci, size_t num_entries)
-{
-    nv_state_t *nv;
-    nv_linux_state_t *nvl;
-    size_t i = 0;
-    int rc = 0;
 
-    /* Clear each card's flags field the lazy way */
-    memset(ci, 0, num_entries * sizeof(ci[0]));
 
-    LOCK_NV_LINUX_DEVICES();
 
-    if (num_entries < atomic_read(&num_nv_devices))
-    {
-        rc = -EINVAL;
-        goto out;
-    }
 
-    for (nvl = nv_linux_devices; nvl && i < num_entries; nvl = nvl->next)
-    {
-        nv = NV_STATE_PTR(nvl);
 
-        /* We do not include excluded GPUs in the list... */
-        if ((nv->flags & NV_FLAG_EXCLUDE) != 0)
-            continue;
 
-        ci[i].valid              = NV_TRUE;
-        ci[i].pci_info.domain    = nv->pci_info.domain;
-        ci[i].pci_info.bus       = nv->pci_info.bus;
-        ci[i].pci_info.slot      = nv->pci_info.slot;
-        ci[i].pci_info.vendor_id = nv->pci_info.vendor_id;
-        ci[i].pci_info.device_id = nv->pci_info.device_id;
-        ci[i].gpu_id             = nv->gpu_id;
-        ci[i].interrupt_line     = nv->interrupt_line;
-        ci[i].reg_address        = nv->regs->cpu_address;
-        ci[i].reg_size           = nv->regs->size;
-        ci[i].minor_number       = nvl->minor_num;
-        if (dev_is_pci(nvl->dev))
-        {
-            ci[i].fb_address         = nv->fb->cpu_address;
-            ci[i].fb_size            = nv->fb->size;
-        }
-        i++;
-    }
 
-out:
-    UNLOCK_NV_LINUX_DEVICES();
-    return rc;
-}
 
-static NV_STATUS nv_validate_ioctl_data(unsigned int arg_cmd, size_t arg_size)
-{
-    int i;
-    NV_STATUS status;
-    static const struct {
-        unsigned int cmdKey;
-        size_t paramSize;
-        NvBool isArgumentArray;
-    } nv_ioctls_table[] = {
-    
-    #define _NV_IOCTL_ENTRY(_cmd, _type, _isArgumentArray) \
-        { .cmdKey = (_cmd & 0xFF), .paramSize = sizeof(_type), .isArgumentArray = _isArgumentArray}
-        /*nvidia ioctls*/
-        _NV_IOCTL_ENTRY(NV_ESC_CHECK_VERSION_STR, nv_ioctl_rm_api_version_t, NV_FALSE),
-        _NV_IOCTL_ENTRY(NV_ESC_IOCTL_XFER_CMD, nv_ioctl_xfer_t, NV_FALSE),
-        _NV_IOCTL_ENTRY(NV_ESC_ATTACH_GPUS_TO_FD, NvU32, NV_TRUE),
-        _NV_IOCTL_ENTRY(NV_ESC_CARD_INFO, nv_ioctl_card_info_t, NV_TRUE),
-        _NV_IOCTL_ENTRY(NV_ESC_QUERY_DEVICE_INTR, nv_ioctl_query_device_intr_t, NV_FALSE),
-        _NV_IOCTL_ENTRY(NV_ESC_SYS_PARAMS, nv_ioctl_sys_params_t, NV_FALSE),
-        _NV_IOCTL_ENTRY(NV_ESC_EXPORT_TO_DMABUF_FD, nv_ioctl_export_to_dma_buf_fd_t, NV_FALSE),
-        _NV_IOCTL_ENTRY(NV_ESC_WAIT_OPEN_COMPLETE, nv_ioctl_wait_open_complete_t, NV_FALSE),
-        _NV_IOCTL_ENTRY(NV_ESC_NUMA_INFO, nv_ioctl_numa_info_t, NV_FALSE),
-        _NV_IOCTL_ENTRY(NV_ESC_SET_NUMA_STATUS, nv_ioctl_set_numa_status_t, NV_FALSE),
-    };
 
-    status = rm_validate_ioctls(arg_cmd, arg_size);
-    if (status != NV_ERR_INVALID_COMMAND) 
-    {
-        return status;
-    }
-    
-    for (i = 0; i < NV_ARRAY_ELEMENTS(nv_ioctls_table); ++i) {
-        if (nv_ioctls_table[i].cmdKey == arg_cmd) {
-            const NvBool is_arg_size_valid = nv_ioctls_table[i].isArgumentArray
-                ? (arg_size != 0 && (arg_size % nv_ioctls_table[i].paramSize) == 0)
-                : (arg_size == nv_ioctls_table[i].paramSize);
-
-            if (is_arg_size_valid)
-            {
-                return NV_OK;
-            }
-
-            nv_printf(NV_DBG_ERRORS, "NVRM: invalid %d structure size, expected %d, got %d!\n",
-                      nv_ioctls_table[i].cmdKey, nv_ioctls_table[i].paramSize, arg_size);
-
-            return NV_ERR_INVALID_ARGUMENT;
-        }
-    }
-    // Unknown IOCTL case. Not found in any nv, rm and RM Tables.
-    nv_printf(NV_DBG_ERRORS, "NVRM:unknown NVRM ioctl command: 0x%x\n", arg_cmd);
-
-    return NV_ERR_INVALID_ARGUMENT;
-}
-
-static NV_STATUS nv_validate_ioctls(unsigned int cmd)
-{
-    return nv_validate_ioctl_data(_IOC_NR(cmd), _IOC_SIZE(cmd));
-}
-
-int
-nvidia_ioctl(
-    struct inode *inode,
-    struct file *file,
-    unsigned int cmd,
-    unsigned long i_arg)
-{
-    NV_STATUS rmStatus;
-    int status = 0;
-    nv_linux_file_private_t *nvlfp = NV_GET_LINUX_FILE_PRIVATE(file);
-    nv_linux_state_t *nvl;
-    nv_state_t *nv;
-    nvidia_stack_t *sp = NULL;
-    nv_ioctl_xfer_t ioc_xfer;
-    void *arg_ptr = (void *) i_arg;
-    void *arg_copy = NULL;
-    size_t arg_size = 0;
-    int arg_cmd;
-
-    if (nv_validate_ioctls(cmd) != NV_OK)
-    {
-        return -EINVAL;
-    }
-
-    nv_printf(NV_DBG_INFO, "NVRM: ioctl(0x%x, 0x%x, 0x%x)\n",
-        _IOC_NR(cmd), (unsigned int) i_arg, _IOC_SIZE(cmd));
-
-    if (!nv_is_control_device(inode))
-    {
-        status = nv_wait_open_complete_interruptible(nvlfp);
-        if (status != 0)
-            goto done_early;
-    }
-
-    arg_size = _IOC_SIZE(cmd);
-    arg_cmd  = _IOC_NR(cmd);
-
-    if (arg_cmd == NV_ESC_IOCTL_XFER_CMD)
-    {
-        if (copy_from_user(&ioc_xfer, arg_ptr, sizeof(ioc_xfer)))
-        {
-            nv_printf(NV_DBG_ERRORS,
-                    "NVRM: failed to copy in ioctl XFER data!\n");
-            status = -EFAULT;
-            goto done_early;
-        }
-
-        arg_cmd  = ioc_xfer.cmd;
-        arg_size = ioc_xfer.size;
-        arg_ptr  = NvP64_VALUE(ioc_xfer.ptr);
-
-        if (arg_size > NV_ABSOLUTE_MAX_IOCTL_SIZE)
-        {
-            nv_printf(NV_DBG_ERRORS, "NVRM: invalid ioctl XFER size!\n");
-            status = -EINVAL;
-            goto done_early;
-        }
-
-        if (nv_validate_ioctl_data(arg_cmd, arg_size) != NV_OK)
-        {
-            status = -EINVAL;
-            goto done_early;
-        }
-    }
-
-    NV_KMALLOC(arg_copy, arg_size);
-    if (arg_copy == NULL)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: failed to allocate ioctl memory\n");
-        status = -ENOMEM;
-        goto done_early;
-    }
-
-    if (copy_from_user(arg_copy, arg_ptr, arg_size))
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: failed to copy in ioctl data!\n");
-        status = -EFAULT;
-        goto done_early;
-    }
-
-    /*
-     * Handle NV_ESC_WAIT_OPEN_COMPLETE early as it is allowed to work
-     * with or without nvl.
-     */
-    if (arg_cmd == NV_ESC_WAIT_OPEN_COMPLETE)
-    {
-        nv_ioctl_wait_open_complete_t *params = arg_copy;
-
-        params->rc = nvlfp->open_rc;
-        params->adapterStatus = nvlfp->adapter_status;
-        goto done_early;
-    }
-
-    nvl = nvlfp->nvptr;
-    if (nvl == NULL)
-    {
-        status = -EIO;
-        goto done_early;
-    }
-
-    nv = NV_STATE_PTR(nvl);
-
-    status = nv_down_read_interruptible(&nv_system_pm_lock);
-    if (status < 0)
-    {
-        goto done_early;
-    }
-
-    status = nv_kmem_cache_alloc_stack(&sp);
-    if (status != 0)
-    {
-        nv_printf(NV_DBG_ERRORS, "NVRM: Unable to allocate altstack for ioctl\n");
-        goto done_pm_unlock;
-    }
-
-    rmStatus = nv_check_gpu_state(nv);
-    if (rmStatus == NV_ERR_GPU_IS_LOST)
-    {
-        nv_printf(NV_DBG_INFO, "NVRM: GPU is lost, skipping nvidia_ioctl\n");
-        status = -EINVAL;
-        goto done;
-    }
-
-    switch (arg_cmd)
-    {
-        case NV_ESC_QUERY_DEVICE_INTR:
-        {
-            nv_ioctl_query_device_intr_t *query_intr = arg_copy;
-
-            NV_ACTUAL_DEVICE_ONLY(nv);
-
-            if (!nv->regs->map)
-            {
-                status = -EINVAL;
-                goto done;
-            }
-
-            query_intr->intrStatus =
-                *(nv->regs->map + (NV_RM_DEVICE_INTR_ADDRESS >> 2));
-            query_intr->status = NV_OK;
-            break;
-        }
-
-        /* pass out info about the card */
-        case NV_ESC_CARD_INFO:
-        {
-            size_t num_arg_devices = arg_size / sizeof(nv_ioctl_card_info_t);
-
-            NV_CTL_DEVICE_ONLY(nv);
-
-            status = nvidia_read_card_info(arg_copy, num_arg_devices);
-            break;
-        }
-
-        case NV_ESC_ATTACH_GPUS_TO_FD:
-        {
-            size_t num_arg_gpus = arg_size / sizeof(NvU32);
-            size_t i;
-
-            NV_CTL_DEVICE_ONLY(nv);
-
-            if (num_arg_gpus == 0)
-            {
-                status = -EINVAL;
-                goto done;
-            }
-
-            /* atomically check and alloc attached_gpus */
-            down(&nvl->ldata_lock);
-
-            if (nvlfp->num_attached_gpus != 0)
-            {
-                up(&nvl->ldata_lock);
-                status = -EINVAL;
-                goto done;
-            }
-
-            NV_KMALLOC(nvlfp->attached_gpus, arg_size);
-            if (nvlfp->attached_gpus == NULL)
-            {
-                up(&nvl->ldata_lock);
-                status = -ENOMEM;
-                goto done;
-            }
-            memcpy(nvlfp->attached_gpus, arg_copy, arg_size);
-            nvlfp->num_attached_gpus = num_arg_gpus;
-
-            up(&nvl->ldata_lock);
-
-            for (i = 0; i < nvlfp->num_attached_gpus; i++)
-            {
-                if (nvlfp->attached_gpus[i] == 0)
-                {
-                    continue;
-                }
-
-                if (nvidia_dev_get(nvlfp->attached_gpus[i], sp, NV_FALSE /* reset_aware */))
-                {
-                    while (i--)
-                    {
-                        if (nvlfp->attached_gpus[i] != 0)
-                            nvidia_dev_put(nvlfp->attached_gpus[i], sp, NV_FALSE /* reset_aware */);
-                    }
-
-                    /* atomically free attached_gpus */
-                    down(&nvl->ldata_lock);
-
-                    NV_KFREE(nvlfp->attached_gpus, arg_size);
-                    nvlfp->num_attached_gpus = 0;
-
-                    up(&nvl->ldata_lock);
-
-                    status = -EINVAL;
-                    break;
-                }
-            }
-
-            break;
-        }
-
-        case NV_ESC_CHECK_VERSION_STR:
-        {
-            NV_CTL_DEVICE_ONLY(nv);
-
-            rmStatus = rm_perform_version_check(sp, arg_copy, arg_size);
-            status = ((rmStatus == NV_OK) ? 0 : -EINVAL);
-            break;
-        }
-
-        case NV_ESC_SYS_PARAMS:
-        {
-            nv_ioctl_sys_params_t *api = arg_copy;
-
-            NV_CTL_DEVICE_ONLY(nv);
-
-            /* numa_memblock_size should only be set once */
-            if (nvl->numa_memblock_size == 0)
-            {
-                nvl->numa_memblock_size = api->memblock_size;
-            }
-            else
-            {
-                status = (nvl->numa_memblock_size == api->memblock_size) ?
-                    0 : -EBUSY;
-                goto done;
-            }
-            break;
-        }
-
-        case NV_ESC_NUMA_INFO:
-        {
-            nv_ioctl_numa_info_t *api = arg_copy;
-            rmStatus = NV_OK;
-
-            NV_ACTUAL_DEVICE_ONLY(nv);
-
-            rmStatus = rm_get_gpu_numa_info(sp, nv, api);
-            if (rmStatus != NV_OK)
-            {
-                status = -EBUSY;
-                goto done;
-            }
-
-            api->status = nv_get_numa_status(nvl);
-            api->use_auto_online = nv_platform_use_auto_online(nvl);
-            api->memblock_size = nv_ctl_device.numa_memblock_size;
-            break;
-        }
-
-        case NV_ESC_SET_NUMA_STATUS:
-        {
-            nv_ioctl_set_numa_status_t *api = arg_copy;
-            rmStatus = NV_OK;
-
-            if (!NV_IS_SUSER())
-            {
-                status = -EACCES;
-                goto done;
-            }
-
-            NV_ACTUAL_DEVICE_ONLY(nv);
-
-            /*
-             * The nv_linux_state_t for the device needs to be locked
-             * in order to prevent additional open()/close() calls from
-             * manipulating the usage count for the device while we
-             * determine if NUMA state can be changed.
-             */
-            down(&nvl->ldata_lock);
-
-            if (nv_get_numa_status(nvl) != api->status)
-            {
-                if (api->status == NV_IOCTL_NUMA_STATUS_OFFLINE_IN_PROGRESS)
-                {
-                    /*
-                     * Only the current client should have an open file
-                     * descriptor for the device, to allow safe offlining.
-                     */
-                    if (atomic64_read(&nvl->usage_count) > 1)
-                    {
-                        status = -EBUSY;
-                        goto unlock;
-                    }
-                    else
-                    {
-                        /*
-                         * If this call fails, it indicates that RM
-                         * is not ready to offline memory, and we should keep
-                         * the current NUMA status of ONLINE.
-                         */
-                        rmStatus = rm_gpu_numa_offline(sp, nv);
-                        if (rmStatus != NV_OK)
-                        {
-                            status = -EBUSY;
-                            goto unlock;
-                        }
-                    }
-                }
-
-                status = nv_set_numa_status(nvl, api->status);
-                if (status < 0)
-                {
-                    if (api->status == NV_IOCTL_NUMA_STATUS_OFFLINE_IN_PROGRESS)
-                        (void) rm_gpu_numa_online(sp, nv);
-                    goto unlock;
-                }
-
-                if (api->status == NV_IOCTL_NUMA_STATUS_ONLINE)
-                {
-                    rmStatus = rm_gpu_numa_online(sp, nv);
-                    if (rmStatus != NV_OK)
-                    {
-                        status = -EBUSY;
-                        goto unlock;
-                    }
-                }
-            }
-
-unlock:
-            up(&nvl->ldata_lock);
-
-            break;
-        }
-
-        case NV_ESC_EXPORT_TO_DMABUF_FD:
-        {
-            nv_ioctl_export_to_dma_buf_fd_t *params = arg_copy;
-
-            NV_ACTUAL_DEVICE_ONLY(nv);
-
-            params->status = nv_dma_buf_export(nv, params);
-
-            break;
-        }
-
-        default:
-            rmStatus = rm_ioctl(sp, nv, &nvlfp->nvfp, arg_cmd, arg_copy, arg_size);
-            status = ((rmStatus == NV_OK) ? 0 : -EINVAL);
-            break;
-    }
-
-done:
-    nv_kmem_cache_free_stack(sp);
-
-done_pm_unlock:
-    up_read(&nv_system_pm_lock);
-
-done_early:
-    if (arg_copy != NULL)
-    {
-        if (status != -EFAULT)
-        {
-            if (copy_to_user(arg_ptr, arg_copy, arg_size))
-            {
-                nv_printf(NV_DBG_ERRORS, "NVRM: failed to copy out ioctl data\n");
-                status = -EFAULT;
-            }
-        }
-        NV_KFREE(arg_copy, arg_size);
-    }
-
-    return status;
-}
-
-long nvidia_unlocked_ioctl(
-    struct file *file,
-    unsigned int cmd,
-    unsigned long i_arg
-)
-{
-    return nvidia_ioctl(NV_FILE_INODE(file), file, cmd, i_arg);
-}
 
 irqreturn_t
 nvidia_isr_msix(
@@ -3287,112 +2003,13 @@ nvidia_rc_timer_callback(
 **
 ** nv control driver open entry point.  Sessions are created here.
 */
-static int
-nvidia_ctl_open(
-    struct inode *inode,
-    struct file *file
-)
-{
-    nv_linux_state_t *nvl = &nv_ctl_device;
-    nv_state_t *nv = NV_STATE_PTR(nvl);
-    nv_linux_file_private_t *nvlfp = NV_GET_LINUX_FILE_PRIVATE(file);
 
-    nv_printf(NV_DBG_INFO, "NVRM: nvidia_ctl_open\n");
-
-    down(&nvl->ldata_lock);
-
-    /* save the nv away in file->private_data */
-    nvlfp->nvptr = nvl;
-
-    if (atomic64_read(&nvl->usage_count) == 0)
-    {
-        nv->flags |= (NV_FLAG_INITIALIZED | NV_FLAG_CONTROL);
-    }
-
-    atomic64_inc(&nvl->usage_count);
-    up(&nvl->ldata_lock);
-
-    return 0;
-}
 
 
 /*
 ** nvidia_ctl_close
 */
-static int
-nvidia_ctl_close(
-    struct inode *inode,
-    struct file *file
-)
-{
-    nv_alloc_t *at, *next;
-    nv_linux_state_t *nvl = NV_GET_NVL_FROM_FILEP(file);
-    nv_state_t *nv = NV_STATE_PTR(nvl);
-    nv_linux_file_private_t *nvlfp = NV_GET_LINUX_FILE_PRIVATE(file);
-    nvidia_stack_t *sp = nvlfp->sp;
 
-    nv_printf(NV_DBG_INFO, "NVRM: nvidia_ctl_close\n");
-
-    down(&nvl->ldata_lock);
-    if (atomic64_dec_and_test(&nvl->usage_count))
-    {
-        nv->flags &= ~NV_FLAG_INITIALIZED;
-    }
-    up(&nvl->ldata_lock);
-
-    rm_cleanup_file_private(sp, nv, &nvlfp->nvfp);
-
-    // Populate free list from file nodes
-    {
-        nv_alloc_mapping_list_node_t *pNode = nvlfp->file_mapping_list;
-        while (pNode != NULL)
-        {
-            if (pNode->context.alloc != NULL)
-            {
-                nv_alloc_t *at = pNode->context.alloc;
-                nv_alloc_release(nvlfp, at);
-            }
-            pNode = pNode->pNext;
-        }
-    }
-
-    if (nvlfp->free_list != NULL)
-    {
-        at = nvlfp->free_list;
-        while (at != NULL)
-        {
-            next = at->next;
-            if (at->pid == os_get_current_process())
-                NV_PRINT_AT(NV_DBG_MEMINFO, at);
-            nv_free_pages(nv, at->num_pages,
-                          at->flags.contig,
-                          at->cache_type,
-                          (void *)at);
-            at = next;
-        }
-    }
-
-    if (nvlfp->num_attached_gpus != 0)
-    {
-        size_t i;
-
-        for (i = 0; i < nvlfp->num_attached_gpus; i++)
-        {
-            if (nvlfp->attached_gpus[i] != 0)
-                nvidia_dev_put(nvlfp->attached_gpus[i], sp, NV_FALSE /* reset_aware */);
-        }
-
-        NV_KFREE(nvlfp->attached_gpus, sizeof(NvU32) * nvlfp->num_attached_gpus);
-        nvlfp->num_attached_gpus = 0;
-    }
-
-    nv_free_file_private(nvlfp);
-    NV_SET_FILE_PRIVATE(file, NULL);
-
-    nv_kmem_cache_free_stack(sp);
-
-    return 0;
-}
 
 
 void NV_API_CALL
@@ -4312,60 +2929,6 @@ nv_file_private_t* NV_API_CALL nv_get_file_private(
     void **os_private
 )
 {
-    struct file *filp = NULL;
-    nv_linux_file_private_t *nvlfp = NULL;
-    dev_t rdev = 0;
-
-    filp = fget(fd);
-
-    if (filp == NULL || !NV_FILE_INODE(filp))
-    {
-        goto fail;
-    }
-
-    rdev = (NV_FILE_INODE(filp))->i_rdev;
-
-    if (MAJOR(rdev) != NV_MAJOR_DEVICE_NUMBER)
-    {
-        goto fail;
-    }
-
-    if (ctl)
-    {
-        if (MINOR(rdev) != NV_MINOR_DEVICE_NUMBER_CONTROL_DEVICE)
-            goto fail;
-    }
-    else
-    {
-        NvBool found = NV_FALSE;
-        int i;
-
-        for (i = 0; i <= NV_MINOR_DEVICE_NUMBER_REGULAR_MAX; i++)
-        {
-            if (test_bit(i, nv_linux_minor_bitmap) && (MINOR(rdev) == i))
-            {
-                found = NV_TRUE;
-                break;
-            }
-        }
-
-        if (!found)
-            goto fail;
-    }
-
-    nvlfp = NV_GET_LINUX_FILE_PRIVATE(filp);
-
-    *os_private = filp;
-
-    return &nvlfp->nvfp;
-
-fail:
-
-    if (filp != NULL)
-    {
-        fput(filp);
-    }
-
     return NULL;
 }
 
@@ -4373,8 +2936,7 @@ void NV_API_CALL nv_put_file_private(
     void *os_private
 )
 {
-    struct file *filp = os_private;
-    fput(filp);
+
 }
 
 int NV_API_CALL nv_get_event(
@@ -4383,42 +2945,7 @@ int NV_API_CALL nv_get_event(
     NvU32              *pending
 )
 {
-    nv_linux_file_private_t *nvlfp = nv_get_nvlfp_from_nvfp(nvfp);
-    nvidia_event_t *nvet;
-    unsigned long eflags;
-
-    //
-    // Note that the head read/write is not atomic when done outside of the
-    // spinlock, so this might not be a valid pointer at all. But if we read
-    // NULL here that means that the value indeed was NULL and we can bail
-    // early since there's no events. Otherwise, we have to do a proper read
-    // under a spinlock.
-    //
-    if (nvlfp->event_data_head == NULL)
-        return NV_ERR_GENERIC;
-
-    NV_SPIN_LOCK_IRQSAVE(&nvlfp->fp_lock, eflags);
-
-    nvet = nvlfp->event_data_head;
-    if (nvet == NULL)
-    {
-        NV_SPIN_UNLOCK_IRQRESTORE(&nvlfp->fp_lock, eflags);
-        return NV_ERR_GENERIC;
-    }
-
-    *event = nvet->event;
-
-    if (nvlfp->event_data_tail == nvet)
-        nvlfp->event_data_tail = NULL;
-    nvlfp->event_data_head = nvet->next;
-
-    *pending = (nvlfp->event_data_head != NULL);
-
-    NV_SPIN_UNLOCK_IRQRESTORE(&nvlfp->fp_lock, eflags);
-
-    NV_KFREE(nvet, sizeof(nvidia_event_t));
-
-    return NV_OK;
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 int NV_API_CALL nv_start_rc_timer(
@@ -5895,13 +4422,7 @@ NvU32 NV_API_CALL nv_get_dev_minor(nv_state_t *nv)
 
 NV_STATUS NV_API_CALL nv_acquire_fabric_mgmt_cap(int fd, int *duped_fd)
 {
-    *duped_fd = nvlink_cap_acquire(fd, NVLINK_CAP_FABRIC_MANAGEMENT);
-    if (*duped_fd < 0)
-    {
-        return NV_ERR_INSUFFICIENT_PERMISSIONS;
-    }
-
-    return NV_OK;
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 /*
@@ -6060,35 +4581,16 @@ void NV_API_CALL nv_audio_dynamic_power(
 #endif
 }
 
-static int nv_match_dev_state(const void *data, struct file *filp, unsigned fd)
-{
-    nv_linux_state_t *nvl = NULL;
 
-    if (filp == NULL ||
-        filp->f_op != &nvidia_fops ||
-        filp->private_data == NULL)
-        return 0;
-
-    nvl = NV_GET_NVL_FROM_FILEP(filp);
-    if (nvl == NULL)
-        return 0;
-
-    return (data == nvl);
-}
 
 NvBool NV_API_CALL nv_match_gpu_os_info(nv_state_t *nv, void *os_info)
 {
-    nv_linux_state_t *nvl = NV_GET_NVL_FROM_NV_STATE(nv);
-
-    return nv_match_dev_state(nvl, os_info, -1);
+    return NV_FALSE;
 }
 
 NvBool NV_API_CALL nv_is_gpu_accessible(nv_state_t *nv)
 {
-    struct files_struct *files = current->files;
-    nv_linux_state_t *nvl = NV_GET_NVL_FROM_NV_STATE(nv);
-
-    return !!iterate_fd(files, 0, nv_match_dev_state, nvl);
+    return NV_TRUE; /* Single trusted kernel owner; no fd identity. */
 }
 
 NvBool NV_API_CALL nv_platform_supports_s0ix(void)
@@ -6732,4 +5234,4 @@ void NV_API_CALL nv_trigger_gpu_flr(nv_state_t *nv)
 }
 
 module_init(nvidia_init_module);
-module_exit(nvidia_exit_module);
+

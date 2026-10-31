@@ -22,13 +22,13 @@
 
 SECTIONS {
 
-  .text   : { *(.text) *(.text.*) *(.gnu.linkonce.t.*) }
+  .text   : { *(.text)  }
 
-  .data   : { *(.data) *(.data.*) }
+  .data   : { *(.data) }
 
-  .rodata : { *(.rodata) *(.rodata.*) *(.gnu.linkonce.r.*) }
+  .rodata : { *(.rodata) }
 
-  .bss    : { *(.bss) *(.bss.*) }
+  .bss    : { *(.bss) }
 
   /* The rest of the sections ("orphaned sections") will just be copied from
      the input to the output */

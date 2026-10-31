@@ -330,6 +330,17 @@ check_symbol_exists() {
     # Check that the given symbol is available
 
     SYMBOL="$1"
+    # Built-ins bind global definitions, not module exports. This allowlist is
+    # for the pinned v6.18.57 kernel-only ABI; the final vmlinux link verifies
+    # every positive entry. User VMA/shmem/Tegra APIs are deliberately absent.
+    if get_configuration_option CONFIG_MODELOS_NVIDIA >/dev/null 2>&1; then
+        case "$SYMBOL" in
+            pci_find_host_bridge|__platform_driver_register|hrtimer_setup|timer_delete_sync|wait_for_device_probe)
+                return 0 ;;
+            *) return 1 ;;
+        esac
+    fi
+
     TAB='	'
 
     if [ ${OS_FREEBSD} -ne 1 ] ; then

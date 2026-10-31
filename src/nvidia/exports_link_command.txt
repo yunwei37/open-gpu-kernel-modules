@@ -214,3 +214,8 @@
 --undefined=rm_acpi_nvpcf_notify
 --undefined=rm_notify_gpu_addition
 --undefined=rm_notify_gpu_removal
+--undefined=modelos_rm_alloc
+--undefined=modelos_rm_control
+--undefined=modelos_rm_free
+--undefined=modelos_rm_map_cpu
+--undefined=modelos_rm_map_dma

@@ -39,7 +39,11 @@ extern "C" {
 #include "nvstatus.h"
 
 #include "nvgputypes.h"
+#if defined(NV_KERNEL_INTERFACE_LAYER)
+#include <rs_access.h>
+#else
 #include "rs_access.h"
+#endif
 #include "nvcfg_sdk.h"
 
 #if defined(NVRISCV_LIBFSP_BUILD)

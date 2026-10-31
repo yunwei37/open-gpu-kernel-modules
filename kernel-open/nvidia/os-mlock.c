@@ -153,64 +153,7 @@ NV_STATUS NV_API_CALL os_lookup_user_io_memory(
     NvU64 **pte_array
 )
 {
-    NV_STATUS rmStatus;
-    struct mm_struct *mm = current->mm;
-    struct vm_area_struct *vma;
-    unsigned long pfn;
-    NvUPtr start = (NvUPtr)address;
-    void **result_array;
-
-    if (!NV_MAY_SLEEP())
-    {
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: %s(): invalid context!\n", __FUNCTION__);
-        return NV_ERR_NOT_SUPPORTED;
-    }
-
-    rmStatus = os_alloc_mem((void **)&result_array, (page_count * sizeof(NvP64)));
-    if (rmStatus != NV_OK)
-    {
-        nv_printf(NV_DBG_ERRORS,
-                "NVRM: failed to allocate page table!\n");
-        return rmStatus;
-    }
-
-    nv_mmap_read_lock(mm);
-
-    // find the first VMA which intersects the interval start_addr..end_addr-1,
-    vma = find_vma_intersection(mm, start, start+1);
-
-    // Verify that the given address range is contained in a single vma
-    if ((vma == NULL) || ((vma->vm_flags & (VM_IO | VM_PFNMAP)) == 0) ||
-            !((vma->vm_start <= start) &&
-              ((vma->vm_end - start) >> PAGE_SHIFT >= page_count)))
-    {
-        nv_printf(NV_DBG_ERRORS,
-                "Cannot map memory with base addr 0x%llx and size of 0x%llx pages\n",
-                start ,page_count);
-        rmStatus = NV_ERR_INVALID_ADDRESS;
-        goto done;
-    }
-
-    if (nv_follow_pfn(vma, start, &pfn) < 0)
-    {
-        rmStatus = NV_ERR_INVALID_ADDRESS;
-        goto done;
-    }
-
-    rmStatus = get_io_ptes(vma, start, page_count, (NvU64 **)result_array);
-    if (rmStatus == NV_OK)
-        *pte_array = (NvU64 *)result_array;
-
-done:
-    nv_mmap_read_unlock(mm);
-
-    if (rmStatus != NV_OK)
-    {
-        os_free_mem(result_array);
-    }
-
-    return rmStatus;
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 NV_STATUS NV_API_CALL os_lock_user_pages(
@@ -220,92 +163,7 @@ NV_STATUS NV_API_CALL os_lock_user_pages(
     NvU32   flags
 )
 {
-    NV_STATUS rmStatus;
-    struct mm_struct *mm = current->mm;
-    struct page **user_pages;
-    NvU64 i;
-    NvU64 npages = page_count;
-    NvU64 pinned = 0;
-    unsigned int gup_flags = DRF_VAL(_LOCK_USER_PAGES, _FLAGS, _WRITE, flags) ? FOLL_WRITE : 0;
-    long ret;
-
-#if defined(NVCPU_FAMILY_X86) && defined(NV_FOLL_LONGTERM_PRESENT)
-    gup_flags |= FOLL_LONGTERM;
-#endif
-
-    if (!NV_MAY_SLEEP())
-    {
-        nv_printf(NV_DBG_ERRORS,
-            "NVRM: %s(): invalid context!\n", __FUNCTION__);
-        return NV_ERR_NOT_SUPPORTED;
-    }
-
-    rmStatus = os_alloc_mem((void **)&user_pages,
-            (page_count * sizeof(*user_pages)));
-    if (rmStatus != NV_OK)
-    {
-        nv_printf(NV_DBG_ERRORS,
-                "NVRM: failed to allocate page table!\n");
-        return rmStatus;
-    }
-
-    nv_mmap_read_lock(mm);
-    ret = NV_PIN_USER_PAGES((unsigned long)address,
-                            npages, gup_flags, user_pages);
-    if (ret > 0)
-    {
-        pinned = ret;
-    }
-#if defined(NVCPU_FAMILY_X86) && defined(NV_FOLL_LONGTERM_PRESENT) && \
-    (defined(NV_PIN_USER_PAGES_HAS_ARGS_VMAS) ||                      \
-     defined(NV_GET_USER_PAGES_HAS_VMAS_ARG))
-    //
-    // NV_PIN_USER_PAGES() passes in NULL for the vmas parameter (if required)
-    // in pin_user_pages() (or get_user_pages() if pin_user_pages() does not
-    // exist). For kernels which do not contain the commit 52650c8b466b
-    // (mm/gup: remove the vma allocation from gup_longterm_locked()), if
-    // FOLL_LONGTERM is passed in, this results in the kernel trying to kcalloc
-    // the vmas array, and since the limit for kcalloc is 4 MB, it results in
-    // NV_PIN_USER_PAGES() failing with ENOMEM if more than
-    // NV_NUM_PIN_PAGES_PER_ITERATION pages are requested on 64-bit systems.
-    //
-    // As a workaround, if we requested more than
-    // NV_NUM_PIN_PAGES_PER_ITERATION pages and failed with ENOMEM, try again
-    // with multiple calls of NV_NUM_PIN_PAGES_PER_ITERATION pages at a time.
-    //
-    else if ((ret == -ENOMEM) &&
-             (page_count > NV_NUM_PIN_PAGES_PER_ITERATION))
-    {
-        for (pinned = 0; pinned < page_count; pinned += ret)
-        {
-            npages = page_count - pinned;
-            if (npages > NV_NUM_PIN_PAGES_PER_ITERATION)
-            {
-                npages = NV_NUM_PIN_PAGES_PER_ITERATION;
-            }
-
-            ret = NV_PIN_USER_PAGES(((unsigned long) address) + (pinned * PAGE_SIZE),
-                                    npages, gup_flags, &user_pages[pinned]);
-            if (ret <= 0)
-            {
-                break;
-            }
-        }
-    }
-#endif
-    nv_mmap_read_unlock(mm);
-
-    if (pinned < page_count)
-    {
-        for (i = 0; i < pinned; i++)
-            NV_UNPIN_USER_PAGE(user_pages[i]);
-        os_free_mem(user_pages);
-        return NV_ERR_INVALID_ADDRESS;
-    }
-
-    *page_array = user_pages;
-
-    return NV_OK;
+    return NV_ERR_NOT_SUPPORTED;
 }
 
 NV_STATUS NV_API_CALL os_unlock_user_pages(
@@ -314,18 +172,5 @@ NV_STATUS NV_API_CALL os_unlock_user_pages(
     NvU32  flags
 )
 {
-    NvBool write = FLD_TEST_DRF(_LOCK_USER_PAGES, _FLAGS, _WRITE, _YES, flags);
-    struct page **user_pages = page_array;
-    NvU32 i;
-
-    for (i = 0; i < page_count; i++)
-    {
-        if (write)
-            set_page_dirty_lock(user_pages[i]);
-        NV_UNPIN_USER_PAGE(user_pages[i]);
-    }
-
-    os_free_mem(user_pages);
-
-    return NV_OK;
+    return NV_ERR_NOT_SUPPORTED;
 }

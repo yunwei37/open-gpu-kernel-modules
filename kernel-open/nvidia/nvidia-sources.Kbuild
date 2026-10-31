@@ -17,9 +17,7 @@ NVIDIA_SOURCES += nvidia/nv-acpi.c
 NVIDIA_SOURCES += nvidia/nv-cray.c
 NVIDIA_SOURCES += nvidia/nv-dma.c
 NVIDIA_SOURCES += nvidia/nv-i2c.c
-NVIDIA_SOURCES += nvidia/nv-mmap.c
 NVIDIA_SOURCES += nvidia/nv-p2p.c
-NVIDIA_SOURCES += nvidia/nv-procfs.c
 NVIDIA_SOURCES += nvidia/nv-usermap.c
 NVIDIA_SOURCES += nvidia/nv-vm.c
 NVIDIA_SOURCES += nvidia/nv-vtophys.c
@@ -36,10 +34,9 @@ NVIDIA_SOURCES += nvidia/nv-report-err.c
 NVIDIA_SOURCES += nvidia/nv-rsync.c
 NVIDIA_SOURCES += nvidia/nv-msi.c
 NVIDIA_SOURCES += nvidia/nv-caps.c
-NVIDIA_SOURCES += nvidia/nv-caps-imex.c
 NVIDIA_SOURCES += nvidia/nv-clk.c
 NVIDIA_SOURCES += nvidia/nv-host1x.c
-NVIDIA_SOURCES += nvidia/nv_uvm_interface.c
+
 NVIDIA_SOURCES += nvidia/libspdm_aead.c
 NVIDIA_SOURCES += nvidia/libspdm_ecc.c
 NVIDIA_SOURCES += nvidia/libspdm_hkdf.c
@@ -55,7 +52,9 @@ NVIDIA_SOURCES += nvidia/libspdm_ec.c
 NVIDIA_SOURCES += nvidia/libspdm_x509.c
 NVIDIA_SOURCES += nvidia/libspdm_rsa_ext.c
 NVIDIA_SOURCES += nvidia/nvlink_linux.c
-NVIDIA_SOURCES += nvidia/nvlink_caps.c
+
+
+
+
+
 NVIDIA_SOURCES += nvidia/linux_nvswitch.c
-NVIDIA_SOURCES += nvidia/procfs_nvswitch.c
-NVIDIA_SOURCES += nvidia/i2c_nvswitch.c

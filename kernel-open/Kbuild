@@ -98,14 +98,28 @@ quiet_cmd_symlink = SYMLINK $@
  cmd_symlink = ln -sf $(abspath $<) $@
 
 
+ifeq ($(CONFIG_MODELOS_NVIDIA),y)
+ NV_KERNEL_SOURCES := $(srctree)
+ NV_KERNEL_OUTPUT := $(abspath $(objtree))
+ NV_KERNEL_MODULES := nvidia
+ NV_SPECTRE_V2 := $(if $(CONFIG_MITIGATION_RETPOLINE),1,0)
+endif
+
 $(foreach _module, $(NV_KERNEL_MODULES), \
  $(eval include $(src)/$(_module)/$(_module).Kbuild))
 
 
+ccflags-y += -I$(obj)
 ccflags-y += -I$(src)/common/inc
 ccflags-y += -I$(src)
 ccflags-y += -Wall $(DEFINES) $(INCLUDES) -Wno-cast-qual -Wno-format-extra-args
-ccflags-y += -D__KERNEL__ -DMODULE -DNVRM
+ccflags-y += -D__KERNEL__ -DNVRM
+ifeq ($(CONFIG_MODELOS_NVIDIA),y)
+ obj-y += $(obj-m)
+ obj-m :=
+else
+ ccflags-y += -DMODULE
+endif
 ccflags-y += -DNV_VERSION_STRING=\"615.78.08\"
 
 # Include and link Tegra out-of-tree modules.
@@ -126,7 +140,7 @@ endif
 # filp_open() and kernel_read(). Disable the NV_FILESYSTEM_ACCESS_AVAILABLE
 # functionality that uses those functions when building for Android.
 
-PLATFORM_IS_ANDROID ?= 0
+PLATFORM_IS_ANDROID := 1
 
 ifeq ($(PLATFORM_IS_ANDROID),1)
  ccflags-y += -DNV_FILESYSTEM_ACCESS_AVAILABLE=0
@@ -161,7 +175,7 @@ ifeq ($(ARCH),x86_64)
  ccflags-y += -mno-red-zone -mcmodel=kernel
 endif
 
-ccflags-y += -DNV_UVM_ENABLE
+
 ccflags-y += $(call cc-option,-Werror=undef,)
 ccflags-y += -DNV_SPECTRE_V2=$(NV_SPECTRE_V2)
 ccflags-y += -DNV_KERNEL_INTERFACE_LAYER
@@ -311,6 +325,10 @@ BUILD_SANITY_CHECKS = \
  preempt_rt_sanity_check \
  vgpu_kvm_sanity_check \
  module_symvers_sanity_check
+
+ifeq ($(CONFIG_MODELOS_NVIDIA),y)
+ BUILD_SANITY_CHECKS := $(filter-out module_symvers_sanity_check,$(BUILD_SANITY_CHECKS))
+endif
 
 .PHONY: $(BUILD_SANITY_CHECKS)
 

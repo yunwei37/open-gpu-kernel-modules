@@ -7,6 +7,10 @@
 #
 
 include $(src)/nvidia/nvidia-sources.Kbuild
+ifeq ($(CONFIG_MODELOS_NVIDIA),y)
+ NVIDIA_SOURCES += nvidia/modelos-submit.c
+endif
+
 NVIDIA_OBJECTS = $(patsubst %.c,%.o,$(NVIDIA_SOURCES))
 
 obj-m += nvidia.o
@@ -53,6 +57,7 @@ nvidia-y += $(NVIDIA_BINARY_OBJECT_O)
 #
 
 NVIDIA_CFLAGS += -I$(src)/nvidia
+NVIDIA_CFLAGS += -I$(realpath $(src)/../src/common/sdk/nvidia/inc)
 NVIDIA_CFLAGS += -DNVIDIA_UNDEF_LEGACY_BIT_MACROS
 NVIDIA_CFLAGS += -DLIBSPDM_CONFIG=\"nvspdm_rmconfig.h\"
 

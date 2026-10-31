@@ -32,28 +32,5 @@ NV_STATUS NV_API_CALL os_match_mmap_offset(
     NvU64 *pPageIndex
 )
 {
-    nv_alloc_t *at = pAllocPrivate;
-    NvU64 i;
-
-    for (i = 0; i < at->num_pages; i++)
-    {
-        if (at->flags.contig)
-        {
-            if (offset == (at->page_table[0].phys_addr + (i * PAGE_SIZE)))
-            {
-                *pPageIndex = i;
-                return NV_OK;
-            }
-        }
-        else
-        {
-            if (offset == at->page_table[i].phys_addr)
-            {
-                *pPageIndex = i;
-                return NV_OK;
-            }
-        }
-    }
-
-    return NV_ERR_OBJECT_NOT_FOUND;
+    return NV_ERR_NOT_SUPPORTED;
 }

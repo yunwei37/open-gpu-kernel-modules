@@ -2582,7 +2582,7 @@ nv_pci_probe_body
      * the nvl object are completed and the device is added to the
      * nv_linux_devices global list
      */
-    nv_procfs_add_gpu(nvl);
+
 
 #if defined(NV_VGPU_KVM_BUILD)
     /*
@@ -2626,7 +2626,7 @@ nv_pci_probe_body
 #if defined(NV_VGPU_KVM_BUILD)
 err_free_all:
 #endif
-    nv_procfs_remove_gpu(nvl);
+
     LOCK_NV_LINUX_DEVICES();
     nv_linux_remove_device_locked(nvl);
     UNLOCK_NV_LINUX_DEVICES();
@@ -2867,7 +2867,7 @@ static void nv_pci_remove_helper(struct pci_dev *pci_dev, bool block_if_gpu_in_u
     rm_check_for_gpu_surprise_removal(sp, nv);
 
     /* Remove proc entry for this GPU */
-    nv_procfs_remove_gpu(nvl);
+
 
 #if defined(CONFIG_PM_DEVFREQ)
     nv_pci_tegra_unregister_devfreq(pci_dev);
@@ -2900,12 +2900,6 @@ static void nv_pci_remove_helper(struct pci_dev *pci_dev, bool block_if_gpu_in_u
         }
         nv_shutdown_adapter(sp, nv, nvl);
         nv_dev_free_stacks(nvl);
-    }
-
-    if (nvl->sysfs_config_file != NULL)
-    {
-        filp_close(nvl->sysfs_config_file, NULL);
-        nvl->sysfs_config_file = NULL;
     }
 
     if (atomic64_read(&nvl->usage_count) == 0)
