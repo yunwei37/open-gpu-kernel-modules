@@ -1212,14 +1212,11 @@ krcWatchdogInit_IMPL
         goto error;
     }
 
-    // Create an object that will require a trip through the graphics engine
-    status = pRmApi->AllocWithHandle(pRmApi,
-        hClient                        /* hClient */,
-        WATCHDOG_PUSHBUFFER_CHANNEL_ID /* hParent */,
-        WATCHDOG_GROBJ_ID              /* hObject */,
-        grObj,
-        NULL,
-        0);
+    /* Replay the known hardware 2D context; channel teardown owns its buffers.
+     * Keep watchdog controller/timer/recovery and the GPU object itself. */
+    extern NV_STATUS NV_API_CALL l2_replay_golden_object(OBJGPU *,NvHandle,NvHandle,NvHandle,NvU32);
+    if (grObj != FERMI_TWOD_A) { status = NV_ERR_NOT_SUPPORTED; goto error; }
+    status = l2_replay_golden_object(pGpu,hClient,WATCHDOG_PUSHBUFFER_CHANNEL_ID,WATCHDOG_GROBJ_ID,grObj);
     if (status != NV_OK)
     {
         NV_PRINTF(LEVEL_WARNING, "Unable to allocate class %x\n", grObj);
@@ -1251,23 +1248,10 @@ krcWatchdogInit_IMPL
     NV_ASSERT_OR_ELSE(pKernelChannel != NULL, status = NV_ERR_INVALID_CHANNEL;
                       goto error);
 
-    {
-        NvU32 classID;
-        RM_ENGINE_TYPE engineID;
+    /* 902D is a hardware GR class. SET_OBJECT uses the class ID directly;
+     * the generic query would look for the deliberately absent CPU child. */
+    pWatchdogChannelInfo->classEngineID = DRF_NUM(906F, _SET_OBJECT, _NVCLASS, grObj);
 
-        status = kchannelGetClassEngineID_HAL(pGpu, pKernelChannel,
-            WATCHDOG_GROBJ_ID,
-            &pWatchdogChannelInfo->classEngineID,
-            &classID,
-            &engineID);
-        if (status != NV_OK)
-        {
-            NV_PRINTF(LEVEL_WARNING,
-                      "Unable to get class engine ID %x\n",
-                      grObj);
-            goto error;
-        }
-    }
 
     pWatchdogState->hClient   = hClient;
     pWatchdogState->runlistId = kchannelGetRunlistId(pKernelChannel);
@@ -1651,4 +1635,45 @@ krcWatchdogWriteNotifierToGpfifo_IMPL
             pWatchdogState->notifierToken->info32);
     }
     SLI_LOOP_END;
+}
+
+/* Admission probe: submit the existing watchdog's 2D notification explicitly.
+ * Hold the GPU lock while observing FFFF->0, excluding CPU recovery/reset
+ * writes. This checks GPU execution, not the automatic 1-Hz timer policy. */
+#include "gpu_mgr/gpu_mgr.h"
+NV_STATUS NV_API_CALL l2_watchdog_roundtrip(void)
+{
+    OBJGPU *gpu;
+    KernelRc *rc;
+    KernelWatchdog *watchdog;
+    KernelWatchdogState *state=NULL;
+    NvU64 start,now;
+    NV_STATUS status=rmapiLockAcquire(RMAPI_LOCK_FLAGS_WRITE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)return status;
+    status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)goto api_out;
+    gpu=gpumgrGetGpu(0);
+    if(!gpu){status=NV_ERR_INVALID_DEVICE;goto done;}
+    rc=GPU_GET_KERNEL_RC(gpu);watchdog=GPU_GET_KERNEL_WATCHDOG(gpu);
+    if(!rc||!watchdog){status=NV_ERR_INVALID_STATE;goto done;}
+    state=&watchdog->watchdogState;
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_STATE flags=0x%x robust=%u power=%u\n",state->flags,rc->bRobustChannelsEnabled,gpuIsGpuFullPower(gpu));
+    if(!(state->flags&WATCHDOG_FLAGS_INITIALIZED)||!state->notifiers[0]){status=NV_ERR_INVALID_STATE;goto done;}
+    state->notifiers[0]->status=0xffff;
+    osFlushCpuWriteCombineBuffer();
+    krcWatchdogWriteNotifierToGpfifo(gpu,rc,watchdog);
+    osGetPerformanceCounter(&start);
+    while(MEM_RD16(&state->notifiers[0]->status)!=0){
+        osGetPerformanceCounter(&now);
+        if(now-start>10ULL*1000*1000*1000){status=NV_ERR_TIMEOUT;goto done;}
+        osDelayUs(100);
+    }
+    status=NV_OK;
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_DIRECT_PASS sentinel=0xffff completion=0x0\n");
+ done:
+    if(state && state->notifierToken && watchdog->watchdogChannelInfo.pControlGPFifo[0])NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_QUEUE token=0x%x get=%u put=%u\n",state->notifierToken->info32,MEM_RD32(&watchdog->watchdogChannelInfo.pControlGPFifo[0]->GPGet),MEM_RD32(&watchdog->watchdogChannelInfo.pControlGPFifo[0]->GPPut));
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_DIRECT_STATUS status=0x%x\n",status);
+    rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+ api_out:
+    rmapiLockRelease();return status;
 }
