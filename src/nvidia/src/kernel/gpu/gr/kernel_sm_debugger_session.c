@@ -330,7 +330,9 @@ ksmdbgssnConstruct_IMPL
                 return NV_ERR_INSUFFICIENT_PERMISSIONS;);
     }
 
-    pKernelSMDebuggerSession->pObject = dynamicCast(pGrResourceRef->pResource, KernelGraphicsObject);
+    /* This fixed catalog has no CPU KernelGraphicsObject registration.
+     * Preserve the invalid-object result without retaining its RTTI/constructor. */
+    pKernelSMDebuggerSession->pObject = NULL;
     if (pKernelSMDebuggerSession->pObject == NULL)
     {
         return NV_ERR_INVALID_OBJECT;
