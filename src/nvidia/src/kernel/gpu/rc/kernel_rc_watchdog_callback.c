@@ -20,6 +20,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
+
 #include "kernel/gpu/rc/kernel_rc.h"
 
 #include "kernel/diagnostics/journal.h"
@@ -268,6 +270,8 @@ krcWatchdog_IMPL
         }
         SLI_LOOP_END;
 
+        if (allNotifiersWritten)l2_record(17,0,NULL,0);
+
         if (!allNotifiersWritten)
         {
             if (currentTime >= pWatchdogPersistent->notifyLimitTime)
@@ -295,7 +299,8 @@ krcWatchdog_IMPL
                 SLI_LOOP_START(SLI_LOOP_FLAGS_NONE);
                 {
                     NvU32 subdeviceId = gpumgrGetSubDeviceInstanceFromGpu(pGpu);
-                    pWatchdogState->notifiers[subdeviceId]->status = 0;
+                    l2_record(18,0,NULL,0);
+                pWatchdogState->notifiers[subdeviceId]->status = 0;
                 }
                 SLI_LOOP_END;
 
@@ -346,6 +351,9 @@ krcWatchdog_IMPL
                 pWatchdogState->notifiers[subdeviceId]->status = 0xFFFF;
             }
             SLI_LOOP_END;
+
+            // Arm only after the CPU writes the nonzero sentinel.
+            l2_record(16,0,NULL,0);
 
             // Set the put pointer on our buffer.
             krcWatchdogWriteNotifierToGpfifo(pGpu, pKernelRc, pKernelWatchdog);

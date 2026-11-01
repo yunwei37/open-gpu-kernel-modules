@@ -3,10 +3,15 @@
 #include <linux/kernel.h>
 #include <linux/spinlock.h>
 #include <linux/string.h>
+#include <linux/delay.h>
+#include <linux/jiffies.h>
+#include <linux/errno.h>
 static DEFINE_SPINLOCK(mmio_lock);
 static DEFINE_SPINLOCK(count_lock);
 static u64 rpc[2][8192],other[16],overflow;
 static bool frozen;
+static bool watchdog_armed;
+static u32 watchdog_completions;
 static struct {u32 bytes;u8 data[1024];} promotes[16];
 static u32 promote_count;
 static struct {u32 id;bool used;u64 cpu,rpc,ok,failed;} classes[1024];
@@ -19,6 +24,9 @@ void l2_record(unsigned type,unsigned long long address,const void *data,unsigne
  spin_lock_irqsave(&count_lock,f);
  if(frozen)goto out;
  if(type<16)other[type]++;
+ if(type==16)watchdog_armed=true;
+ if(type==18)watchdog_armed=false;
+ if(type==17 && watchdog_armed){watchdog_completions++;watchdog_armed=false;}
  if((type==1||type==2)&&length>=32){
   memcpy(&function,(char *)data+12,4);
   if(function<8192)rpc[type-1][function]++;else overflow++;
@@ -61,4 +69,12 @@ void l2_counts_dump(void)
   for(j=0;j<promotes[i].bytes;j+=16)pr_info("L2_PROMOTE_HEX index=%u offset=%u data=%*phN\n",i,j,min(16u,promotes[i].bytes-j),promotes[i].data+j);
  }
  for(i=0;i<32768;i++)if(regs[i].used)pr_info("L2_NATIVE_REG offset=0x%x reads=%llu writes=%llu\n",regs[i].offset,regs[i].reads,regs[i].writes);
+}
+
+int l2_watchdog_wait(void)
+{
+ unsigned long deadline=jiffies+10*HZ;
+ while(!READ_ONCE(watchdog_completions)&&time_before(jiffies,deadline))msleep(20);
+ if(!READ_ONCE(watchdog_completions)){pr_err("L2_WATCHDOG_TIMEOUT\n");return -ETIMEDOUT;}
+ pr_info("L2_WATCHDOG_GPU_COMPLETE count=%u\n",READ_ONCE(watchdog_completions));return 0;
 }

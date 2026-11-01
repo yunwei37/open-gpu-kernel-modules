@@ -20,6 +20,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
+
 
 #include "kernel/core/core.h"
 #include "kernel/core/locks.h"
@@ -1548,7 +1550,8 @@ _watchdogInitPushbuffer
         MEM_WR32(
             &pWatchdogChannelInfo->pControlGPFifo[subdeviceId]->GPPut,
             1);
-        pWatchdogState->notifiers[subdeviceId]->status = 0;
+        l2_record(18,0,NULL,0);
+                pWatchdogState->notifiers[subdeviceId]->status = 0;
     }
     SLI_LOOP_END;
 
