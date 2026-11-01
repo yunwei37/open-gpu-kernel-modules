@@ -1,12 +1,7 @@
 // SPDX-License-Identifier: MIT
-/* Compile-checked submission sketch for the modified, built-in NVIDIA RM.
- * No ioctl, file descriptor, Linux user VMA, libcuda, or automatic GPU test.
- * Caller must own the GPU, serialize operations, validate a load-time manifest,
- * provide correctly attributed/mapped memory, and keep it until completion.
- */
+/* Direct RM SM120 store test. Built in; no file/ioctl/UVM/libcuda transport. */
 #include "nv-linux.h"
 #include "nv-proto.h"
-#include "ctrl/ctrl0000/ctrl0000gpu.h"
 #include "nvos.h"
 #include "class/cl0000.h"
 #include "class/cl0080.h"
@@ -15,270 +10,553 @@
 #include "class/cl90f1.h"
 #include "class/cla06c.h"
 #include "class/cl9067.h"
+#include "class/clc56f.h"
+#include "class/clc661.h"
+#include "class/clc361.h"
+#include "class/clc6c0.h"
 #include "alloc/alloc_channel.h"
 #include "ctrl/ctrla06c.h"
 #include "ctrl/ctrlc36f.h"
+#include "ctrl/ctrl0000/ctrl0000gpu.h"
 #include "ctrl/ctrl0080/ctrl0080gpu.h"
-#include "class/clc361.h"
-#include "class/clc6c0.h"
+#include "ctrl/ctrl2080/ctrl2080gr.h"
 #include <linux/elf.h>
+#include <linux/unaligned.h>
 #include <linux/io.h>
 #include <linux/ktime.h>
 #include <linux/delay.h>
+#include <linux/mutex.h>
+#include <linux/device/driver.h>
+#include "modelos-submit.h"
+#include "modelos-qmd5.h"
+#include "nvidia/modelos-test-cubin.h"
 
-extern NV_STATUS modelos_rm_alloc(nvidia_stack_t *,NvHandle,NvHandle,NvHandle *,NvU32,void *,NvU32);
-extern NV_STATUS modelos_rm_control(nvidia_stack_t *,NvHandle,NvHandle,NvU32,void *,NvU32);
-extern NV_STATUS modelos_rm_free(nvidia_stack_t *,NvHandle,NvHandle);
-extern NV_STATUS modelos_rm_map_cpu(nvidia_stack_t *,NvHandle,NvHandle,NvHandle,NvU64,NvU64,void **,NvU32);
-extern NV_STATUS modelos_rm_map_dma(nvidia_stack_t *,NVOS46_PARAMETERS *);
+extern NV_STATUS modelos_rm_alloc(nvidia_stack_t *, NvHandle, NvHandle, NvHandle *, NvU32, void *, NvU32);
+extern NV_STATUS modelos_rm_control(nvidia_stack_t *, NvHandle, NvHandle, NvU32, void *, NvU32);
+extern NV_STATUS modelos_rm_free(nvidia_stack_t *, NvHandle, NvHandle);
+extern NV_STATUS modelos_rm_map_cpu(nvidia_stack_t *, NvHandle, NvHandle, NvHandle, NvU64, NvU64, void **, NvU32);
+extern NV_STATUS modelos_rm_map_dma(nvidia_stack_t *, NVOS46_PARAMETERS *);
+extern NV_STATUS modelos_rm_unmap_cpu(nvidia_stack_t *, NvHandle, NvHandle, NvHandle, void *);
+extern NV_STATUS modelos_rm_unmap_dma(nvidia_stack_t *, NVOS47_PARAMETERS *);
 
+/* Public class IDs from NVIDIA open-gpu-doc (see modelos-qmd5.h provenance). */
+#define MODELOS_MEMORY_SYSTEM 0x3eU /* NV01_MEMORY_SYSTEM, generated g_allclasses.h */
+#define MODELOS_BLACKWELL_GPFIFO 0xc96fU
+#define MODELOS_BLACKWELL_COMPUTE_B 0xcfc0U
+#define ARENA_VA 0x40000000ULL
+#define ARENA_SIZE 0x10000U
+#define FIFO_ENTRIES 1024U
+#define USERD_OFF 0x2000U
+#define PUSH_OFF 0x4000U
+#define QMD_OFF 0x5000U
+#define CBUF_OFF 0x6000U
+#define OUTPUT_OFF 0x7000U
+#define DONE_OFF 0x7100U
+#define CODE_OFF 0x8000U
+#define TEST_VALUE 0x4d4f534bU
+#define TEST_SENTINEL 0xdeadbeefU
+#define SHARED_WINDOW 0x729400000000ULL
+#define LOCAL_WINDOW 0x729300000000ULL
+
+struct modelos_mem {
+    NvHandle handle;
+    void *cpu;
+    NvU64 va, size;
+    bool gpu_mapped;
+};
 struct modelos_nv {
     nvidia_stack_t *stack;
-    NvU32 gpu_id;
-    NvBool adapter_held;
-    NvHandle client,device,subdevice,vaspace,virtual_memory,group,ctxshare,channel,compute;
-    NvU32 token,compute_class;
-    NvHandle usermode;
-    void *doorbell_cpu;
+    NvU32 gpu_id, subindex, token, put;
+    bool adapter_held, in_flight;
+    NvHandle client, device, subdevice, vaspace, virtual_memory;
+    NvHandle group, ctxshare, channel, compute, usermode;
+    void *doorbell;
+    struct modelos_mem arena, error;
 };
+struct modelos_program {
+    const void *text, *constant;
+    size_t text_size, constant_size;
+    NvU32 registers, param_base;
+};
+static DEFINE_MUTEX(test_lock);
+static struct modelos_nv *quarantined;
+static bool boot_test;
+static unsigned int boot_gpu;
 
-static NV_STATUS alloc(struct modelos_nv *c,NvHandle parent,NvHandle *out,
-                       NvU32 cls,void *p,NvU32 n)
-{ return modelos_rm_alloc(c->stack,c->client,parent,out,cls,p,n); }
-
-static NV_STATUS modelos_nv_close(struct modelos_nv *c)
+static int rm_status(const char *stage, NV_STATUS status)
 {
-    /* RM recursively destroys child objects, GPU mappings and allocations.
-     * Caller MUST stop/drain the channel before invoking this on real hardware.
-     */
-    if (c->client) {
-        NV_STATUS st=modelos_rm_free(c->stack,c->client,c->client);
-        if (st!=NV_OK) return st; /* Retain ownership for caller recovery. */
-    }
-    if (c->adapter_held) nvidia_dev_put(c->gpu_id,c->stack,NV_FALSE);
-    if (c->stack) nv_kmem_cache_free_stack(c->stack);
-    memset(c,0,sizeof(*c));
-    return NV_OK;
+    if (status == NV_OK)
+        return 0;
+    pr_err("MODELOS_NVTEST RM_FAIL stage=%s status=0x%x\n", stage, status);
+    return -EIO;
+}
+#define RM_TRY(stage, expr) do { ret = rm_status(stage, (expr)); if (ret) goto fail; } while (0)
+
+static NV_STATUS alloc(struct modelos_nv *c, NvHandle parent, NvHandle *out,
+                       NvU32 cls, void *params, NvU32 bytes)
+{
+    return modelos_rm_alloc(c->stack, c->client, parent, out, cls, params, bytes);
 }
 
-static NV_STATUS modelos_nv_open(struct modelos_nv *c,NvU32 gpu_id)
+static int open_gpu(struct modelos_nv *c, NvU32 gpu_id)
 {
-    NV_STATUS st;
     NV0000_CTRL_GPU_GET_ID_INFO_V2_PARAMS info = {0};
     NV0080_ALLOC_PARAMETERS dev = {0};
     NV2080_ALLOC_PARAMETERS sub = {0};
     NV_VASPACE_ALLOCATION_PARAMETERS va = {0};
     NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS vm = {0};
-    NV_CHANNEL_GROUP_ALLOCATION_PARAMETERS grp = {0};
-    NV_CTXSHARE_ALLOCATION_PARAMETERS ctx = {0};
-    memset(c,0,sizeof(*c));
-    if (nv_kmem_cache_alloc_stack(&c->stack)) return NV_ERR_NO_MEMORY;
-#define TRY(expr) do { st=(expr); if (st!=NV_OK) goto fail; } while (0)
-    /* Kernel analogue of device open: initialize adapter/GSP/IRQs and hold
-     * the reset-counted device reference before creating RM resources. */
-    if (nvidia_dev_get(gpu_id,c->stack,NV_FALSE)) {
-        st=NV_ERR_INVALID_DEVICE; goto fail;
+    NV_CHANNEL_GROUP_ALLOCATION_PARAMETERS group = {0};
+    NV_CTXSHARE_ALLOCATION_PARAMETERS share = {0};
+    int ret;
+
+    if (nv_kmem_cache_alloc_stack(&c->stack))
+        return -ENOMEM;
+    ret = nvidia_dev_get(gpu_id, c->stack, NV_FALSE);
+    if (ret) {
+        pr_err("MODELOS_NVTEST adapter_get gpu=0x%x errno=%d\n", gpu_id, ret);
+        return ret;
     }
-    c->gpu_id=gpu_id; c->adapter_held=NV_TRUE;
-    TRY(alloc(c,0,&c->client,NV01_ROOT,&c->client,sizeof(c->client)));
-    info.gpuId=gpu_id;
-    TRY(modelos_rm_control(c->stack,c->client,c->client,
-        NV0000_CTRL_CMD_GPU_GET_ID_INFO_V2,&info,sizeof(info)));
-    dev.deviceId=info.deviceInstance; dev.hClientShare=c->client;
-    sub.subDeviceId=info.subDeviceInstance;
-    dev.vaMode=NV_DEVICE_ALLOCATION_VAMODE_OPTIONAL_MULTIPLE_VASPACES;
-    TRY(alloc(c,c->client,&c->device,NV01_DEVICE_0,&dev,sizeof(dev)));
-    TRY(alloc(c,c->device,&c->subdevice,NV20_SUBDEVICE_0,&sub,sizeof(sub)));
-    /* RM owns GPU page tables; ATS, UVM CPU-page faulting and external ownership
-     * are deliberately absent. This is GPU VA, not a Linux process mm. */
-    va.vaBase=0x1000; va.vaSize=(1ULL<<47)-0x1000;
-    TRY(alloc(c,c->device,&c->vaspace,FERMI_VASPACE_A,&va,sizeof(va)));
-    vm.hVASpace=c->vaspace; vm.offset=va.vaBase; vm.limit=(1ULL<<47)-1;
-    TRY(alloc(c,c->device,&c->virtual_memory,NV01_MEMORY_VIRTUAL,&vm,sizeof(vm)));
-    grp.engineType=0; /* NV2080_ENGINE_TYPE_GRAPHICS, as in the NV reference. */
-    TRY(alloc(c,c->device,&c->group,KEPLER_CHANNEL_GROUP_A,&grp,sizeof(grp)));
-    ctx.hVASpace=c->vaspace; ctx.flags=NV_CTXSHARE_ALLOCATION_FLAGS_SUBCONTEXT_ASYNC;
-    TRY(alloc(c,c->group,&c->ctxshare,FERMI_CONTEXT_SHARE_A,&ctx,sizeof(ctx)));
-    return NV_OK;
-fail: modelos_nv_close(c); return st;
-#undef TRY
+    c->adapter_held = true;
+    c->gpu_id = gpu_id;
+    RM_TRY("client", alloc(c, 0, &c->client, NV01_ROOT, &c->client, sizeof(c->client)));
+    info.gpuId = gpu_id;
+    RM_TRY("gpu-id", modelos_rm_control(c->stack, c->client, c->client,
+        NV0000_CTRL_CMD_GPU_GET_ID_INFO_V2, &info, sizeof(info)));
+    if (info.subDeviceInstance >= NV_MAX_SUBDEVICES)
+        return -ERANGE;
+    c->subindex = info.subDeviceInstance;
+    dev.deviceId = info.deviceInstance;
+    dev.hClientShare = c->client;
+    dev.vaMode = NV_DEVICE_ALLOCATION_VAMODE_OPTIONAL_MULTIPLE_VASPACES;
+    sub.subDeviceId = info.subDeviceInstance;
+    RM_TRY("device", alloc(c, c->client, &c->device, NV01_DEVICE_0, &dev, sizeof(dev)));
+    RM_TRY("subdevice", alloc(c, c->device, &c->subdevice, NV20_SUBDEVICE_0, &sub, sizeof(sub)));
+    /* RM-owned, fully mapped VA; no ATS/external UVM ownership/page faults. */
+    va.vaBase = 0x1000;
+    va.vaSize = (1ULL << 47) - 0x1000;
+    RM_TRY("vaspace", alloc(c, c->device, &c->vaspace, FERMI_VASPACE_A, &va, sizeof(va)));
+    vm.hVASpace = c->vaspace;
+    vm.offset = va.vaBase;
+    vm.limit = (1ULL << 47) - 1;
+    RM_TRY("virtual-memory", alloc(c, c->device, &c->virtual_memory, NV01_MEMORY_VIRTUAL, &vm, sizeof(vm)));
+    group.hVASpace = c->vaspace;
+    group.engineType = 0; /* NV2080_ENGINE_TYPE_GRAPHICS */
+    RM_TRY("channel-group", alloc(c, c->device, &c->group, KEPLER_CHANNEL_GROUP_A, &group, sizeof(group)));
+    share.hVASpace = c->vaspace;
+    share.flags = NV_CTXSHARE_ALLOCATION_FLAGS_SUBCONTEXT_ASYNC;
+    RM_TRY("context-share", alloc(c, c->group, &c->ctxshare, FERMI_CONTEXT_SHARE_A, &share, sizeof(share)));
+    return 0;
+fail:
+    return ret;
 }
 
-/* Query advertised classes before choosing GPFIFO/compute/USERMODE IDs. */
-static NV_STATUS modelos_nv_classes(struct modelos_nv *c,NvU32 *classes,NvU32 *count)
+static int require_blackwell(struct modelos_nv *c, NvU32 *sass_version)
 {
-    NV0080_CTRL_GPU_GET_CLASSLIST_PARAMS p = {0}; NV_STATUS st;
-    if (!count) return NV_ERR_INVALID_ARGUMENT;
-    p.numClasses=classes ? *count : 0;
-    p.classList=NV_PTR_TO_NvP64(classes);
-    st=modelos_rm_control(c->stack,c->client,c->device,
-        NV0080_CTRL_CMD_GPU_GET_CLASSLIST,&p,sizeof(p));
-    *count=p.numClasses; return st;
-}
-/* USERMODE is NVIDIA's hardware doorbell class name; mapping is kernel-only. */
-static NV_STATUS modelos_nv_doorbell(struct modelos_nv *c,NvU32 cls)
-{
-    NV_STATUS st=alloc(c,c->subdevice,&c->usermode,cls,NULL,0);
-    if (st!=NV_OK) return st;
-    return modelos_rm_map_cpu(c->stack,c->client,c->subdevice,c->usermode,
-        0,0x10000,&c->doorbell_cpu,NVOS33_FLAGS_ACCESS_WRITE_ONLY);
-}
+    NV0080_CTRL_GPU_GET_CLASSLIST_PARAMS list = {0};
+    NV2080_CTRL_GR_INFO gr = { .index = NV2080_CTRL_GR_INFO_INDEX_SM_VERSION };
+    NV2080_CTRL_GR_GET_INFO_PARAMS info = { .grInfoListSize = 1, .grInfoList = NV_PTR_TO_NvP64(&gr) };
+    NvU32 *classes = NULL, n, found = 0;
+    int ret;
 
-static NV_STATUS modelos_nv_memory(struct modelos_nv *c,NvU32 memory_class,
-     NV_MEMORY_ALLOCATION_PARAMS *params,NvU64 gpu_va,NvHandle *memory,
-     void **cpu,NvU32 cpu_map_flags)
-{
-    NVOS46_PARAMETERS map = {0}; NV_STATUS st;
-    if (!params->size || gpu_va > U64_MAX-params->size) return NV_ERR_INVALID_ARGUMENT;
-    params->owner=c->client;
-    st=alloc(c,c->device,memory,memory_class,params,sizeof(*params));
-    if (st!=NV_OK) return st;
-    map.hClient=c->client; map.hDevice=c->device; map.hDma=c->virtual_memory;
-    map.hMemory=*memory; map.length=params->size; map.dmaOffset=gpu_va;
-    st=modelos_rm_map_dma(c->stack,&map);
-    if (st!=NV_OK) goto fail;
-    /* Kernel mapping flag is mandatory. Caller additionally selects UC/WC
-     * consistent with the RM allocation and host/device architecture. */
-    st=modelos_rm_map_cpu(c->stack,c->client,c->subdevice,*memory,0,params->size,cpu,
-       cpu_map_flags & ~(1U << 14));
-    if (st==NV_OK) return st;
-fail: modelos_rm_free(c->stack,c->client,*memory); *memory=0; return st;
-}
-
-static NV_STATUS modelos_nv_channel(struct modelos_nv *c,NvU32 fifo_class,
-    NvU32 compute_class,NV_CHANNELGPFIFO_ALLOCATION_PARAMETERS *fifo)
-{
-    NVA06C_CTRL_GPFIFO_SCHEDULE_PARAMS schedule = {0};
-    NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS token = {0};
-    NV_STATUS st;
-    if (!is_power_of_2(fifo->gpFifoEntries) || !fifo->hUserdMemory[0])
-        return NV_ERR_INVALID_ARGUMENT;
-    fifo->hContextShare=c->ctxshare;
-    st=alloc(c,c->group,&c->channel,fifo_class,fifo,sizeof(*fifo));
-    if (st!=NV_OK) return st;
-    st=alloc(c,c->channel,&c->compute,compute_class,NULL,0);
-    if (st!=NV_OK) return st;
-    schedule.bEnable=NV_TRUE;
-    st=modelos_rm_control(c->stack,c->client,c->group,NVA06C_CTRL_CMD_GPFIFO_SCHEDULE,
-                          &schedule,sizeof(schedule));
-    if (st!=NV_OK) return st;
-    st=modelos_rm_control(c->stack,c->client,c->channel,
-          NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN,&token,sizeof(token));
-    if (st==NV_OK) { c->token=token.workSubmitToken; c->compute_class=compute_class; }
-    return st;
-}
-
-/* Restricted cubin extraction: accept one already-linked, named text section.
- * A load-time manifest supplies .nv.info resource counts and constant data.
- * Full cubin relocation/linking is NOT implemented by this sketch. */
-static int modelos_nv_cubin_text(const void *blob,size_t n,const char *section,
-                                 void *code,size_t capacity,size_t *written)
-{
-    const Elf64_Ehdr *eh=blob; const Elf64_Shdr *sh; const char *strings;
-    unsigned int i;
-    if (n<sizeof(*eh) || memcmp(eh->e_ident,ELFMAG,SELFMAG) ||
-        eh->e_ident[EI_CLASS]!=ELFCLASS64 || eh->e_ident[EI_DATA]!=ELFDATA2LSB ||
-        eh->e_machine!=190 || eh->e_shentsize!=sizeof(*sh) ||
-        eh->e_shoff>n || eh->e_shnum>(n-eh->e_shoff)/sizeof(*sh) ||
-        eh->e_shstrndx>=eh->e_shnum) return -EINVAL;
-    sh=(const void *)((const char *)blob+eh->e_shoff);
-    if (sh[eh->e_shstrndx].sh_offset>n || sh[eh->e_shstrndx].sh_size>
-        n-sh[eh->e_shstrndx].sh_offset) return -EINVAL;
-    strings=(const char *)blob+sh[eh->e_shstrndx].sh_offset;
-    for (i=0;i<eh->e_shnum;i++) {
-        if (sh[i].sh_type==SHT_REL || sh[i].sh_type==SHT_RELA) return -EOPNOTSUPP;
-        if (sh[i].sh_name>=sh[eh->e_shstrndx].sh_size) return -EINVAL;
-        if (!memchr(strings+sh[i].sh_name,0,sh[eh->e_shstrndx].sh_size-sh[i].sh_name)) return -EINVAL;
+    RM_TRY("class-count", modelos_rm_control(c->stack, c->client, c->device,
+        NV0080_CTRL_CMD_GPU_GET_CLASSLIST, &list, sizeof(list)));
+    if (!list.numClasses || list.numClasses > 4096)
+        return -ERANGE;
+    classes = kcalloc(list.numClasses, sizeof(*classes), GFP_KERNEL);
+    if (!classes)
+        return -ENOMEM;
+    n = list.numClasses;
+    list.classList = NV_PTR_TO_NvP64(classes);
+    RM_TRY("classes", modelos_rm_control(c->stack, c->client, c->device,
+        NV0080_CTRL_CMD_GPU_GET_CLASSLIST, &list, sizeof(list)));
+    if (list.numClasses > n) { ret = -ERANGE; goto fail; }
+    for (n = 0; n < list.numClasses; n++) {
+        if (classes[n] == MODELOS_BLACKWELL_GPFIFO) found |= 1;
+        if (classes[n] == MODELOS_BLACKWELL_COMPUTE_B) found |= 2;
+        if (classes[n] == HOPPER_USERMODE_A) found |= 4;
     }
-    for (i=0;i<eh->e_shnum;i++) if (!strcmp(strings+sh[i].sh_name,section)) {
-        if (!(sh[i].sh_flags&SHF_EXECINSTR) || sh[i].sh_offset>n ||
-            sh[i].sh_size>n-sh[i].sh_offset || sh[i].sh_size>capacity) return -EINVAL;
-        if (sh[i].sh_size>SIZE_MAX-8192 || round_up(sh[i].sh_size,4096)+4096>capacity) return -ENOSPC;
-        memset(code,0,round_up(sh[i].sh_size,4096)+4096);
-        memcpy(code,(const char *)blob+sh[i].sh_offset,sh[i].sh_size);
-        *written=sh[i].sh_size; return 0;
-    }
-    return -ENOENT;
+    if (found != 7) { ret = -EOPNOTSUPP; goto fail; }
+    RM_TRY("sm-version", modelos_rm_control(c->stack, c->client, c->subdevice,
+        NV2080_CTRL_CMD_GR_GET_INFO, &info, sizeof(info)));
+    pr_info("MODELOS_NVTEST gpu=0x%x sm_version=0x%x classes=c96f,cfc0,c661\n", c->gpu_id, gr.data);
+    /* RM's internal 10.4 SASS target is CUDA sm_120, as in the NV reference. */
+    if (gr.data != 0xa04) { ret = -EOPNOTSUPP; goto fail; }
+    *sass_version = ((gr.data & 0xf00) >> 4) | (gr.data & 0xf);
+    ret = 0;
+fail:
+    kfree(classes);
+    return ret;
 }
 
-/* Bit positions from tinygrad nv_615.py, pinned in README. Blackwell QMD v5.
- * Template must include validated cache/resource/constant-buffer settings from
- * the load-time compiler manifest. Only addresses and launch dimensions vary. */
-static void qmd_bits(NvU32 *q,unsigned hi,unsigned lo,NvU64 v)
+static int memory_create(struct modelos_nv *c, struct modelos_mem *m, NvU64 va, NvU64 bytes)
+{
+    NV_MEMORY_ALLOCATION_PARAMS p = {0};
+    NVOS46_PARAMETERS map = {0};
+    int ret;
+
+    m->va = va; m->size = bytes;
+    p.owner = c->client; p.alignment = 4096; p.limit = bytes - 1; p.size = bytes;
+    p.format = 6; p.type = NVOS32_TYPE_NOTIFIER;
+    p.attr = DRF_DEF(OS32, _ATTR, _LOCATION, _PCI) |
+             DRF_DEF(OS32, _ATTR, _PHYSICALITY, _ALLOW_NONCONTIGUOUS) |
+             DRF_DEF(OS32, _ATTR, _COHERENCY, _CACHED);
+    p.attr2 = DRF_DEF(OS32, _ATTR2, _GPU_CACHEABLE, _NO) | NVOS32_ATTR2_ZBC_PREFER_NO_ZBC;
+    p.flags = NVOS32_ALLOC_FLAGS_MAP_NOT_REQUIRED | NVOS32_ALLOC_FLAGS_MEMORY_HANDLE_PROVIDED |
+              NVOS32_ALLOC_FLAGS_ALIGNMENT_FORCE | NVOS32_ALLOC_FLAGS_IGNORE_BANK_PLACEMENT;
+    RM_TRY("system-memory", alloc(c, c->device, &m->handle, MODELOS_MEMORY_SYSTEM, &p, sizeof(p)));
+    map.hClient = c->client; map.hDevice = c->device;
+    map.hDma = c->virtual_memory; map.hMemory = m->handle;
+    map.length = bytes; map.dmaOffset = va;
+    map.flags = DRF_DEF(OS46, _FLAGS, _PAGE_SIZE, _4KB) |
+                DRF_DEF(OS46, _FLAGS, _CACHE_SNOOP, _ENABLE) |
+                DRF_DEF(OS46, _FLAGS, _DMA_OFFSET_FIXED, _TRUE);
+    RM_TRY("map-gpu", modelos_rm_map_dma(c->stack, &map));
+    m->gpu_mapped = true;
+    m->va = map.dmaOffset;
+    if (map.dmaOffset != va) return -ERANGE;
+    RM_TRY("map-kernel", modelos_rm_map_cpu(c->stack, c->client, c->subdevice,
+        m->handle, 0, bytes, &m->cpu, DRF_DEF(OS33, _FLAGS, _CACHING_TYPE, _CACHED)));
+    if (!m->cpu) return -EFAULT;
+    memset(m->cpu, 0, bytes);
+    return 0;
+fail:
+    return ret;
+}
+
+static int make_channel(struct modelos_nv *c)
+{
+    NV_CHANNELGPFIFO_ALLOCATION_PARAMETERS fifo = {0};
+    NVA06C_CTRL_GPFIFO_SCHEDULE_PARAMS schedule = { .bEnable = NV_TRUE };
+    NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS token = { .workSubmitToken = U32_MAX };
+    int ret;
+
+    RM_TRY("usermode", alloc(c, c->subdevice, &c->usermode, HOPPER_USERMODE_A, NULL, 0));
+    RM_TRY("doorbell-map", modelos_rm_map_cpu(c->stack, c->client, c->subdevice,
+        c->usermode, 0, 0x10000, &c->doorbell, NVOS33_FLAGS_ACCESS_WRITE_ONLY));
+    if (!c->doorbell) return -EFAULT;
+    fifo.hObjectError = c->error.handle;
+    fifo.hObjectBuffer = c->arena.handle;
+    fifo.gpFifoOffset = c->arena.va;
+    fifo.gpFifoEntries = FIFO_ENTRIES;
+    fifo.hContextShare = c->ctxshare;
+    fifo.hUserdMemory[c->subindex] = c->arena.handle;
+    fifo.userdOffset[c->subindex] = USERD_OFF;
+    fifo.engineType = 0;
+    /* hVASpace=0 inherits the explicitly RM-owned TSG VA, no UVM registration. */
+    RM_TRY("gpfifo", alloc(c, c->group, &c->channel, MODELOS_BLACKWELL_GPFIFO, &fifo, sizeof(fifo)));
+    RM_TRY("compute", alloc(c, c->channel, &c->compute, MODELOS_BLACKWELL_COMPUTE_B, NULL, 0));
+    RM_TRY("schedule", modelos_rm_control(c->stack, c->client, c->group,
+        NVA06C_CTRL_CMD_GPFIFO_SCHEDULE, &schedule, sizeof(schedule)));
+    RM_TRY("work-token", modelos_rm_control(c->stack, c->client, c->channel,
+        NVC36F_CTRL_CMD_GPFIFO_GET_WORK_SUBMIT_TOKEN, &token, sizeof(token)));
+    c->token = token.workSubmitToken;
+    return 0;
+fail:
+    return ret;
+}
+
+static int memory_destroy(struct modelos_nv *c, struct modelos_mem *m)
+{
+    NVOS47_PARAMETERS unmap = {0};
+    int ret;
+
+    if (m->cpu) {
+        RM_TRY("unmap-kernel", modelos_rm_unmap_cpu(c->stack, c->client, c->subdevice, m->handle, m->cpu));
+        m->cpu = NULL;
+    }
+    if (m->gpu_mapped) {
+        unmap.hClient = c->client; unmap.hDevice = c->device;
+        unmap.hDma = c->virtual_memory; unmap.hMemory = m->handle;
+        unmap.dmaOffset = m->va; unmap.size = m->size;
+        RM_TRY("unmap-gpu", modelos_rm_unmap_dma(c->stack, &unmap));
+        m->gpu_mapped = false;
+    }
+    if (m->handle) {
+        RM_TRY("free-memory", modelos_rm_free(c->stack, c->client, m->handle));
+        m->handle = 0;
+    }
+    return 0;
+fail:
+    return ret;
+}
+
+static int close_gpu(struct modelos_nv *c)
+{
+    NVA06C_CTRL_GPFIFO_SCHEDULE_PARAMS schedule = { .bEnable = NV_FALSE };
+    int ret;
+
+    if (c->in_flight) return -EBUSY;
+    if (c->channel) {
+        RM_TRY("stop-group", modelos_rm_control(c->stack, c->client, c->group,
+            NVA06C_CTRL_CMD_GPFIFO_SCHEDULE, &schedule, sizeof(schedule)));
+        RM_TRY("free-channel", modelos_rm_free(c->stack, c->client, c->channel));
+        c->channel = 0;
+    }
+    ret = memory_destroy(c, &c->error); if (ret) return ret;
+    ret = memory_destroy(c, &c->arena); if (ret) return ret;
+    if (c->doorbell) {
+        RM_TRY("unmap-doorbell", modelos_rm_unmap_cpu(c->stack, c->client, c->subdevice, c->usermode, c->doorbell));
+        c->doorbell = NULL;
+    }
+    if (c->client) {
+        RM_TRY("free-client", modelos_rm_free(c->stack, c->client, c->client));
+        c->client = 0;
+    }
+    if (c->adapter_held) nvidia_dev_put(c->gpu_id, c->stack, NV_FALSE);
+    if (c->stack) nv_kmem_cache_free_stack(c->stack);
+    return 0;
+fail:
+    return ret;
+}
+
+/* Restricted cubin loader: no runtime relocations, stack, or extra constants.
+ * Nonallocated debug relocations are ignored; ptxas emits them in real cubins.
+ */
+static int cubin_program(const void *blob, size_t bytes, struct modelos_program *p)
+{
+    const Elf64_Ehdr *e = blob;
+    const Elf64_Shdr *s;
+    const char *strings;
+    size_t string_bytes;
+    unsigned i;
+    bool have_regs = false, have_param = false, have_stack = false;
+
+    memset(p, 0, sizeof(*p));
+    if (bytes < sizeof(*e) || memcmp(e->e_ident, ELFMAG, SELFMAG) ||
+        e->e_ident[EI_CLASS] != ELFCLASS64 || e->e_ident[EI_DATA] != ELFDATA2LSB ||
+        e->e_machine != 190 || ((e->e_flags >> 8) & 255) != 120 ||
+        e->e_shentsize != sizeof(*s) || (e->e_shoff & 7) || e->e_shoff > bytes ||
+        e->e_shnum > (bytes - e->e_shoff) / sizeof(*s) || e->e_shstrndx >= e->e_shnum)
+        return -EINVAL;
+    s = blob + e->e_shoff;
+    if (s[e->e_shstrndx].sh_offset > bytes || s[e->e_shstrndx].sh_size > bytes-s[e->e_shstrndx].sh_offset)
+        return -EINVAL;
+    strings = blob + s[e->e_shstrndx].sh_offset;
+    string_bytes = s[e->e_shstrndx].sh_size;
+    for (i = 0; i < e->e_shnum; i++) {
+        const char *name;
+        const u8 *data;
+        size_t pos = 0, n = s[i].sh_size;
+        if (s[i].sh_name >= string_bytes || !memchr(strings+s[i].sh_name, 0, string_bytes-s[i].sh_name)) return -EINVAL;
+        name = strings+s[i].sh_name;
+        if (s[i].sh_type != SHT_NOBITS && (s[i].sh_offset > bytes || n > bytes-s[i].sh_offset)) return -EINVAL;
+        if (s[i].sh_type == SHT_REL || s[i].sh_type == SHT_RELA) {
+            if (s[i].sh_info >= e->e_shnum || (s[s[i].sh_info].sh_flags & SHF_ALLOC)) return -EOPNOTSUPP;
+        }
+        if (!strcmp(name, ".text.modelos_store")) {
+            if (s[i].sh_type != SHT_PROGBITS || !(s[i].sh_flags & SHF_EXECINSTR)) return -EINVAL;
+            p->text = blob+s[i].sh_offset; p->text_size = n;
+        } else if (!strcmp(name, ".nv.constant0.modelos_store")) {
+            if (s[i].sh_type != SHT_PROGBITS) return -EINVAL;
+            p->constant = blob+s[i].sh_offset; p->constant_size = n;
+        } else if (!strncmp(name, ".nv.constant", 12) ||
+                   (!strncmp(name, ".nv.local", 9) && n) ||
+                   (!strncmp(name, ".nv.shared.", 11) && n &&
+                    (strcmp(name, ".nv.shared.reserved.0") || n > 0x400))) {
+            return -EOPNOTSUPP;
+        }
+        if (strcmp(name, ".nv.info") && strcmp(name, ".nv.info.modelos_store")) continue;
+        if (s[i].sh_type == SHT_NOBITS) return -EINVAL;
+        data = blob+s[i].sh_offset;
+        while (pos < n) {
+            u16 length;
+            u8 format, attr;
+            const u8 *v;
+            if (n-pos < 4) return -EINVAL;
+            format = data[pos]; attr = data[pos+1];
+            length = get_unaligned_le16(data+pos+2);
+            if (format != 4) length = 0;
+            if (length > n-pos-4) return -EINVAL;
+            v = data+pos+4;
+            if (!strcmp(name, ".nv.info") && attr == 0x2f && length == 8) {
+                p->registers = get_unaligned_le32(v+4); have_regs = true;
+            } else if (!strcmp(name, ".nv.info") && attr == 0x11 && length == 8) {
+                if (get_unaligned_le32(v+4)) return -EOPNOTSUPP;
+            } else if (!strcmp(name, ".nv.info") && attr == 0x12 && length == 8) {
+                if (get_unaligned_le32(v+4)) return -EOPNOTSUPP;
+                have_stack = true;
+            } else if (!strcmp(name, ".nv.info.modelos_store") && attr == 0x0a && length == 8) {
+                p->param_base = get_unaligned_le16(v+4);
+                if (get_unaligned_le16(v+6) != sizeof(u64)) return -EOPNOTSUPP;
+                have_param = true;
+            }
+            pos += 4+length;
+        }
+    }
+    if (!have_regs || !have_param || !have_stack || !p->text || !p->constant ||
+        !p->text_size || p->text_size > 0x6000 || p->constant_size > 0x1000 ||
+        p->param_base != 0x380 || p->param_base+sizeof(u64) > p->constant_size ||
+        !p->registers || p->registers > 32)
+        return -EINVAL;
+    return 0;
+}
+
+static void qmd_bits(u32 *q, unsigned hi, unsigned lo, u64 value)
 {
     unsigned b;
-    for (b=lo;b<=hi;b++) {
-        NvU32 mask=1U<<(b%32);
-        q[b/32]=(q[b/32]&~mask) | (((v>>(b-lo))&1) ? mask:0);
+    for (b = lo; b <= hi; b++) {
+        u32 bit = 1U << (b % 32);
+        q[b/32] = (q[b/32] & ~bit) | (((value >> (b-lo)) & 1) ? bit : 0);
     }
 }
-static int modelos_nv_qmd5(NvU32 q[96],NvU64 program,NvU32 grid[3],NvU32 block[3],NvU64 completion_va,NvU32 expected)
+#define QSET(q, field, value) qmd_bits(q, MQ_##field##_HI, MQ_##field##_LO, value)
+
+static void build_qmd(u32 *q, const struct modelos_program *p, u32 sass, u32 sequence)
 {
-    if ((program&15) || program>>57 || completion_va>>57 || (completion_va&3) || !grid[0] || !grid[1] || !grid[2] ||
-        grid[1]>65535 || !block[0] || !block[1] || !block[2] ||
-        block[0]>1024 || block[1]>1024 || block[2]>64 ||
-        (NvU64)block[0]*block[1]*block[2]>1024) return -EINVAL;
-    qmd_bits(q,288,288,1); /* release0 enable */
-    qmd_bits(q,290,289,1); /* one-word semaphore */
-    qmd_bits(q,291,291,1); /* FE_SYSMEMBAR */
-    qmd_bits(q,511,480,(NvU32)completion_va); qmd_bits(q,536,512,completion_va>>32);
-    qmd_bits(q,575,544,expected); qmd_bits(q,607,576,0);
-    qmd_bits(q,471,468,5); qmd_bits(q,153,151,2);
-    qmd_bits(q,1055,1024,(NvU32)(program>>4)); qmd_bits(q,1076,1056,program>>36);
-    qmd_bits(q,1279,1248,grid[0]); qmd_bits(q,1295,1280,grid[1]); qmd_bits(q,1327,1312,grid[2]);
-    qmd_bits(q,1103,1088,block[0]); qmd_bits(q,1119,1104,block[1]); qmd_bits(q,1127,1120,block[2]);
+    u64 code = ARENA_VA+CODE_OFF, constant = ARENA_VA+CBUF_OFF, done = ARENA_VA+DONE_OFF;
+    memset(q, 0, 96*sizeof(*q));
+    QSET(q, QMD_MAJOR_VERSION, 5); QSET(q, QMD_TYPE, 2); QSET(q, QMD_GROUP_ID, 0x3f);
+    QSET(q, REGISTER_COUNT, p->registers); QSET(q, SASS_VERSION, sass);
+    QSET(q, SHARED_MEMORY_SIZE_SHIFTED7, 0x400 >> 7);
+    QSET(q, INVALIDATE_TEXTURE_HEADER_CACHE, 1); QSET(q, INVALIDATE_TEXTURE_SAMPLER_CACHE, 1);
+    QSET(q, INVALIDATE_TEXTURE_DATA_CACHE, 1); QSET(q, INVALIDATE_SHADER_DATA_CACHE, 1);
+    QSET(q, INVALIDATE_INSTRUCTION_CACHE, 1); QSET(q, API_VISIBLE_CALL_LIMIT, 1);
+    QSET(q, SAMPLER_INDEX, 1); QSET(q, BARRIER_COUNT, 1); QSET(q, CWD_MEMBAR_TYPE, 1);
+    QSET(q, CONSTANT_BUFFER_INVALIDATE_0, 1);
+    QSET(q, MIN_SM_CONFIG_SHARED_MEM_SIZE, 9); QSET(q, TARGET_SM_CONFIG_SHARED_MEM_SIZE, 9);
+    QSET(q, MAX_SM_CONFIG_SHARED_MEM_SIZE, 0x1a);
+    QSET(q, PROGRAM_ADDRESS_LOWER_SHIFTED4, (u32)(code >> 4));
+    QSET(q, PROGRAM_ADDRESS_UPPER_SHIFTED4, code >> 36);
+    QSET(q, PROGRAM_PREFETCH_ADDR_LOWER_SHIFTED, (u32)(code >> 8));
+    QSET(q, PROGRAM_PREFETCH_ADDR_UPPER_SHIFTED, code >> 40);
+    QSET(q, PROGRAM_PREFETCH_SIZE, min_t(size_t, p->text_size >> 8, 0x1ff));
+    QSET(q, CONSTANT_BUFFER_ADDR_LOWER_SHIFTED6_0, (u32)(constant >> 6));
+    QSET(q, CONSTANT_BUFFER_ADDR_UPPER_SHIFTED6_0, constant >> 38);
+    QSET(q, CONSTANT_BUFFER_SIZE_SHIFTED4_0, ALIGN(p->constant_size, 16) >> 4);
+    QSET(q, CONSTANT_BUFFER_VALID_0, 1);
+    QSET(q, GRID_WIDTH, 1); QSET(q, GRID_HEIGHT, 1); QSET(q, GRID_DEPTH, 1);
+    QSET(q, CTA_THREAD_DIMENSION0, 1); QSET(q, CTA_THREAD_DIMENSION1, 1); QSET(q, CTA_THREAD_DIMENSION2, 1);
+    QSET(q, RELEASE_ENABLE_0, 1); QSET(q, RELEASE_STRUCTURE_SIZE_0, 1);
+    QSET(q, RELEASE_MEMBAR_TYPE_0, 1);
+    QSET(q, RELEASE_SEMAPHORE0_ADDR_LOWER, (u32)done); QSET(q, RELEASE_SEMAPHORE0_ADDR_UPPER, done >> 32);
+    QSET(q, RELEASE_SEMAPHORE0_PAYLOAD_LOWER, sequence);
+}
+
+static u32 method(unsigned offset, unsigned words)
+{
+    return (2U << 28) | (words << 16) | (1U << 13) | (offset >> 2);
+}
+
+static int launch(struct modelos_nv *c, const struct modelos_program *p, u32 sass, u32 sequence)
+{
+    u32 *push = c->arena.cpu+PUSH_OFF, *qmd = c->arena.cpu+QMD_OFF;
+    u32 *put = c->arena.cpu+USERD_OFF+offsetof(AmpereAControlGPFifo, GPPut);
+    u32 *get = c->arena.cpu+USERD_OFF+offsetof(AmpereAControlGPFifo, GPGet);
+    u32 *done = c->arena.cpu+DONE_OFF, *output = c->arena.cpu+OUTPUT_OFF;
+    __le64 *ring = c->arena.cpu;
+    u64 deadline = ktime_get_ns()+2*NSEC_PER_SEC;
+    unsigned n = 0;
+
+    WRITE_ONCE(*output, TEST_SENTINEL);
+    build_qmd(qmd, p, sass, sequence);
+    push[n++] = method(NVC6C0_SET_OBJECT, 1); push[n++] = MODELOS_BLACKWELL_COMPUTE_B;
+    push[n++] = method(NVC6C0_SET_SHADER_LOCAL_MEMORY_WINDOW_A, 2);
+    push[n++] = upper_32_bits(LOCAL_WINDOW); push[n++] = lower_32_bits(LOCAL_WINDOW);
+    push[n++] = method(NVC6C0_SET_SHADER_SHARED_MEMORY_WINDOW_A, 2);
+    push[n++] = upper_32_bits(SHARED_WINDOW); push[n++] = lower_32_bits(SHARED_WINDOW);
+    push[n++] = method(NVC6C0_SEND_PCAS_A, 1); push[n++] = (ARENA_VA+QMD_OFF) >> 8;
+    push[n++] = method(NVC6C0_SEND_SIGNALING_PCAS2_B, 1);
+    push[n++] = NVC6C0_SEND_SIGNALING_PCAS2_B_PCAS_ACTION_PREFETCH_SCHEDULE;
+    ring[c->put & (FIFO_ENTRIES-1)] = cpu_to_le64((ARENA_VA+PUSH_OFF) | ((u64)n << 42) | (1ULL << 41));
+    c->in_flight = true;
+    dma_wmb();
+    ++c->put;
+    WRITE_ONCE(*put, c->put & (FIFO_ENTRIES-1));
+    wmb();
+    writel(c->token, (void __iomem *)c->doorbell+NVC361_NOTIFY_CHANNEL_PENDING);
+    while (READ_ONCE(*done) != sequence || READ_ONCE(*get) != (c->put & (FIFO_ENTRIES-1))) {
+        if (ktime_get_ns() > deadline) {
+            u32 *err = c->error.cpu;
+            pr_err("MODELOS_NVTEST TIMEOUT sequence=%u put=%u get=%u done=%u notifier=%08x:%08x:%08x:%08x\n",
+                sequence, READ_ONCE(*put), READ_ONCE(*get), READ_ONCE(*done), err[0], err[1], err[2], err[3]);
+            return -ETIMEDOUT;
+        }
+        usleep_range(50, 100);
+    }
+    dma_rmb();
+    c->in_flight = false;
+    if (READ_ONCE(*output) != TEST_VALUE) {
+        pr_err("MODELOS_NVTEST BAD_OUTPUT sequence=%u output=0x%x\n", sequence, READ_ONCE(*output));
+        return -EBADMSG;
+    }
     return 0;
 }
 
-static int modelos_nv_launch(struct modelos_nv *c,NvU32 *push,NvU64 push_va,
-    NvU64 qmd_va,NvU64 *ring,unsigned entries,unsigned *put,
-    void __iomem *gpput,NvU32 *done,NvU32 expected,u64 timeout_ns)
+int modelos_nv_test_run(unsigned int gpu_index)
 {
-    u64 deadline;
-    /* Caller supplies a queue that is known drained, a 256-byte-aligned QMD,
-     * and completion storage initialized to a different value. A separately
-     * validated release-semaphore command/template must write expected. */
-    if (!is_power_of_2(entries) || (qmd_va&255) || (push_va&3) ||
-        qmd_va>>40 || push_va>>40 || !c->doorbell_cpu || READ_ONCE(*done)==expected) return -EINVAL;
-    deadline=ktime_get_ns();
-    if (!timeout_ns || timeout_ns>U64_MAX-deadline) return -EINVAL;
-    deadline+=timeout_ns;
-    push[0]=(2U<<28)|(1U<<16)|(1U<<13)|(NVC6C0_SET_OBJECT/4);
-    push[1]=c->compute_class;
-    push[2]=(2U<<28)|(1U<<16)|(1U<<13)|(NVC6C0_SEND_PCAS_A/4);
-    push[3]=qmd_va>>8;
-    push[4]=(2U<<28)|(1U<<16)|(1U<<13)|(NVC6C0_SEND_SIGNALING_PCAS2_B/4);
-    push[5]=NVC6C0_SEND_SIGNALING_PCAS2_B_PCAS_ACTION_PREFETCH_SCHEDULE;
-    ring[*put&(entries-1)]=cpu_to_le64(push_va|(6ULL<<42)|(1ULL<<41));
-    wmb(); ++*put; writel(*put&(entries-1),gpput); wmb();
-    writel(c->token,(void __iomem *)c->doorbell_cpu+NVC361_NOTIFY_CHANNEL_PENDING);
-    while (READ_ONCE(*done)!=expected) {
-        if (ktime_get_ns()>deadline) return -ETIMEDOUT;
-        usleep_range(50,100);
+    struct modelos_program program, rejected;
+    struct modelos_nv *c = NULL;
+    NvU32 *ids = NULL, count = 0, sass = 0, sequence;
+    int ret, cleanup = 0;
+    u32 *cb;
+    unsigned short cs;
+
+    mutex_lock(&test_lock);
+    if (quarantined) { ret = -EBUSY; goto out; }
+    ret = cubin_program(modelos_store_cubin, sizeof(modelos_store_cubin), &program);
+    if (ret) goto out;
+    if (!cubin_program(modelos_store_cubin, sizeof(Elf64_Ehdr)-1, &rejected)) { ret = -EINVAL; goto out; }
+    pr_info("MODELOS_NVTEST fixture PASS arch=sm_120 code=%zu regs=%u param_base=0x%x constant=%zu\n",
+        program.text_size, program.registers, program.param_base, program.constant_size);
+    wait_for_device_probe();
+    if (!nvidia_get_gpuid_list(NULL, &count) || gpu_index >= count) {
+        pr_info("MODELOS_NVTEST SKIP no selected GPU index=%u count=%u\n", gpu_index, count);
+        ret = -ENODEV; goto out;
     }
-    dma_rmb(); return 0;
+    ids = kcalloc(count, sizeof(*ids), GFP_KERNEL);
+    c = kzalloc(sizeof(*c), GFP_KERNEL);
+    if (!ids || !c) { ret = -ENOMEM; goto cleanup; }
+    if (!nvidia_get_gpuid_list(ids, &count) || gpu_index >= count) { ret = -ENODEV; goto cleanup; }
+    ret = open_gpu(c, ids[gpu_index]); if (ret) goto cleanup;
+    ret = require_blackwell(c, &sass); if (ret) goto cleanup;
+    ret = memory_create(c, &c->arena, ARENA_VA, ARENA_SIZE); if (ret) goto cleanup;
+    ret = memory_create(c, &c->error, ARENA_VA+ARENA_SIZE, 4096); if (ret) goto cleanup;
+    memcpy(c->arena.cpu+CODE_OFF, program.text, program.text_size);
+    memcpy(c->arena.cpu+CBUF_OFF, program.constant, program.constant_size);
+    cb = c->arena.cpu+CBUF_OFF;
+    cb[188] = lower_32_bits(SHARED_WINDOW); cb[189] = upper_32_bits(SHARED_WINDOW);
+    cb[190] = lower_32_bits(LOCAL_WINDOW); cb[191] = upper_32_bits(LOCAL_WINDOW);
+    cb[223] = 0xfffdc0;
+    put_unaligned_le64(ARENA_VA+OUTPUT_OFF, c->arena.cpu+CBUF_OFF+program.param_base);
+    ret = make_channel(c); if (ret) goto cleanup;
+    pr_info("MODELOS_NVTEST submit arena=0x%llx entries=%u launches=%u\n", ARENA_VA, FIFO_ENTRIES, FIFO_ENTRIES+1);
+    for (sequence = 1; sequence <= FIFO_ENTRIES+1; sequence++) {
+        ret = launch(c, &program, sass, sequence);
+        if (ret) goto cleanup;
+    }
+cleanup:
+    if (c) {
+        cleanup = close_gpu(c);
+        if (cleanup) {
+            quarantined = c;
+            pr_err("MODELOS_NVTEST QUARANTINED errno=%d in_flight=%u; retain DMA memory/client until owning guest reset\n",
+                cleanup, c->in_flight);
+            c = NULL;
+        }
+    }
+    if (!ret && !cleanup) {
+        asm volatile("mov %%cs,%0" : "=r"(cs));
+        pr_info("MODELOS_NVTEST PASS launches=%u wraps=1 output=0x%x completion=%u cleanup=ok cpl=%u mm=%s\n",
+            FIFO_ENTRIES+1, TEST_VALUE, FIFO_ENTRIES+1, cs & 3, current->mm ? "present" : "none");
+    }
+    kfree(c); kfree(ids);
+    if (!ret) ret = cleanup;
+out:
+    if (ret && ret != -ENODEV) pr_err("MODELOS_NVTEST FAIL errno=%d\n", ret);
+    mutex_unlock(&test_lock);
+    return ret;
 }
 
-/* A real service will consume this interface. Escaping its address here keeps
- * the whole sketch in the link, so unresolved RM calls cannot be hidden by GC.
- * No function is executed and no GPU is accessed by this initcall. */
-static const struct {
-    typeof(nvidia_get_gpuid_list) *enumerate;
-    typeof(modelos_nv_open) *open;
-    typeof(modelos_nv_classes) *classes;
-    typeof(modelos_nv_doorbell) *doorbell;
-    typeof(modelos_nv_memory) *memory;
-    typeof(modelos_nv_channel) *channel;
-    typeof(modelos_nv_cubin_text) *cubin_text;
-    typeof(modelos_nv_qmd5) *qmd5;
-    typeof(modelos_nv_launch) *launch;
-    typeof(modelos_nv_close) *close;
-} modelos_nv_submission = {nvidia_get_gpuid_list,modelos_nv_open,modelos_nv_classes,modelos_nv_doorbell,modelos_nv_memory,modelos_nv_channel,
-    modelos_nv_cubin_text,modelos_nv_qmd5,modelos_nv_launch,modelos_nv_close};
+static int __init test_param(char *s) { return kstrtobool(s, &boot_test); }
+static int __init gpu_param(char *s) { return kstrtouint(s, 0, &boot_gpu); }
+early_param("modelos.nv_test", test_param);
+early_param("modelos.nv_gpu", gpu_param);
 static int __init modelos_nv_submission_init(void)
 {
-    pr_info("MODELOS_SUBMISSION_SKETCH linked ops=%px; hardware validation pending\n",&modelos_nv_submission);
-    return 0;
+    if (!boot_test) {
+        pr_info("MODELOS_NVTEST disabled; enable with modelos.nv_test=1\n");
+        return 0;
+    }
+    return modelos_nv_test_run(boot_gpu);
 }
 late_initcall(modelos_nv_submission_init);
-

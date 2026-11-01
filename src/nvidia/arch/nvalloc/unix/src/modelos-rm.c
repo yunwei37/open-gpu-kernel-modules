@@ -48,3 +48,21 @@ NV_STATUS NV_API_CALL modelos_rm_map_dma(nvidia_stack_t *sp, NVOS46_PARAMETERS *
     status = api->Map(api, params);
     NV_EXIT_RM_RUNTIME(sp,fp); return status;
 }
+
+NV_STATUS NV_API_CALL modelos_rm_unmap_cpu(nvidia_stack_t *sp, NvHandle client,
+    NvHandle device, NvHandle memory, void *addr)
+{
+    NV_STATUS status; void *fp; RM_API *api;
+    NV_ENTER_RM_RUNTIME(sp,fp);
+    api = rmapiGetInterface(RMAPI_EXTERNAL_KERNEL);
+    status = api->UnmapFromCpu(api, client, device, memory, addr, 0, osGetCurrentProcess());
+    NV_EXIT_RM_RUNTIME(sp,fp); return status;
+}
+NV_STATUS NV_API_CALL modelos_rm_unmap_dma(nvidia_stack_t *sp, NVOS47_PARAMETERS *params)
+{
+    NV_STATUS status; void *fp; RM_API *api;
+    NV_ENTER_RM_RUNTIME(sp,fp);
+    api = rmapiGetInterface(RMAPI_EXTERNAL_KERNEL);
+    status = api->Unmap(api, params);
+    NV_EXIT_RM_RUNTIME(sp,fp); return status;
+}
