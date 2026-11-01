@@ -75,3 +75,11 @@ void l2_unmap(void *cpu)
  for(off=0;off<m.size;off+=65536)
   l2_record(7,(unsigned long long)cpu+off,cpu+off,min_t(u64,65536,m.size-off));
 }
+
+static DEFINE_SPINLOCK(mmio_lock);
+unsigned long l2_mmio_enter(void)
+{
+ unsigned long flags; spin_lock_irqsave(&mmio_lock,flags); return flags;
+}
+void l2_mmio_exit(unsigned long flags)
+{ spin_unlock_irqrestore(&mmio_lock,flags); }
