@@ -13,7 +13,10 @@ NV_STATUS NV_API_CALL modelos_rm_alloc(nvidia_stack_t *sp, NvHandle client,
     NV_ENTER_RM_RUNTIME(sp,fp);
     api = rmapiGetInterface(RMAPI_EXTERNAL_KERNEL);
     if(cls==0xcec0 && params==NULL && size==0)
-        status=l2_gsp_compute_alloc(client,parent,object);
+        {
+        status=api->Alloc(api,client,parent,object,cls,params,size);
+        if(status==NV_OK) status=l2_gsp_compute_alloc(client,parent,object);
+    }
     else
         status = api->Alloc(api, client, parent, object, cls, params, size);
     NV_EXIT_RM_RUNTIME(sp,fp); return status;
