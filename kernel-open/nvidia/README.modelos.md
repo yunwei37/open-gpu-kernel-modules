@@ -80,8 +80,8 @@ extracted package with a flat `firmware/` directory must first be arranged in
 that layout. No firmware blobs or CUDA runtime libraries are redistributed
 in this source branch.
 
-Only the serve lane uses `yunwei356/modelos-vfio` and its assigned RTX 5090.
-Use that lane's existing **guest** VFIO QEMU launch and keep its device/ROM/
+The designated GPU test lane uses its assigned RTX 5090.
+Use its existing **guest** VFIO QEMU launch and keep its device/ROM/
 BAR/IOMMU arguments. Replace the guest kernel with `$OUT/arch/x86/boot/bzImage`,
 omit initramfs, keep at most four vCPUs/four GiB, and append:
 
