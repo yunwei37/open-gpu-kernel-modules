@@ -7814,39 +7814,67 @@ static NV_STATUS _kgspDecodeGspStaticInfo(OBJGPU *pGpu, NvU64 *pKVData, NvU64 kv
  * No host KernelGraphicsObject is created for this private handle. */
 #include "gpu_mgr/gpu_mgr.h"
 #include "rmapi/rmapi.h"
-NV_STATUS NV_API_CALL l2_gsp_compute_alloc(NvHandle client,NvHandle parent,NvHandle *object)
+NV_STATUS NV_API_CALL l2_gsp_alloc_locked(OBJGPU *gpu,NvHandle client,NvHandle parent,NvHandle handle,NvU32 cls,NvU32 paramBytes)
 {
-    NV_STATUS status;
-    OBJGPU *gpu;
-    KernelGsp *gsp;
-    OBJRPC *rpc;
+    KernelGsp *gsp=GPU_GET_KERNEL_GSP(gpu);
+    OBJRPC *rpc=gsp->pRpc;
     rpc_message_header_v *header;
-    NvHandle handle=0xe2000001;
-    status=rmapiLockAcquire(RMAPI_LOCK_FLAGS_WRITE,RM_LOCK_MODULES_CLIENT);
-    if(status!=NV_OK)return status;
-    status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_CLIENT);
-    if(status!=NV_OK)goto api_out;
-    gpu=gpumgrGetGpu(0);
-    if(!gpu){status=NV_ERR_INVALID_DEVICE;goto gpu_out;}
-    gsp=GPU_GET_KERNEL_GSP(gpu);rpc=gsp->pRpc;
-    if(!rpc){status=NV_ERR_INVALID_STATE;goto gpu_out;}
+    NV_STATUS status;
+    if(!rpc || paramBytes>16)return NV_ERR_INVALID_ARGUMENT;
     status=rpcWriteCommonHeader(gpu,rpc,NV_VGPU_MSG_FUNCTION_GSP_RM_ALLOC,sizeof(rpc_gsp_rm_alloc_v03_00));
-    if(status!=NV_OK)goto gpu_out;
-    portMemSet(&rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v,0,sizeof(rpc_gsp_rm_alloc_v03_00));
+    if(status!=NV_OK)return status;
     rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hClient=client;
     rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hParent=parent;
     rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hObject=handle;
-    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hClass=0xcec0;
-    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.paramsSize=16;
-    portMemSet(rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.params,0,16);
+    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hClass=cls;
+    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.paramsSize=paramBytes;
     header=rpcGetVgpuMessageHeader(rpc);header->sequence=rpc->sequence++;
     status=kgspSendRpc(gpu,gsp,NVDM_TYPE_RM_RPC,header->length,NV_TRUE);
     if(status==NV_OK)status=rpcGetVgpuMessageHeader(rpc)->rpc_result;
     if(status==NV_OK)status=rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.status;
-    if(status==NV_OK)*object=handle;
-    NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_COMPUTE status=0x%x client=0x%x parent=0x%x object=0x%x\n",status,client,parent,handle);
- gpu_out:
-    rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
- api_out:
+    return status;
+}
+NV_STATUS NV_API_CALL l2_gsp_compute_alloc(NvHandle client,NvHandle parent,NvHandle *object)
+{
+    OBJGPU *gpu;
+    NV_STATUS status=rmapiLockAcquire(RMAPI_LOCK_FLAGS_WRITE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)return status;
+    status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_CLIENT);
+    if(status==NV_OK){
+        gpu=gpumgrGetGpu(0);
+        status=gpu?l2_gsp_alloc_locked(gpu,client,parent,0xe2000001,0xcec0,16):NV_ERR_INVALID_DEVICE;
+        if(status==NV_OK)*object=0xe2000001;
+        NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_COMPUTE status=0x%x client=0x%x parent=0x%x object=0xe2000001\n",status,client,parent);
+        rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+    }
     rmapiLockRelease();return status;
+}
+
+/* L2 typed replay of the recorded no-pointer GPU_PROMOTE_CTX control. Caller
+ * holds RM API/GPU locks; buffers/handles in params are from this boot. */
+#include "ctrl/ctrl2080/ctrl2080gpu.h"
+NV_STATUS NV_API_CALL l2_gsp_promote_context(OBJGPU *gpu,NvHandle client,
+    NvHandle sub,const NV2080_CTRL_GPU_PROMOTE_CTX_PARAMS *params)
+{
+    KernelGsp *gsp=GPU_GET_KERNEL_GSP(gpu);
+    OBJRPC *rpc=gsp->pRpc;
+    rpc_gsp_rm_control_v03_00 *control;
+    rpc_message_header_v *header;
+    NV_STATUS status;
+    NvU32 size=sizeof(*control)+sizeof(*params);
+    if(!rpc || size+sizeof(*header)>rpc->maxRpcSize)return NV_ERR_BUFFER_TOO_SMALL;
+    status=rpcWriteCommonHeader(gpu,rpc,NV_VGPU_MSG_FUNCTION_GSP_RM_CONTROL,size);
+    if(status!=NV_OK)return status;
+    control=&rpcGetVgpuMessageData(rpc)->gsp_rm_control_v03_00;
+    control->hClient=client;control->hObject=sub;
+    control->cmd=NV2080_CTRL_CMD_GPU_PROMOTE_CTX;control->paramsSize=sizeof(*params);
+    /* Recorded flags/access rights/reserved words are all zero. Header writer
+     * zeroes the buffer; this command has no pointers or serialization flags. */
+    portMemCopy(control->params,sizeof(*params),params,sizeof(*params));
+    header=rpcGetVgpuMessageHeader(rpc);header->sequence=rpc->sequence++;
+    status=kgspSendRpc(gpu,gsp,NVDM_TYPE_RM_RPC,header->length,NV_TRUE);
+    if(status==NV_OK)status=rpcGetVgpuMessageHeader(rpc)->rpc_result;
+    if(status==NV_OK)status=rpcGetVgpuMessageData(rpc)->gsp_rm_control_v03_00.status;
+    NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_PROMOTE status=0x%x entries=%u\n",status,params->entryCount);
+    return status;
 }
