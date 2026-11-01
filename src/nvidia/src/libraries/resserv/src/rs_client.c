@@ -730,6 +730,10 @@ _clientAllocResourceHelper
     }
 
     *phResource = hResource;
+    {
+        extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
+        l2_record(13,pParams->externalClassId,NULL,0);
+    }
 
     return NV_OK;
 
