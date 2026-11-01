@@ -7850,3 +7850,32 @@ NV_STATUS NV_API_CALL l2_gsp_compute_alloc(NvHandle client,NvHandle parent,NvHan
  api_out:
     rmapiLockRelease();return status;
 }
+
+/* L2 typed replay of the recorded no-pointer GPU_PROMOTE_CTX control. Caller
+ * holds RM API/GPU locks; buffers/handles in params are from this boot. */
+#include "ctrl/ctrl2080/ctrl2080gpu.h"
+NV_STATUS NV_API_CALL l2_gsp_promote_context(OBJGPU *gpu,NvHandle client,
+    NvHandle sub,const NV2080_CTRL_GPU_PROMOTE_CTX_PARAMS *params)
+{
+    KernelGsp *gsp=GPU_GET_KERNEL_GSP(gpu);
+    OBJRPC *rpc=gsp->pRpc;
+    rpc_gsp_rm_control_v03_00 *control;
+    rpc_message_header_v *header;
+    NV_STATUS status;
+    NvU32 size=sizeof(*control)+sizeof(*params);
+    if(!rpc || size+sizeof(*header)>rpc->maxRpcSize)return NV_ERR_BUFFER_TOO_SMALL;
+    status=rpcWriteCommonHeader(gpu,rpc,NV_VGPU_MSG_FUNCTION_GSP_RM_CONTROL,size);
+    if(status!=NV_OK)return status;
+    control=&rpcGetVgpuMessageData(rpc)->gsp_rm_control_v03_00;
+    control->hClient=client;control->hObject=sub;
+    control->cmd=NV2080_CTRL_CMD_GPU_PROMOTE_CTX;control->paramsSize=sizeof(*params);
+    /* Recorded flags/access rights/reserved words are all zero. Header writer
+     * zeroes the buffer; this command has no pointers or serialization flags. */
+    portMemCopy(control->params,sizeof(*params),params,sizeof(*params));
+    header=rpcGetVgpuMessageHeader(rpc);header->sequence=rpc->sequence++;
+    status=kgspSendRpc(gpu,gsp,NVDM_TYPE_RM_RPC,header->length,NV_TRUE);
+    if(status==NV_OK)status=rpcGetVgpuMessageHeader(rpc)->rpc_result;
+    if(status==NV_OK)status=rpcGetVgpuMessageData(rpc)->gsp_rm_control_v03_00.status;
+    NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_PROMOTE status=0x%x entries=%u\n",status,params->entryCount);
+    return status;
+}

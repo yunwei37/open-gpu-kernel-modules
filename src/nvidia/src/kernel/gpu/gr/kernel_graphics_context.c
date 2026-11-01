@@ -3756,6 +3756,7 @@ void shrkgrctxDetach_IMPL
     SLI_LOOP_END;
 }
 
+extern NV_STATUS NV_API_CALL l2_gsp_promote_context(OBJGPU *,NvHandle,NvHandle,const NV2080_CTRL_GPU_PROMOTE_CTX_PARAMS *);
 /* L2 fixed compute context: retain RM buffer/map primitives, replace the
  * KernelGraphicsObject constructor/ResourceServer instance. Fresh descriptors
  * and VA_LISTs belong to the existing channel/ctxshare and use its teardown. */
@@ -3812,7 +3813,7 @@ NV_STATUS NV_API_CALL l2_prepare_compute_context(NvHandle hClient,NvHandle hChan
     p.engineType=NV2080_ENGINE_TYPE_GR(kgraphicsGetInstance(gpu,gr));p.hChanClient=hClient;p.hObject=hChannel;
     L2_CTX(subdeviceGetByDeviceAndGpu(client,device,gpu,&sub));
     GPU_RES_SET_THREAD_BC_STATE(sub);
-    L2_CTX(GPU_GET_PHYSICAL_RMAPI(gpu)->Control(GPU_GET_PHYSICAL_RMAPI(gpu),hClient,RES_GET_HANDLE(sub),NV2080_CTRL_CMD_GPU_PROMOTE_CTX,&p,sizeof(p)));
+    L2_CTX(l2_gsp_promote_context(gpu,hClient,RES_GET_HANDLE(sub),&p));
     for(i=0;i<p.entryCount;i++)if(p.promoteEntry[i].bInitialize)
         kgrctxMarkCtxBufferInitialized(gpu,ctx,gr,channel,p.promoteEntry[i].bufferId);
     NV_PRINTF(LEVEL_ERROR,"L2_CONTEXT_PREP entries=%u cpu_compute_object=0\n",p.entryCount);
