@@ -89,6 +89,26 @@ omit initramfs, keep at most four vCPUs/four GiB, and append:
 console=ttyS0,115200 earlyprintk=serial,ttyS0,115200 keep_bootcon printk.time=1 modelos.nv_test=1 modelos.nv_gpu=0 nvidia.NVreg_DynamicPowerManagement=0x00
 ```
 
+A host-side runner is included so the test has an explicit acceptance command:
+
+```sh
+python3 "$NV/kernel-open/nvidia/run-modelos-test.py" \
+  --kernel "$OUT/arch/x86/boot/bzImage" --log "$LOG" \
+  --lock "$GPU_LOCK" --block-marker "$RECOVERY_MARKER" \
+  --device "$GPU_BDF" --device "$AUDIO_BDF"
+# Repeat --device for any other already-assigned companion controllers.
+# Add --dry-run to print the command without inspecting devices or running QEMU.
+```
+
+The runner uses four vCPUs/four GiB, KVM/Q35 and a 128-GiB PCI aperture (not
+128 GiB of guest RAM). It preserves the owner's shared GPU lock/block marker,
+requires already-bound VFIO devices including an NVIDIA display/3D function,
+starts only its own guest, and quits via QMP after the success line and four
+busy workers. It never binds/resets/recovers a host device. It checks device
+identity/driver again after VM exit and records a block marker if they changed.
+A JSON result accompanies the full serial log. The hardware runner was checked
+with --dry-run only; no GPU execution or post-GPU health result is claimed here.
+
 Retain serial output for up to 180 seconds. Require the exact success marker,
 no RM/firmware/channel errors, and the subsequent four ModelOS workers at
 CPL 0/mm=none. Save the two fork SHAs, config/image hashes, firmware hashes,
