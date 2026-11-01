@@ -7830,16 +7830,19 @@ NV_STATUS NV_API_CALL l2_gsp_compute_alloc(NvHandle client,NvHandle parent,NvHan
     if(!gpu){status=NV_ERR_INVALID_DEVICE;goto gpu_out;}
     gsp=GPU_GET_KERNEL_GSP(gpu);rpc=gsp->pRpc;
     if(!rpc){status=NV_ERR_INVALID_STATE;goto gpu_out;}
-    status=rpcWriteCommonHeader(gpu,rpc,NV_VGPU_MSG_FUNCTION_ALLOC_OBJECT,sizeof(rpc_alloc_object_v2C_01));
+    status=rpcWriteCommonHeader(gpu,rpc,NV_VGPU_MSG_FUNCTION_GSP_RM_ALLOC,sizeof(rpc_gsp_rm_alloc_v03_00));
     if(status!=NV_OK)goto gpu_out;
-    portMemSet(&rpcGetVgpuMessageData(rpc)->alloc_object_v,0,sizeof(rpc_alloc_object_v2C_01));
-    rpcGetVgpuMessageData(rpc)->alloc_object_v.hClient=client;
-    rpcGetVgpuMessageData(rpc)->alloc_object_v.hParent=parent;
-    rpcGetVgpuMessageData(rpc)->alloc_object_v.hObject=handle;
-    rpcGetVgpuMessageData(rpc)->alloc_object_v.hClass=0xcec0;
+    portMemSet(&rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v,0,sizeof(rpc_gsp_rm_alloc_v03_00));
+    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hClient=client;
+    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hParent=parent;
+    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hObject=handle;
+    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.hClass=0xcec0;
+    rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.paramsSize=16;
+    portMemSet(rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.params,0,16);
     header=rpcGetVgpuMessageHeader(rpc);header->sequence=rpc->sequence++;
     status=kgspSendRpc(gpu,gsp,NVDM_TYPE_RM_RPC,header->length,NV_TRUE);
     if(status==NV_OK)status=rpcGetVgpuMessageHeader(rpc)->rpc_result;
+    if(status==NV_OK)status=rpcGetVgpuMessageData(rpc)->gsp_rm_alloc_v.status;
     if(status==NV_OK)*object=handle;
     NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_COMPUTE status=0x%x client=0x%x parent=0x%x object=0x%x\n",status,client,parent,handle);
  gpu_out:
