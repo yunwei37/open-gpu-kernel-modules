@@ -119,6 +119,7 @@ void RsResInfoInitialize(void)
     // and we only call this once on boot anyway.
     //
     NvU32 i, j;
+    NV_PRINTF(LEVEL_ERROR,"L2_RESOURCE_CATALOG entries=%u\n",NUM_ENTRIES_DESC_LIST);
     for (i = 0; i < NUM_ENTRIES_DESC_LIST - 1; i++)
     {
         for (j = i + 1; j < NUM_ENTRIES_DESC_LIST; j++)
@@ -145,6 +146,8 @@ RsResInfoByExternalClassId
 {
     NvU32 low  = 0;
     NvU32 high = NUM_ENTRIES_DESC_LIST;
+    extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
+    l2_record(14,externalClassId,NULL,0);
 
     // Binary search the array; If not found, the break in the middle will be hit
     while (1)
@@ -163,6 +166,7 @@ RsResInfoByExternalClassId
             low = mid;
     }
 
+    l2_record(15,externalClassId,NULL,0);
     return NULL;
 }
 
