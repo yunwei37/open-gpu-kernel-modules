@@ -3755,3 +3755,70 @@ void shrkgrctxDetach_IMPL
     }
     SLI_LOOP_END;
 }
+
+/* L2 fixed compute context: retain RM buffer/map primitives, replace the
+ * KernelGraphicsObject constructor/ResourceServer instance. Fresh descriptors
+ * and VA_LISTs belong to the existing channel/ctxshare and use its teardown. */
+NV_STATUS NV_API_CALL l2_prepare_compute_context(NvHandle hClient,NvHandle hChannel)
+{
+    RsClient *client;
+    RsResourceRef *ref;
+    KernelChannel *channel;
+    KernelGraphicsContext *ctx;
+    KernelGraphicsContextUnicast *u;
+    KernelGraphics *gr;
+    OBJGPU *gpu;
+    Device *device;
+    Subdevice *sub;
+    ENGINE_CTX_DESCRIPTOR *eng;
+    NV2080_CTRL_GR_ROUTE_INFO route={0};
+    NV2080_CTRL_GPU_PROMOTE_CTX_PARAMS p={0};
+    NvU32 ids[4]={0,2,9,11},i;
+    NvBool init,promote;
+    GR_GLOBALCTX_BUFFER map;
+    NV_STATUS status;
+    status=rmapiLockAcquire(RMAPI_LOCK_FLAGS_WRITE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)return status;
+    status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)goto api_out;
+#define L2_CTX(expr) do{status=(expr);if(status!=NV_OK)goto done;}while(0)
+    L2_CTX(serverGetClientUnderLock(&g_resServ,hClient,&client));
+    L2_CTX(clientGetResourceRef(client,hChannel,&ref));
+    channel=dynamicCast(ref->pResource,KernelChannel);
+    if(!channel){status=NV_ERR_INVALID_CHANNEL;goto done;}
+    gpu=GPU_RES_GET_GPU(channel);device=GPU_RES_GET_DEVICE(channel);
+    L2_CTX(kgrctxFromKernelChannel(channel,&ctx));
+    L2_CTX(kgrctxGetUnicast(gpu,ctx,&u));
+    kgrmgrCtrlSetChannelHandle(hChannel,&route);
+    L2_CTX(kgrmgrCtrlRouteKGRWithDevice(gpu,GPU_GET_KERNEL_GRAPHICS_MANAGER(gpu),device,&route,&gr));
+    L2_CTX(kgraphicsInitializeDeferredStaticData(gpu,gr,NV01_NULL_OBJECT,NV01_NULL_OBJECT));
+    if(!kgrctxIsMainContextAllocated(gpu,ctx))
+        L2_CTX(kgrctxAllocMainCtxBuffer(gpu,ctx,gr,channel));
+    if(!u->ctxPatchBuffer.pMemDesc)
+        L2_CTX(kgrctxAllocPatchBuffer(gpu,ctx,gr,channel));
+    eng=channel->pKernelChannelGroupApi->pKernelChannelGroup->ppEngCtxDesc[gpumgrGetSubDeviceInstanceFromGpu(gpu)];
+    if(!eng||!eng->pMemDesc){status=NV_ERR_INVALID_STATE;goto done;}
+    L2_CTX(kgraphicsMapCtxBuffer(gpu,gr,eng->pMemDesc,channel->pVAS,&eng->vaList,NV_FALSE,NV_FALSE));
+    L2_CTX(kgraphicsMapCtxBuffer(gpu,gr,u->ctxPatchBuffer.pMemDesc,channel->pVAS,&u->ctxPatchBuffer.vAddrList,NV_FALSE,NV_FALSE));
+    map=kgrctxGetRegisterAccessMapId_HAL(gpu,ctx,channel);
+    L2_CTX(kgrctxGetGlobalContextBufferExternalId(map,&ids[3]));
+    L2_CTX(kgrctxMapGlobalCtxBuffer(gpu,ctx,gr,kchannelGetGfid(channel),channel->pVAS,map,NV_TRUE));
+    for(i=0;i<4;i++){
+        L2_CTX(kgrctxPrepareInitializeCtxBuffer(gpu,ctx,gr,channel,ids[i],&p.promoteEntry[p.entryCount],&init));
+        L2_CTX(kgrctxPreparePromoteCtxBuffer(gpu,ctx,channel,ids[i],&p.promoteEntry[p.entryCount],&promote));
+        if(init||promote)p.entryCount++;
+    }
+    p.engineType=NV2080_ENGINE_TYPE_GR(kgraphicsGetInstance(gpu,gr));p.hChanClient=hClient;p.hObject=hChannel;
+    L2_CTX(subdeviceGetByDeviceAndGpu(client,device,gpu,&sub));
+    GPU_RES_SET_THREAD_BC_STATE(sub);
+    L2_CTX(GPU_GET_PHYSICAL_RMAPI(gpu)->Control(GPU_GET_PHYSICAL_RMAPI(gpu),hClient,RES_GET_HANDLE(sub),NV2080_CTRL_CMD_GPU_PROMOTE_CTX,&p,sizeof(p)));
+    for(i=0;i<p.entryCount;i++)if(p.promoteEntry[i].bInitialize)
+        kgrctxMarkCtxBufferInitialized(gpu,ctx,gr,channel,p.promoteEntry[i].bufferId);
+    NV_PRINTF(LEVEL_ERROR,"L2_CONTEXT_PREP entries=%u cpu_compute_object=0\n",p.entryCount);
+ done:
+    NV_PRINTF(LEVEL_ERROR,"L2_CONTEXT_STATUS status=0x%x\n",status);
+    rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+ api_out:
+    rmapiLockRelease();return status;
+#undef L2_CTX
+}
