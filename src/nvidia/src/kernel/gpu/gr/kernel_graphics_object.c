@@ -382,21 +382,8 @@ kgrobjGetMemInterMapParams_IMPL
     RMRES_MEM_INTER_MAP_PARAMS *pParams
 )
 {
-    MEMORY_DESCRIPTOR *pSrcMemDesc = pKernelGraphicsObject->pMmioMemDesc;
-
-    if (pParams->bSubdeviceHandleProvided)
-    {
-        NV_PRINTF(LEVEL_ERROR, "Unicast DMA mappings of non-memory objects not supported.\n");
-        return NV_ERR_NOT_SUPPORTED;
-    }
-
-    if (pSrcMemDesc == NULL)
-        return NV_ERR_INVALID_OBJECT_HANDLE;
-
-    pParams->pSrcMemDesc = pSrcMemDesc;
-    pParams->pSrcGpu = pSrcMemDesc->pGpu;
-
-    return NV_OK;
+    /* No CPU compute objects exist in this specialized catalog. */
+    return NV_ERR_INVALID_OBJECT_HANDLE;
 }
 
 /*!
@@ -409,67 +396,7 @@ kgrobjSetComputeMmio_IMPL
     KernelGraphicsObject *pKernelGraphicsObject
 )
 {
-    ChannelDescendant *pChanDes = staticCast(pKernelGraphicsObject, ChannelDescendant);
-    MemoryManager *pMemoryManager = GPU_GET_MEMORY_MANAGER(pGpu);
-    NvU32 classNum = pChanDes->resourceDesc.externalClassId;
-    NvU32 objType;
-    NV_ADDRESS_SPACE addrSpace;
-
-    kgrmgrGetGrObjectType(classNum, &objType);
-
-    // Nothing to do for non-compute
-    if (objType != GR_OBJECT_TYPE_COMPUTE)
-        return NV_OK;
-
-    // This can be called multiple times in SLI, so just skip it if present
-    if (pKernelGraphicsObject->pMmioMemDesc != NULL)
-        return NV_OK;
-
-    if (pGpu->pGpuArch->bGpuArchIsZeroFb)
-    {
-        addrSpace = ADDR_SYSMEM;
-    }
-    else
-    {
-        addrSpace = ADDR_FBMEM;
-    }
-
-    // Set up MMIO memDesc to allow GPU mappings of compute object
-    NV_CHECK_OK_OR_RETURN(LEVEL_ERROR,
-        memdescCreate(&pKernelGraphicsObject->pMmioMemDesc, pGpu, RM_PAGE_SIZE, 0,
-                    NV_TRUE, addrSpace, NV_MEMORY_UNCACHED,
-                    MEMDESC_FLAGS_NONE));
-
-    //
-    // The address field is completely ignored for these mappings.  We use the
-    // chid as the address strictly for debug purposes.
-    //
-    memdescDescribe(pKernelGraphicsObject->pMmioMemDesc, addrSpace /* Ignored */,
-                    RM_PAGE_SIZE * pChanDes->pKernelChannel->ChID,
-                    RM_PAGE_SIZE);
-
-    memdescSetPteKind(pKernelGraphicsObject->pMmioMemDesc,
-                      memmgrGetMessageKind_HAL(pGpu, pMemoryManager));
-
-    memmgrSetMemDescPageSize_HAL(pGpu, pMemoryManager, pKernelGraphicsObject->pMmioMemDesc, AT_GPU,
-                                 RM_ATTR_PAGE_SIZE_4KB);
-
-    if (pGpu->pGpuArch->bGpuArchIsZeroFb)
-    {
-        //
-        // DMA mapping path in RM checks to make sure the sysmem page is actually allocated before allowing
-        // the mapping
-        //
-        NV_CHECK_OK_OR_RETURN(LEVEL_ERROR, memdescAlloc(pKernelGraphicsObject->pMmioMemDesc));
-
-        //
-        // Flag needed to differentiate between SKED and internal MMIO
-        // - SKED reflected surface is encoded with aperture = sysncoh and KIND = SKED
-        // - MMIO surface is encoded with aperture = syscoh and KIND = SKED
-        //
-        memdescSetFlag(pKernelGraphicsObject->pMmioMemDesc, MEMDESC_FLAGS_ALLOC_SKED_REFLECTED, NV_TRUE);
-    }
-
+    /* Remaining CPU GR objects are bootstrap 3D/2D, not compute. */
     return NV_OK;
 }
 
@@ -483,11 +410,7 @@ kgrobjFreeComputeMmio_IMPL
     KernelGraphicsObject *pKernelGraphicsObject
 )
 {
-    if (pGpu->pGpuArch->bGpuArchIsZeroFb)
-        memdescFree(pKernelGraphicsObject->pMmioMemDesc);
-
-    memdescDestroy(pKernelGraphicsObject->pMmioMemDesc);
-    pKernelGraphicsObject->pMmioMemDesc = NULL;
+    /* Compute MMIO descriptors are never created in this profile. */
 }
 
 /*!
