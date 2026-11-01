@@ -41,17 +41,26 @@ static ssize_t read_stats(struct file *f,char __user *p,size_t n,loff_t *pos)
  char b[128]; int len=scnprintf(b,sizeof(b),"records=%llu bytes=%zu dropped=%llu frozen=%u\n",serial,used,dropped,frozen);
  return simple_read_from_buffer(p,n,pos,b,len);
 }
+static ssize_t mark_tape(struct file *f,const char __user *p,size_t n,loff_t *pos)
+{
+ char label[64];
+ if(n>sizeof(label)) return -E2BIG;
+ if(copy_from_user(label,p,n)) return -EFAULT;
+ l2_record(11,0,label,n);
+ return n;
+}
+static const struct proc_ops mark_ops={.proc_write=mark_tape};
 static const struct proc_ops tape_ops={.proc_read=read_tape};
 static const struct proc_ops freeze_ops={.proc_write=freeze_tape,.proc_read=read_stats};
 int l2_record_init(void)
 {
  tape=vzalloc(CAPACITY);
  if(!tape) return -ENOMEM;
- if(!proc_create("l2trace",0400,NULL,&tape_ops) || !proc_create("l2freeze",0600,NULL,&freeze_ops)) return -ENOMEM;
+ if(!proc_create("l2marker",0200,NULL,&mark_ops) || !proc_create("l2trace",0400,NULL,&tape_ops) || !proc_create("l2freeze",0600,NULL,&freeze_ops)) return -ENOMEM;
  return 0;
 }
 void l2_record_exit(void)
-{ remove_proc_entry("l2trace",NULL);remove_proc_entry("l2freeze",NULL);vfree(tape);tape=NULL; }
+{ remove_proc_entry("l2marker",NULL);remove_proc_entry("l2trace",NULL);remove_proc_entry("l2freeze",NULL);vfree(tape);tape=NULL; }
 
 struct l2_mapping { void *cpu; u64 size, physical; };
 static struct l2_mapping mappings[4096];
