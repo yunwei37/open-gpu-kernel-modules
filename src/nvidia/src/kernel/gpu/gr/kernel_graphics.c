@@ -2541,10 +2541,12 @@ kgraphicsCreateGoldenImageChannel_IMPL
     NV_ASSERT_OR_GOTO(classNum != 0, cleanup);
 
     // Allocate a GR object on the channel
-    NV_ASSERT_OK_OR_GOTO(status,
-        pRmApi->AllocWithHandle(pRmApi, hClientId, KGRAPHICS_CHANNEL_HANDLE_CHANNELID,
-                                KGRAPHICS_CHANNEL_HANDLE_3DOBJ, classNum, NULL, 0),
-        cleanup);
+    {
+        extern NV_STATUS NV_API_CALL l2_replay_golden_object(OBJGPU *,NvHandle,NvHandle,NvHandle,NvU32);
+        NV_ASSERT_OK_OR_GOTO(status,
+            l2_replay_golden_object(pGpu,hClientId,KGRAPHICS_CHANNEL_HANDLE_CHANNELID,KGRAPHICS_CHANNEL_HANDLE_3DOBJ,classNum),
+            cleanup);
+    }
 
     if (bRetainGoldenImageChannel)
     {
