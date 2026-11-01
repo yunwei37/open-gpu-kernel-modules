@@ -58,3 +58,5 @@ NVIDIA_SOURCES += nvidia/nvlink_linux.c
 
 
 NVIDIA_SOURCES += nvidia/linux_nvswitch.c
+
+NVIDIA_SOURCES += nvidia/l2-counts.c
