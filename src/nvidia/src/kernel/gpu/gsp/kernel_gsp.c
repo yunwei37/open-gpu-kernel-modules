@@ -1473,27 +1473,7 @@ const char *_getRpcName
     NvU32 id
 )
 {
-    static const char *rpcName[] =
-        {
-            #define X(UNIT, a, VAL) #a,
-            #define E(a, VAL) #a,
-            #undef _RPC_GLOBAL_ENUMS_H_
-            #include "vgpu/rpc_global_enums.h"
-            #undef X
-            #undef E
-        };
-
-    if (id < NV_VGPU_MSG_FUNCTION_NUM_FUNCTIONS)
-    {
-        return rpcName[id];
-    }
-    else if ((id > NV_VGPU_MSG_EVENT_FIRST_EVENT) && (id < NV_VGPU_MSG_EVENT_NUM_EVENTS))
-    {
-        NvU32 index = id - (NV_VGPU_MSG_EVENT_FIRST_EVENT - NV_VGPU_MSG_FUNCTION_NUM_FUNCTIONS) + 1;
-        return rpcName[index];
-    }
-
-    return "Unknown";
+    return "rpc";
 }
 
 /*!
