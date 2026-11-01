@@ -324,28 +324,8 @@ RS_ENTRY(
     /* Required Access Rights */ RS_ACCESS_NONE
 )
 
-RS_ENTRY(
-    /* External Class         */ BLACKWELL_B,
-    /* Internal Class         */ KernelGraphicsObject,
-    /* Multi-Instance         */ NV_TRUE,
-    /* Parents                */ RS_LIST(classId(KernelChannel)),
-    /* Alloc Param Info       */ RS_OPTIONAL(NV_GR_ALLOCATION_PARAMETERS),
-    /* Resource Free Priority */ RS_FREE_PRIORITY_DEFAULT,
-    /* Flags                  */ RS_FLAGS_ALLOC_NON_PRIVILEGED | RS_FLAGS_CHANNEL_DESCENDANT_COMMON |
-                                 RS_FLAGS_ACQUIRE_RO_API_LOCK_ON_ALLOC | RS_FLAGS_ALLOC_GSP_PLUGIN_FOR_VGPU_GSP,
-    /* Required Access Rights */ RS_ACCESS_NONE
-)
-RS_ENTRY(
-    /* External Class         */ FERMI_TWOD_A,
-    /* Internal Class         */ KernelGraphicsObject,
-    /* Multi-Instance         */ NV_TRUE,
-    /* Parents                */ RS_LIST(classId(KernelChannel)),
-    /* Alloc Param Info       */ RS_OPTIONAL(NV_GR_ALLOCATION_PARAMETERS),
-    /* Resource Free Priority */ RS_FREE_PRIORITY_DEFAULT,
-    /* Flags                  */ RS_FLAGS_ALLOC_NON_PRIVILEGED | RS_FLAGS_CHANNEL_DESCENDANT_COMMON |
-                                 RS_FLAGS_ACQUIRE_RO_API_LOCK_ON_ALLOC | RS_FLAGS_ALLOC_GSP_PLUGIN_FOR_VGPU_GSP,
-    /* Required Access Rights */ RS_ACCESS_NONE
-)
+
+
 RS_ENTRY(
     /* External Class         */ NV01_CONTEXT_DMA,
     /* Internal Class         */ ContextDma,
