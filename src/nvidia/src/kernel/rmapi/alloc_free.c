@@ -922,6 +922,14 @@ serverAllocResourceUnderLock
 
             NV_ASSERT_OK_OR_GOTO(status,
                 resservSwapTlsCallContext(&pOldContext, &callContext), done);
+            /* L2 fixed-workload experiment: keep the host constructor/context
+             * preparation, but let the ModelOS GSP replayer create compute. */
+            if (pRmAllocParams->externalClassId == 0xcec0)
+            {
+                NV_PRINTF(LEVEL_ERROR,"L2_SKIP_COMPUTE_RPC object=0x%x client=0x%x\n",pRmAllocParams->hResource,hClient);
+                status = NV_OK;
+            }
+            else
             NV_RM_RPC_ALLOC_OBJECT(pGpu,
                                    pRmAllocParams->hClient,
                                    pRmAllocParams->hParent,
@@ -935,7 +943,7 @@ serverAllocResourceUnderLock
             if (status != NV_OK)
                 goto done;
 
-            pRmResource->bRpcFree = NV_TRUE;
+            pRmResource->bRpcFree = (pRmAllocParams->externalClassId != 0xcec0);
         }
     }
 
