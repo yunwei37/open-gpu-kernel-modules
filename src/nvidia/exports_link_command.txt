@@ -219,3 +219,5 @@
 --undefined=modelos_rm_free
 --undefined=modelos_rm_map_cpu
 --undefined=modelos_rm_map_dma
+
+--undefined=modelos_rm_watchdog_probe

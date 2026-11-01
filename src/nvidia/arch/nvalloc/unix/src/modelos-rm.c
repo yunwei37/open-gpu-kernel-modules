@@ -56,3 +56,12 @@ NV_STATUS NV_API_CALL modelos_rm_map_dma(nvidia_stack_t *sp, NVOS46_PARAMETERS *
     status = api->Map(api, params);
     NV_EXIT_RM_RUNTIME(sp,fp); return status;
 }
+
+extern NV_STATUS NV_API_CALL l2_watchdog_roundtrip(void);
+NV_STATUS NV_API_CALL modelos_rm_watchdog_probe(nvidia_stack_t *sp)
+{
+    NV_STATUS status;void *fp;
+    NV_ENTER_RM_RUNTIME(sp,fp);
+    status=l2_watchdog_roundtrip();
+    NV_EXIT_RM_RUNTIME(sp,fp);return status;
+}
