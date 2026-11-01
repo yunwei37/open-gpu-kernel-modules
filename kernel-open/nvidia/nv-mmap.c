@@ -1,3 +1,4 @@
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1999-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -660,6 +661,12 @@ int nvidia_mmap_helper(
                         up(&nvl->mmap_lock);
                         ret = -EAGAIN;
                         goto done;
+                    }
+                    {
+                        NvU64 evidence[5]={vma->vm_start+curOffs,
+                            mmap_context->memArea.pRanges[idx].start,
+                            mmap_context->memArea.pRanges[idx].size,access_start,access_len};
+                        l2_record(12,current->tgid,evidence,sizeof(evidence));
                     }
                     curOffs = nextOffs;
                 }
