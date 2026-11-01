@@ -7808,3 +7808,42 @@ static NV_STATUS _kgspDecodeGspStaticInfo(OBJGPU *pGpu, NvU64 *pKVData, NvU64 kv
 
     return status;
 }
+
+/* L2 experiment: replay only the GSP compute-object allocation, with symbolic
+ * client/channel/sequence fields. Other resources and GSP bootstrap retain RM.
+ * No host KernelGraphicsObject is created for this private handle. */
+#include "gpu_mgr/gpu_mgr.h"
+#include "rmapi/rmapi.h"
+NV_STATUS NV_API_CALL l2_gsp_compute_alloc(NvHandle client,NvHandle parent,NvHandle *object)
+{
+    NV_STATUS status;
+    OBJGPU *gpu;
+    KernelGsp *gsp;
+    OBJRPC *rpc;
+    rpc_message_header_v *header;
+    NvHandle handle=0xe2000001;
+    status=rmapiLockAcquire(RMAPI_LOCK_FLAGS_WRITE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)return status;
+    status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)goto api_out;
+    gpu=gpumgrGetGpu(0);
+    if(!gpu){status=NV_ERR_INVALID_DEVICE;goto gpu_out;}
+    gsp=GPU_GET_KERNEL_GSP(gpu);rpc=gsp->pRpc;
+    if(!rpc){status=NV_ERR_INVALID_STATE;goto gpu_out;}
+    status=rpcWriteCommonHeader(gpu,rpc,NV_VGPU_MSG_FUNCTION_ALLOC_OBJECT,sizeof(rpc_alloc_object_v2C_01));
+    if(status!=NV_OK)goto gpu_out;
+    portMemSet(&rpcGetVgpuMessageData(rpc)->alloc_object_v,0,sizeof(rpc_alloc_object_v2C_01));
+    rpcGetVgpuMessageData(rpc)->alloc_object_v.hClient=client;
+    rpcGetVgpuMessageData(rpc)->alloc_object_v.hParent=parent;
+    rpcGetVgpuMessageData(rpc)->alloc_object_v.hObject=handle;
+    rpcGetVgpuMessageData(rpc)->alloc_object_v.hClass=0xcec0;
+    header=rpcGetVgpuMessageHeader(rpc);header->sequence=rpc->sequence++;
+    status=kgspSendRpc(gpu,gsp,NVDM_TYPE_RM_RPC,header->length,NV_TRUE);
+    if(status==NV_OK)status=rpcGetVgpuMessageHeader(rpc)->rpc_result;
+    if(status==NV_OK)*object=handle;
+    NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_COMPUTE status=0x%x client=0x%x parent=0x%x object=0x%x\n",status,client,parent,handle);
+ gpu_out:
+    rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+ api_out:
+    rmapiLockRelease();return status;
+}

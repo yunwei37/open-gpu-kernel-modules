@@ -5,13 +5,17 @@
 #include <core/thread_state.h>
 #include "rmapi/rmapi.h"
 
+extern NV_STATUS NV_API_CALL l2_gsp_compute_alloc(NvHandle,NvHandle,NvHandle *);
 NV_STATUS NV_API_CALL modelos_rm_alloc(nvidia_stack_t *sp, NvHandle client,
     NvHandle parent, NvHandle *object, NvU32 cls, void *params, NvU32 size)
 {
     NV_STATUS status; void *fp; RM_API *api;
     NV_ENTER_RM_RUNTIME(sp,fp);
     api = rmapiGetInterface(RMAPI_EXTERNAL_KERNEL);
-    status = api->Alloc(api, client, parent, object, cls, params, size);
+    if(cls==0xcec0 && params==NULL && size==0)
+        status=l2_gsp_compute_alloc(client,parent,object);
+    else
+        status = api->Alloc(api, client, parent, object, cls, params, size);
     NV_EXIT_RM_RUNTIME(sp,fp); return status;
 }
 NV_STATUS NV_API_CALL modelos_rm_control(nvidia_stack_t *sp, NvHandle client,
