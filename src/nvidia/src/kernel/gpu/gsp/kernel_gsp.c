@@ -410,62 +410,7 @@ _kgspRpcSanityCheck(OBJGPU *pGpu, KernelGsp *pKernelGsp, OBJRPC *pRpc)
     return NV_OK;
 }
 
-static void
-_kgspAddRpcHistoryEntry
-(
-    OBJRPC *pRpc,
-    RpcHistoryEntry *pHistory,
-    NvU32 *pCurrent,
-    NvU32 func,
-    NvU32 sequence
-)
-{
-    NvU32 entry = *pCurrent = (*pCurrent + 1) % RPC_HISTORY_DEPTH;
 
-    portMemSet(&pHistory[entry], 0, sizeof(pHistory[0]));
-    pHistory[entry].function = func;
-    pHistory[entry].sequence = sequence;
-    pHistory[entry].ts_start = osGetTimestamp();
-
-    _kgspGetActiveRpcDebugData(pRpc, func,
-                               &pHistory[entry].data[0],
-                               &pHistory[entry].data[1]);
-}
-
-static void
-_kgspCompleteRpcHistoryEntry
-(
-    RpcHistoryEntry *pHistory,
-    NvU32 current
-)
-{
-    NvU32 historyIndex;
-    NvU32 historyEntry;
-
-    // Complete the current entry (it should be active)
-    // TODO: assert that ts_end == 0 here when continuation record timestamps are fixed
-    NV_ASSERT_OR_RETURN_VOID(pHistory[current].ts_start != 0);
-
-    pHistory[current].ts_end = osGetTimestamp();
-
-    //
-    // Complete any previous entries that aren't marked complete yet, using the same timestamp
-    // (we may not have explicitly waited for them)
-    //
-    for (historyIndex = 1; historyIndex < RPC_HISTORY_DEPTH; historyIndex++)
-    {
-        historyEntry = (current + RPC_HISTORY_DEPTH - historyIndex) % RPC_HISTORY_DEPTH;
-        if (pHistory[historyEntry].ts_start != 0 &&
-            pHistory[historyEntry].ts_end   == 0)
-        {
-            pHistory[historyEntry].ts_end = pHistory[current].ts_end;
-        }
-        else
-        {
-            break;
-        }
-    }
-}
 
 /*!
  * GSP client RM RPC send routine
@@ -519,7 +464,6 @@ NV_STATUS kgspSendRpc_IMPL
         return nvStatus;
     }
 
-    _kgspAddRpcHistoryEntry(pRpc, pRpc->rpcHistory, &pRpc->rpcHistoryCurrent, func, sequence);
 
     return bSync ? _kgspRpcRecvPoll(pGpu, pRpc, func, sequence) : NV_OK;
 }
@@ -1570,7 +1514,6 @@ _kgspProcessRpcEvent
     NV_PRINTF(LEVEL_INFO, "received event from GPU%d: 0x%x (%s) status: 0x%x size: %d\n",
               gpuGetInstance(pGpu), event, _getRpcName(event), pMsgHdr->rpc_result, pMsgHdr->length);
 
-    _kgspAddRpcHistoryEntry(pRpc, pRpc->rpcEventHistory, &pRpc->rpcEventHistoryCurrent, pMsgHdr->function, pMsgHdr->sequence);
 
     /*
      * Shortlist of RPC's that have been manually screened to be safe without the API lock
@@ -1766,7 +1709,6 @@ _kgspProcessRpcEvent
     }
 
 done:
-    _kgspCompleteRpcHistoryEntry(pRpc->rpcEventHistory, pRpc->rpcEventHistoryCurrent);
 }
 
 /*!
@@ -2007,13 +1949,11 @@ _kgspRpcDrainOneEvent
         }
 
         NV_PRINTF(LEVEL_INFO, "Received GMCAPI event 0x%08x with %u bytes\n", cmd, pGmcHdr->size);
-        _kgspAddRpcHistoryEntry(pRpc, pRpc->rpcEventHistory, &pRpc->rpcEventHistoryCurrent, cmd, pGmcHdr->sequence);
         nvStatus = gmcapiCommand(pGpu, cmd, pGmcHdr->data, pGmcHdr->size, NULL, NULL);
         if (nvStatus != NV_OK)
         {
             NV_PRINTF(LEVEL_ERROR, "GMCAPI event 0x%08x failed, status=0x%08x\n", cmd, nvStatus);
         }
-        _kgspCompleteRpcHistoryEntry(pRpc->rpcEventHistory, pRpc->rpcEventHistoryCurrent);
 
         if(pConditionFunc != NULL)
         {
@@ -3382,7 +3322,6 @@ kgspRecvPoll_IMPL
         switch (rpcStatus) {
             case NV_WARN_MORE_PROCESSING_REQUIRED:
                 // The synchronous RPC response we were waiting for is here
-                _kgspCompleteRpcHistoryEntry(pRpc->rpcHistory, pRpc->rpcHistoryCurrent);
                 if (!bSlowGspRpc)
                 {
                     _kgspCheckSlowRpc(pGpu, pRpc);
