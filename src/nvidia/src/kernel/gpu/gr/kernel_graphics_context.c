@@ -3790,8 +3790,11 @@ static NV_STATUS l2_prepare_context_locked(NvHandle hClient,NvHandle hChannel,Nv
     kgrmgrCtrlSetChannelHandle(hChannel,&route);
     L2_CTX(kgrmgrCtrlRouteKGRWithDevice(gpu,GPU_GET_KERNEL_GRAPHICS_MANAGER(gpu),device,&route,&gr));
     L2_CTX(kgraphicsInitializeDeferredStaticData(gpu,gr,NV01_NULL_OBJECT,NV01_NULL_OBJECT));
-    if(bootstrap)L2_CTX(kgraphicsAllocKgraphicsBuffers_HAL(gpu,gr,ctx,channel));
-    else L2_CTX(kgrctxMapGlobalCtxBuffer(gpu,ctx,gr,kchannelGetGfid(channel),channel->pVAS,GR_GLOBALCTX_BUFFER_FECS_EVENT,NV_FALSE));
+    /* Replay owns explicit FECS backing/mapping; do not install the CPU
+     * context-switch log consumer mapping from the graphics-object bundle. */
+    if(!kgraphicsGetGlobalCtxBuffers(gpu,gr,kchannelGetGfid(channel))->memDesc[GR_GLOBALCTX_BUFFER_FECS_EVENT])
+        L2_CTX(kgraphicsAllocGlobalCtxBuffers_HAL(gpu,gr,kchannelGetGfid(channel)));
+    L2_CTX(kgrctxMapGlobalCtxBuffer(gpu,ctx,gr,kchannelGetGfid(channel),channel->pVAS,GR_GLOBALCTX_BUFFER_FECS_EVENT,NV_FALSE));
     if(!kgrctxIsMainContextAllocated(gpu,ctx))L2_CTX(kgrctxAllocMainCtxBuffer(gpu,ctx,gr,channel));
     if(!u->ctxPatchBuffer.pMemDesc)L2_CTX(kgrctxAllocPatchBuffer(gpu,ctx,gr,channel));
     if(kgrctxShouldPreAllocPmBuffer_HAL(gpu,ctx,channel))L2_CTX(kgrctxAllocPmBuffer(gpu,ctx,gr,channel));
