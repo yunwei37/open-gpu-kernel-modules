@@ -194,6 +194,9 @@ os_enable_pci_req_atomics(
 
 void NV_API_CALL os_pci_trigger_flr(void *handle)
 {
+#ifdef CONFIG_KEXEC_CORE
+    pr_info("KEXEC_GPU_FLR_CALLED\n");
+#endif
     struct pci_dev *pdev = (struct pci_dev *) handle;
     int ret;
 
