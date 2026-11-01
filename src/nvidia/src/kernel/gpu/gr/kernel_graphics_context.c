@@ -3792,7 +3792,7 @@ NV_STATUS NV_API_CALL l2_prepare_compute_context(NvHandle hClient,NvHandle hChan
     kgrmgrCtrlSetChannelHandle(hChannel,&route);
     L2_CTX(kgrmgrCtrlRouteKGRWithDevice(gpu,GPU_GET_KERNEL_GRAPHICS_MANAGER(gpu),device,&route,&gr));
     L2_CTX(kgraphicsInitializeDeferredStaticData(gpu,gr,NV01_NULL_OBJECT,NV01_NULL_OBJECT));
-    L2_CTX(kgraphicsAllocKgraphicsBuffers_HAL(gpu,gr,ctx,channel));
+    L2_CTX(kgrctxMapGlobalCtxBuffer(gpu,ctx,gr,kchannelGetGfid(channel),channel->pVAS,GR_GLOBALCTX_BUFFER_FECS_EVENT,NV_FALSE));
     if(!kgrctxIsMainContextAllocated(gpu,ctx))
         L2_CTX(kgrctxAllocMainCtxBuffer(gpu,ctx,gr,channel));
     if(!u->ctxPatchBuffer.pMemDesc)
