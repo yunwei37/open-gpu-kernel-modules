@@ -10219,6 +10219,7 @@ void osAssertFailed(void);
 #define RPC_LOCK_DEBUG_DUMP_STACK()
 #endif
 
+#include "l2-sm-order.h"
 NV_STATUS rpcRmApiControl_GSP
 (
     RM_API *pRmApi,
@@ -10489,6 +10490,7 @@ NV_STATUS rpcRmApiControl_GSP
     }
 
 done:
+    if(cmd==0x20800a22 && status==NV_OK)l2_observe_sm_order(pGpu,pOriginalParams,paramsSize);
     if (gpuMaskRelease != 0)
     {
         rmGpuGroupLockRelease(gpuMaskRelease, GPUS_LOCK_FLAGS_NONE);
