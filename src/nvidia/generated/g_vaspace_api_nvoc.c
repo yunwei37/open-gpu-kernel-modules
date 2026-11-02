@@ -131,22 +131,13 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_VaSpaceApi =
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014004u)
-static NV_STATUS vaspaceapiCtrlCmdVaspaceCopyServerReservedPdes__EXPORT(void *pVaspaceApi, void *pCopyServerReservedPdesParams) {
-    return vaspaceapiCtrlCmdVaspaceCopyServerReservedPdes_IMPL(pVaspaceApi, pCopyServerReservedPdesParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014004u)
 
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_VaSpaceApi[] = 
 {
     {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14004u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &vaspaceapiCtrlCmdVaspaceCopyServerReservedPdes__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14004u)
         /*flags=*/      0x14004u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x90f10106u,

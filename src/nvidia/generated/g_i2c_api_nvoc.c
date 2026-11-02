@@ -127,11 +127,6 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_I2cApi =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS i2capiCtrlCmdI2cGetPortInfo__EXPORT(void *pI2cApi, void *pParams) {
-    return i2capiCtrlCmdI2cGetPortInfo_IMPL(pI2cApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
 
 
@@ -141,11 +136,7 @@ static NV_STATUS i2capiCtrlCmdI2cGetPortInfo__EXPORT(void *pI2cApi, void *pParam
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_I2cApi[] = 
 {
     {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &i2capiCtrlCmdI2cGetPortInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
         /*flags=*/      0x48u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x402c0101u,

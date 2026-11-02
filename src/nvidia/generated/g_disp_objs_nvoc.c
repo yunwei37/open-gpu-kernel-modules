@@ -2539,11 +2539,6 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_DispCommon =
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0082004au)
-static NV_STATUS dispcmnCtrlCmdSystemGetSuppported__EXPORT(void *pDispCommon, void *pSupportedParams) {
-    return dispcmnCtrlCmdSystemGetSuppported_IMPL(pDispCommon, pSupportedParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0082004au)
 
 
 
@@ -2576,11 +2571,6 @@ static NV_STATUS dispcmnCtrlCmdSystemGetSuppported__EXPORT(void *pDispCommon, vo
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000046u)
-static NV_STATUS dispcmnCtrlCmdSpecificOrGetInfo__EXPORT(void *pDispCommon, void *pParams) {
-    return dispcmnCtrlCmdSpecificOrGetInfo_IMPL(pDispCommon, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000046u)
 
 
 
@@ -2588,11 +2578,6 @@ static NV_STATUS dispcmnCtrlCmdSpecificOrGetInfo__EXPORT(void *pDispCommon, void
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS dispcmnCtrlCmdSpecificGetI2cPortid__EXPORT(void *pDispCommon, void *pParams) {
-    return dispcmnCtrlCmdSpecificGetI2cPortid_IMPL(pDispCommon, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
 
 
@@ -2670,11 +2655,7 @@ static NV_STATUS dispcmnCtrlCmdSpecificGetI2cPortid__EXPORT(void *pDispCommon, v
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_DispCommon[] = 
 {
     {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x82004au)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &dispcmnCtrlCmdSystemGetSuppported__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x82004au)
         /*flags=*/      0x82004au,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x730107u,
@@ -2685,11 +2666,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_DispComm
 #endif
     },
     {               /*  [38] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &dispcmnCtrlCmdSpecificGetI2cPortid__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
         /*flags=*/      0x48u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x730211u,
@@ -2700,11 +2677,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_DispComm
 #endif
     },
     {               /*  [57] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x46u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &dispcmnCtrlCmdSpecificOrGetInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x46u)
         /*flags=*/      0x46u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x73028bu,

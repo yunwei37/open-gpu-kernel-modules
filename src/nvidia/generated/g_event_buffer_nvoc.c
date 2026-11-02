@@ -101,11 +101,6 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_EventBuffer =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000009u)
-static NV_STATUS eventbuffertBufferCtrlCmdEnableEvent__EXPORT(void *pEventBuffer, void *pEnableParams) {
-    return eventbuffertBufferCtrlCmdEnableEvent_IMPL(pEventBuffer, pEnableParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000009u)
 
 
 
@@ -114,11 +109,7 @@ static NV_STATUS eventbuffertBufferCtrlCmdEnableEvent__EXPORT(void *pEventBuffer
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_EventBuffer[] = 
 {
     {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x9u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &eventbuffertBufferCtrlCmdEnableEvent__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x9u)
         /*flags=*/      0x9u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x90cd0101u,

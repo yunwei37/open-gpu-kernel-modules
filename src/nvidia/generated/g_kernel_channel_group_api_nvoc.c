@@ -140,11 +140,6 @@ static NV_STATUS kchangrpapiCtrlCmdGpFifoSchedule__EXPORT(void *pKernelChannelGr
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014240u)
-static NV_STATUS kchangrpapiCtrlCmdInternalPromoteFaultMethodBuffers__EXPORT(void *pKernelChannelGroupApi, void *pParams) {
-    return kchangrpapiCtrlCmdInternalPromoteFaultMethodBuffers_IMPL(pKernelChannelGroupApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014240u)
 
 
 
@@ -174,11 +169,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_KernelCh
 #endif
     },
     {               /*  [14] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14240u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchangrpapiCtrlCmdInternalPromoteFaultMethodBuffers__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14240u)
         /*flags=*/      0x14240u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0xa06c010au,
