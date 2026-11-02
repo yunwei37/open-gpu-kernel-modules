@@ -5,7 +5,7 @@
 #include <linux/string.h>
 static DEFINE_SPINLOCK(mmio_lock);
 static DEFINE_SPINLOCK(count_lock);
-static u64 rpc[2][8192],other[17],overflow;
+static u64 rpc[2][8192],other[18],overflow;
 static bool frozen;
 static struct {u32 bytes;u8 data[1024];} promotes[16];
 static u32 promote_count;
@@ -24,7 +24,7 @@ void l2_record(unsigned type,unsigned long long address,const void *data,unsigne
  unsigned long f;unsigned i;u32 function;
  spin_lock_irqsave(&count_lock,f);
  if(frozen)goto out;
- if(type<17)other[type]++;
+ if(type<18)other[type]++;
  if((type==1||type==2)&&length>=32){
   memcpy(&function,(char *)data+12,4);
   if(function<8192)rpc[type-1][function]++;else overflow++;
@@ -99,6 +99,7 @@ void l2_counts_dump(void)
  for(i=0;i<8192;i++)if(rpc[0][i]||rpc[1][i])pr_info("L2_NATIVE_RPC id=%u sends=%llu replies=%llu\n",i,rpc[0][i],rpc[1][i]);
  for(i=0;i<512;i++)if(controls[i].used)pr_info("L2_NATIVE_CTRL cmd=0x%x sends=%llu replies=%llu failed=%llu params_min=%u params_max=%u\n",controls[i].cmd,controls[i].sends,controls[i].replies,controls[i].failed,controls[i].lo,controls[i].hi);
  for(i=0;i<bif_count;i++)pr_info("L2_BIF_WIRE index=%u kind=%u bytes=%u data=%*phN%*phN\n",i,bif[i].kind,bif[i].bytes,64,bif[i].data,bif[i].bytes-64,bif[i].data+64);
+ pr_info("L2_BIF_REPLAY calls=%llu bytes=4 reply=01000000\n",other[17]);
  pr_info("L2_FIFO_REPLAY calls=%llu qualified_selectors=16 channels=2048\n",other[16]);
  for(i=0;i<fifo_count;i++)pr_info("L2_FIFO_WIRE index=%u kind=%u bytes=%u seq=%u params=%u status=0x%x header_status=0x%x client=0x%x object=0x%x runlist=%u channels=%u\n",i,fifo[i].type,fifo[i].length,fifo[i].sequence,fifo[i].params,fifo[i].status,fifo[i].header_status,fifo[i].client,fifo[i].object,fifo[i].a,fifo[i].b);
  for(i=0;i<4096;i++)if(methods[i].used)pr_info("L2_NATIVE_METHOD class=0x%x cmd=0x%x hits=%llu misses=%llu\n",methods[i].cls,methods[i].cmd,methods[i].hits,methods[i].misses);

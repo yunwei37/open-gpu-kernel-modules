@@ -10152,6 +10152,13 @@ NV_STATUS rpcRmApiControl_GSP
         goto done;
     }
 
+    if(cmd==0x20800aac)
+    {
+        status=(resCtrlFlags & NVOS54_FLAGS_FINN_SERIALIZED) ? NV_ERR_NOT_SUPPORTED :
+            l2_replay_bif_info(pGpu,pParamStructPtr,paramsSize);
+        if(status!=NV_OK)NV_PRINTF(LEVEL_ERROR,"L2_BIF_REPLAY_REJECT status=0x%x flags=0x%x bytes=%u\n",status,resCtrlFlags,paramsSize);
+        goto done;
+    }
     if(cmd==0x20800a61)
     {
         status=(resCtrlFlags & NVOS54_FLAGS_FINN_SERIALIZED) ? NV_ERR_NOT_SUPPORTED :

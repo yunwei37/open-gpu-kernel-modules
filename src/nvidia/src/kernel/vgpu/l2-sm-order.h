@@ -239,3 +239,17 @@ static NV_STATUS l2_replay_fifo_capacity(OBJGPU *gpu,void *data,NvU32 bytes)
     }
     return NV_ERR_NOT_SUPPORTED;
 }
+
+/* BIF output-only flags qualified by dma1, mapped8 and native wire capture. */
+_Static_assert(sizeof(NV2080_CTRL_INTERNAL_BIF_GET_STATIC_INFO_PARAMS)==4,"BIF info size");
+static NV_STATUS l2_replay_bif_info(OBJGPU *gpu,void *data,NvU32 bytes)
+{
+    NV2080_CTRL_INTERNAL_BIF_GET_STATIC_INFO_PARAMS *p=data;
+    if(!p || bytes!=sizeof(*p) || l2_recorded_physical_gpu(gpu)!=NV_OK)return NV_ERR_NOT_SUPPORTED;
+    p->bPcieGen4Capable=NV_TRUE;
+    p->bIsC2CLinkUp=NV_FALSE;
+    p->bIsDeviceMultiFunction=NV_FALSE;
+    p->bGcxPmuCfgSpaceRestore=NV_FALSE;
+    l2_record(17,0x20800aac,p,sizeof(*p));
+    return NV_OK;
+}
