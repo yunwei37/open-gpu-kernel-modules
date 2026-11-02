@@ -56,6 +56,13 @@
 #include "gpu/conf_compute/ccsl.h"
 #include "gpu/conf_compute/conf_compute.h"
 
+/* The recorded physical-GB202 profile owns this RAM through Linux DMA API.
+ * The queue protocol and firmware consumer are unchanged. */
+extern int l2_queue_allocate(NvU64 bytes, NvU64 entries, void **cpu,
+                             NvU64 *dma, void **owner);
+extern void l2_queue_release(void *owner);
+extern int l2_queue_publish(void *owner, NvU64 tableBytes, NvU64 cmdBytes, NvU64 statusBytes);
+
 static void _gspMsgQueueCleanup(MESSAGE_QUEUE_INFO *pMQI);
 
 static void
@@ -215,12 +222,12 @@ GspMsgQueuesInit
     MESSAGE_QUEUE_INFO  *pRmQueueInfo = NULL;
     RmPhysAddr  *pPageTbl;
     NvP64        pVaKernel;
-    NvP64        pPrivKernel;
     NV_STATUS    nvStatus         = NV_OK;
     NvLength     sharedBufSize;
     NvP64        lastQueueVa;
     NvLength     lastQueueSize;
-    NvU64 flags = MEMDESC_FLAGS_NONE;
+    NvU64 queueDma;
+    NvU32 page;
 
     if (*ppMQCollection != NULL)
     {
@@ -245,72 +252,34 @@ GspMsgQueuesInit
                     pRmQueueInfo->commandQueueSize +
                     pRmQueueInfo->statusQueueSize;
 
-    if (confComputeForceUnprotAlloc(pGpu))
+    /* No CC/decrypted-memory fallback: only the qualified physical profile. */
+    if (pRmQueueInfo->bEncryptionEnabled || confComputeForceUnprotAlloc(pGpu) ||
+        IS_VIRTUAL(pGpu) || RM_PAGE_SIZE != 4096)
     {
-        flags |= MEMDESC_FLAGS_ALLOC_IN_UNPROTECTED_MEMORY;
+        nvStatus = NV_ERR_NOT_SUPPORTED;
+        goto error_ret;
     }
-
-    //
-    // For now, put all shared queue memory in one block.
-    //
-    NV_ASSERT_OK_OR_GOTO(nvStatus,
-        memdescCreate(&pMQCollection->pSharedMemDesc, pGpu, sharedBufSize,
-            RM_PAGE_SIZE, NV_MEMORY_NONCONTIGUOUS, ADDR_SYSMEM, NV_MEMORY_CACHED,
-            flags),
-        error_ret);
-
-    memdescSetFlag(pMQCollection->pSharedMemDesc, MEMDESC_FLAGS_KERNEL_MODE, NV_TRUE);
-
-    memdescSetPageSize(pMQCollection->pSharedMemDesc, AT_GPU, RM_PAGE_SIZE_HUGE);
-    memdescTagAlloc(nvStatus, NV_FB_ALLOC_RM_INTERNAL_OWNER_UNNAMED_TAG_58,
-                    pMQCollection->pSharedMemDesc);
-
-    if (nvStatus == NV_ERR_NO_MEMORY)
+    if (l2_queue_allocate(sharedBufSize, pMQCollection->pageTableEntryCount,
+                          (void **)&pVaKernel, &queueDma,
+                          &pMQCollection->pL2QueueOwner) != 0)
     {
-        // TODO: Bug 5299603
-        NV_PRINTF(LEVEL_ERROR, "Allocation failed with big page size, retrying with default page size\n");
-        memdescSetPageSize(pMQCollection->pSharedMemDesc, AT_GPU, RM_PAGE_SIZE);
-        memdescTagAlloc(nvStatus, NV_FB_ALLOC_RM_INTERNAL_OWNER_UNNAMED_TAG_58,
-                        pMQCollection->pSharedMemDesc);
-    }
-
-    NV_ASSERT_OK_OR_GOTO(nvStatus, nvStatus, error_ret);
-
-    // Create kernel mapping for command queue.
-    NV_ASSERT_OK_OR_GOTO(nvStatus,
-        memdescMap(pMQCollection->pSharedMemDesc, 0, sharedBufSize,
-            NV_TRUE, NV_PROTECT_WRITEABLE,
-            &pVaKernel, &pPrivKernel),
-        error_ret);
-
-    memdescSetKernelMapping(pMQCollection->pSharedMemDesc, pVaKernel);
-    memdescSetKernelMappingPriv(pMQCollection->pSharedMemDesc, pPrivKernel);
-
-    if (pVaKernel == NvP64_NULL)
-    {
-        NV_PRINTF(LEVEL_ERROR, "Error allocating message queue shared buffer\n");
         nvStatus = NV_ERR_NO_MEMORY;
         goto error_ret;
     }
-
-    portMemSet((void *)pVaKernel, 0, sharedBufSize);
-
     pPageTbl = pVaKernel;
+    /* dma_alloc_coherent returns a contiguous device address range, not a
+     * CPU-physical-address promise. Include the page table's own first page. */
+    for (page = 0; page < pMQCollection->pageTableEntryCount; page++)
+        pPageTbl[page] = queueDma + (NvU64)page * RM_PAGE_SIZE;
 
-    // Shared memory layout.
-    //
-    // Each of the following are page aligned:
-    //   Shared memory layout header (includes page table)
-    //   RM Command queue header
-    //   RM Command queue entries
-    //   RM Status queue header
-    //   RM Status queue entries
-    memdescGetPhysAddrs(pMQCollection->pSharedMemDesc,
-                    AT_GPU,                     // addressTranslation
-                    0,                          // offset
-                    RM_PAGE_SIZE,               // stride
-                    pMQCollection->pageTableEntryCount,  // count
-                    pPageTbl);                  // physical address table
+    if (l2_queue_publish(pMQCollection->pL2QueueOwner,
+                         pMQCollection->pageTableSize,
+                         pRmQueueInfo->commandQueueSize,
+                         pRmQueueInfo->statusQueueSize) != 0)
+    {
+        nvStatus = NV_ERR_INVALID_STATE;
+        goto error_ret;
+    }
 
     pRmQueueInfo->pCommandQueue = NvP64_VALUE(
         NvP64_PLUS_OFFSET(pVaKernel, pMQCollection->pageTableSize));
@@ -447,22 +416,10 @@ void GspMsgQueuesCleanup(MESSAGE_QUEUE_COLLECTION **ppMQCollection)
 
     _gspMsgQueueCleanup(pRmQueueInfo);
 
-    if (pMQCollection->pSharedMemDesc != NULL)
+    if (pMQCollection->pL2QueueOwner != NULL)
     {
-        NvP64 pVaKernel   = memdescGetKernelMapping(pMQCollection->pSharedMemDesc);
-        NvP64 pPrivKernel = memdescGetKernelMappingPriv(pMQCollection->pSharedMemDesc);
-
-        // Destroy kernel mapping for command queue.
-        if (pVaKernel != 0)
-        {
-            memdescUnmap(pMQCollection->pSharedMemDesc, NV_TRUE,
-                         pVaKernel, pPrivKernel);
-        }
-
-        // Free command queue memory.
-        memdescFree(pMQCollection->pSharedMemDesc);
-        memdescDestroy(pMQCollection->pSharedMemDesc);
-        pMQCollection->pSharedMemDesc = NULL;
+        l2_queue_release(pMQCollection->pL2QueueOwner);
+        pMQCollection->pL2QueueOwner = NULL;
     }
 
     portMemFree(pMQCollection);

@@ -62,3 +62,4 @@ NVIDIA_SOURCES += nvidia/linux_nvswitch.c
 NVIDIA_SOURCES += nvidia/l2-counts.c
 
 NVIDIA_SOURCES += nvidia/l2-owner.c
+NVIDIA_SOURCES += nvidia/l2-queue.c

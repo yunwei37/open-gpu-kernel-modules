@@ -171,7 +171,7 @@ typedef struct MESSAGE_QUEUE_COLLECTION
     NvLength               pageTableSize;
 
     // Shared memory area.
-    MEMORY_DESCRIPTOR     *pSharedMemDesc;
+    void                  *pL2QueueOwner; // Linux DMA allocation, no RM memdesc.
     RmPhysAddr             sharedMemPA;   // Page table for all of shared mem.
 
     MESSAGE_QUEUE_INFO rpcQueues[RPC_QUEUE_COUNT];
