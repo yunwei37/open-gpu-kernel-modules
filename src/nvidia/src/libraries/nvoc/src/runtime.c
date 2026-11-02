@@ -304,7 +304,7 @@ void __nvoc_destructFromBase(Dynamic *pDynamic)
     pDerivedObj->__nvoc_rtti->dtor(pDerivedObj);
 }
 
-const struct NVOC_EXPORTED_METHOD_DEF* nvocGetExportedMethodDefFromMethodInfo_IMPL(const struct NVOC_EXPORT_INFO *pExportInfo, NvU32 methodId)
+static const struct NVOC_EXPORTED_METHOD_DEF* l2_lookup_method(const struct NVOC_EXPORT_INFO *pExportInfo, NvU32 methodId)
 {
     NvU32 exportLength;
     const struct NVOC_EXPORTED_METHOD_DEF *exportArray;
@@ -338,6 +338,20 @@ const struct NVOC_EXPORTED_METHOD_DEF* nvocGetExportedMethodDefFromMethodInfo_IM
     }
 
     return NULL;
+}
+
+/* Metadata census includes hits and misses, including queries without execution. */
+extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
+const struct NVOC_EXPORTED_METHOD_DEF* nvocGetExportedMethodDefFromMethodInfo_IMPL(const struct NVOC_EXPORT_INFO *info,NvU32 cmd)
+{
+    const struct NVOC_EXPORTED_METHOD_DEF *def=l2_lookup_method(info,cmd);
+    if(info && info->numEntries && info->pExportEntries)
+    {
+        NvU32 hit=def!=NULL;
+        NvU64 key=((NvU64)info->pExportEntries[0].pClassInfo->classId<<32)|cmd;
+        l2_record(11,key,&hit,sizeof(hit));
+    }
+    return def;
 }
 
 const struct NVOC_EXPORTED_METHOD_DEF *objGetExportedMethodDef_IMPL(Dynamic *pObj, NvU32 methodId)

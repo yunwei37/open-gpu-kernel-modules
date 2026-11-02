@@ -10,6 +10,7 @@ static bool frozen;
 static struct {u32 bytes;u8 data[1024];} promotes[16];
 static u32 promote_count;
 static struct {u32 cmd,lo,hi;bool used;u64 sends,replies,failed;} controls[512];
+static struct {u32 cls,cmd;bool used;u64 hits,misses;} methods[4096];
 static struct {u32 id;bool used;u64 cpu,rpc,ok,failed,lookups,misses;} classes[1024];
 static struct {u32 offset;bool used;u64 reads,writes;} regs[32768];
 unsigned long l2_mmio_enter(void){unsigned long f;spin_lock_irqsave(&mmio_lock,f);return f;}
@@ -55,6 +56,13 @@ void l2_record(unsigned type,unsigned long long address,const void *data,unsigne
   else{memcpy(&status,(char *)data+48,4);memcpy(&header_status,(char *)data+16,4);
    if(!status&&!header_status)classes[i].ok++;else classes[i].failed++;}
  }
+ if(type==11 && length==4){
+  u32 cls=address>>32,cmd=(u32)address,hit;memcpy(&hit,data,4);
+  for(i=0;i<4096;i++)if(!methods[i].used||(methods[i].cls==cls&&methods[i].cmd==cmd))break;
+  if(i==4096){overflow++;goto out;}
+  methods[i].used=true;methods[i].cls=cls;methods[i].cmd=cmd;
+  if(hit)methods[i].hits++;else methods[i].misses++;
+ }
  if(type==3||type==4){
   for(i=0;i<32768;i++)if(!regs[i].used||regs[i].offset==address)break;
   if(i==32768){overflow++;goto out;}
@@ -70,6 +78,7 @@ void l2_counts_dump(void)
  pr_info("L2_NATIVE_COUNTS sends=%llu replies=%llu reads=%llu writes=%llu overflow=%llu\n",other[1],other[2],other[3],other[4],overflow);
  for(i=0;i<8192;i++)if(rpc[0][i]||rpc[1][i])pr_info("L2_NATIVE_RPC id=%u sends=%llu replies=%llu\n",i,rpc[0][i],rpc[1][i]);
  for(i=0;i<512;i++)if(controls[i].used)pr_info("L2_NATIVE_CTRL cmd=0x%x sends=%llu replies=%llu failed=%llu params_min=%u params_max=%u\n",controls[i].cmd,controls[i].sends,controls[i].replies,controls[i].failed,controls[i].lo,controls[i].hi);
+ for(i=0;i<4096;i++)if(methods[i].used)pr_info("L2_NATIVE_METHOD class=0x%x cmd=0x%x hits=%llu misses=%llu\n",methods[i].cls,methods[i].cmd,methods[i].hits,methods[i].misses);
  for(i=0;i<1024;i++)if(classes[i].used)pr_info("L2_NATIVE_CLASS id=0x%x cpu_created=%llu alloc_rpc=%llu gpu_ok=%llu gpu_failed=%llu info_lookups=%llu info_misses=%llu\n",classes[i].id,classes[i].cpu,classes[i].rpc,classes[i].ok,classes[i].failed,classes[i].lookups,classes[i].misses);
  for(i=0;i<promote_count;i++){
   pr_info("L2_PROMOTE_PACKET index=%u bytes=%u\n",i,promotes[i].bytes);

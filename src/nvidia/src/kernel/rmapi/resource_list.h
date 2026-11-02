@@ -247,17 +247,6 @@ RS_ENTRY(
     /* Required Access Rights */ RS_ACCESS_NONE
 )
 RS_ENTRY(
-    /* External Class         */ NV01_MEMORY_VIRTUAL,
-    /* Internal Class         */ VirtualMemoryRange,
-    /* Multi-Instance         */ NV_TRUE,
-    /* Parents                */ RS_LIST(classId(Device)),
-    /* Alloc Param Info       */ RS_REQUIRED(NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS),
-    /* Resource Free Priority */ RS_FREE_PRIORITY_DEFAULT,
-    /* Flags                  */ RS_FLAGS_ALLOC_NON_PRIVILEGED | RS_FLAGS_ACQUIRE_GPUS_LOCK |
-                                 RS_FLAGS_ALLOC_GSP_PLUGIN_FOR_VGPU_GSP,
-    /* Required Access Rights */ RS_ACCESS_NONE
-)
-RS_ENTRY(
     /* External Class         */ FERMI_VASPACE_A,
     /* Internal Class         */ VaSpaceApi,
     /* Multi-Instance         */ NV_TRUE,
