@@ -349,3 +349,50 @@ vaspaceGetPageLevelInfoCommon_IMPL
 
     return NV_OK;
 }
+
+/* Fixed trusted-consumer mapping path. Memory and VaSpaceApi backing remain
+ * RM-owned. The caller keeps them alive, destroys the channel group first,
+ * then explicitly unmaps before root free. No VirtualMemory range resource
+ * or NVOS46 client map record is needed by this path. */
+#include "mem_mgr/mem.h"
+#include "containers/eheap_old.h"
+#include "gpu/mem_mgr/virt_mem_allocator.h"
+#include "core/locks.h"
+#include "rmapi/rmapi.h"
+NV_STATUS NV_API_CALL l2_direct_memory_map(NvHandle client,NvHandle vas,NvHandle memory,
+                                          NvU64 *address,NvU64 *reservation,NvBool unmap)
+{
+    RsClient *c;RsResourceRef *r;
+    VaSpaceApi *v;Memory *m;OBJGPU *gpu;
+    NvU64 before,after;
+    NV_STATUS status=rmapiLockAcquire(RMAPI_LOCK_FLAGS_WRITE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)return status;
+    status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_CLIENT);
+    if(status!=NV_OK)goto api_out;
+#define L2_MAP(expr) do{status=(expr);if(status!=NV_OK)goto done;}while(0)
+    L2_MAP(serverGetClientUnderLock(&g_resServ,client,&c));
+    L2_MAP(clientGetResourceRef(c,vas,&r));v=dynamicCast(r->pResource,VaSpaceApi);
+    L2_MAP(clientGetResourceRef(c,memory,&r));m=dynamicCast(r->pResource,Memory);
+    if(!v||!m||!v->pVASpace||!m->pMemDesc){status=NV_ERR_INVALID_OBJECT;goto done;}
+    gpu=m->pGpu;
+    if(GPU_RES_GET_GPU(v)!=gpu){status=NV_ERR_INVALID_DEVICE;goto done;}
+    before=vaspaceGetHeap(v->pVASpace)->free;
+    if(unmap){
+        if(!*reservation){status=NV_ERR_INVALID_STATE;goto done;}
+        dmaUnmapBuffer_HAL(gpu,GPU_GET_DMA(gpu),v->pVASpace,*address);
+        after=vaspaceGetHeap(v->pVASpace)->free;
+        status=(after>=before && after-before==*reservation)?NV_OK:NV_ERR_INVALID_STATE;
+        if(status==NV_OK)*reservation=0;
+    }else{
+        L2_MAP(dmaMapBuffer_HAL(gpu,GPU_GET_DMA(gpu),v->pVASpace,m->pMemDesc,address,0,0));
+        after=vaspaceGetHeap(v->pVASpace)->free;
+        if(before<=after){status=NV_ERR_INVALID_STATE;goto done;}
+        *reservation=before-after;
+    }
+    NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_DMA unmap=%u memory=0x%x va=0x%llx heap_before=%llu heap_after=%llu reserved=%llu status=0x%x\n",unmap,memory,*address,before,after,*reservation,status);
+ done:
+    rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+ api_out:
+    rmapiLockRelease();return status;
+#undef L2_MAP
+}

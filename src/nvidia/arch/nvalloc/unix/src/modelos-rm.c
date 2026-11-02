@@ -65,3 +65,12 @@ NV_STATUS NV_API_CALL modelos_rm_watchdog_probe(nvidia_stack_t *sp)
     status=l2_watchdog_roundtrip();
     NV_EXIT_RM_RUNTIME(sp,fp);return status;
 }
+
+extern NV_STATUS NV_API_CALL l2_direct_memory_map(NvHandle,NvHandle,NvHandle,NvU64 *,NvU64 *,NvBool);
+NV_STATUS NV_API_CALL modelos_l2_map_memory(nvidia_stack_t *sp,NvHandle client,NvHandle vas,
+                                            NvHandle memory,NvU64 *address,NvU64 *reservation,NvBool unmap)
+{
+    NV_STATUS status;void *fp;NV_ENTER_RM_RUNTIME(sp,fp);
+    status=l2_direct_memory_map(client,vas,memory,address,reservation,unmap);
+    NV_EXIT_RM_RUNTIME(sp,fp);return status;
+}

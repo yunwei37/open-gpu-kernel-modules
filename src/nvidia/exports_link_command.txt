@@ -221,3 +221,5 @@
 --undefined=modelos_rm_map_dma
 
 --undefined=modelos_rm_watchdog_probe
+
+--undefined=modelos_l2_map_memory
