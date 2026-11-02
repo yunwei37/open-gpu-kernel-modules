@@ -4,6 +4,8 @@
  * Qualified against native GSP reply by driver commit 739d013.
  * Replay only on the recorded physical GPU UUID; not a generic device profile. */
 #include "ctrl/ctrl2080/ctrl2080internal.h"
+#include "kernel/gpu/mig_mgr/kernel_mig_manager.h"
+extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
 _Static_assert(sizeof(NV2080_CTRL_INTERNAL_STATIC_KGR_GET_GLOBAL_SM_ORDER_PARAMS)==81952,"SM-order protocol size");
 static const NvU16 l2_sm_counts[8][2]={
 {170,85},
@@ -199,18 +201,41 @@ static void l2_fill_sm_order(void *data)
             portMemCopy(&p->globalSmOrder[e].globalSmId[i],sizeof(p->globalSmOrder[e].globalSmId[i]),l2_sm_ids[k],sizeof(l2_sm_ids[k]));
     }
 }
-static NV_STATUS l2_replay_sm_order(OBJGPU *gpu,void *data,NvU32 bytes)
+static NV_STATUS l2_recorded_physical_gpu(OBJGPU *gpu)
 {
     static const NvU8 expected_uuid[16]={0x9e,0x3a,0x17,0x05,0x1f,0x25,0x5d,0xb8,0xc5,0xbe,0x3a,0xf0,0xbd,0x57,0xde,0xd4};
     NvU32 i;NV_STATUS status=NV_OK;
     _Static_assert(sizeof(gpu->gpuUuid.uuid)==sizeof(expected_uuid),"GPU UUID size");
-    if(IS_VIRTUAL(gpu) || !data || bytes!=81952)return NV_ERR_NOT_SUPPORTED;
+    if(IS_VIRTUAL(gpu) || IS_MIG_ENABLED(gpu))return NV_ERR_NOT_SUPPORTED;
     if(!gpu->gpuUuid.isInitialized)
         status=gpuGetGidInfo(gpu,NULL,NULL,DRF_DEF(2080_GPU_CMD,_GPU_GET_GID_FLAGS,_TYPE,_SHA1));
     if(status!=NV_OK || !gpu->gpuUuid.isInitialized)return NV_ERR_NOT_SUPPORTED;
     for(i=0;i<sizeof(expected_uuid);i++)
         if(gpu->gpuUuid.uuid[i]!=expected_uuid[i])return NV_ERR_NOT_SUPPORTED;
+    return NV_OK;
+}
+static NV_STATUS l2_replay_sm_order(OBJGPU *gpu,void *data,NvU32 bytes)
+{
+    if(!data || bytes!=81952 || l2_recorded_physical_gpu(gpu)!=NV_OK)return NV_ERR_NOT_SUPPORTED;
     l2_fill_sm_order(data);
     NV_PRINTF(LEVEL_ERROR,"L2_SM_ORDER_REPLAY bytes=%u uuid_match=1 physical_gpu=1 recorded_sm=170 recorded_tpc=85\n",bytes);
     return NV_OK;
+}
+
+/* Both loss-checked tapes plus the 21-pair native wire observer agree.
+ * Preserve input selector, never substitute a live handle or address. */
+_Static_assert(sizeof(NV2080_CTRL_INTERNAL_FIFO_GET_NUM_CHANNELS_PARAMS)==8,"FIFO capacity protocol size");
+static NV_STATUS l2_replay_fifo_capacity(OBJGPU *gpu,void *data,NvU32 bytes)
+{
+    static const NvU8 runlists[]={0,1,2,3,4,6,7,8,9,12,13,14,15,16,20,21};
+    NV2080_CTRL_INTERNAL_FIFO_GET_NUM_CHANNELS_PARAMS *p=data;
+    NvU32 i;
+    if(!p || bytes!=sizeof(*p) || l2_recorded_physical_gpu(gpu)!=NV_OK)return NV_ERR_NOT_SUPPORTED;
+    for(i=0;i<sizeof(runlists);i++)if(p->runlistId==runlists[i])
+    {
+        p->numChannels=2048;
+        l2_record(16,0x20800a61,p,sizeof(*p));
+        return NV_OK;
+    }
+    return NV_ERR_NOT_SUPPORTED;
 }
