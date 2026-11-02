@@ -146,6 +146,7 @@ NV_STATUS resControlLookup_IMPL
     return NV_OK;
 }
 
+extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
 typedef NV_STATUS (*CONTROL_EXPORT_FNPTR)(void*, void*);
 typedef NV_STATUS (*CONTROL_EXPORT_FNPTR_NO_PARAMS)(void*);
 
@@ -202,6 +203,8 @@ resControl_IMPL
     }
     else
     {
+        /* Count invocation, not merely metadata lookup or prologue handling. */
+        { NvU32 site=1; l2_record(12,((NvU64)pEntry->pClassInfo->classId<<32)|pRsParams->cmd,&site,sizeof(site)); }
         // Check the size of paramSize while it is non-zero.
         // Zero size means the exported method only have one param (pResource)
         if (pEntry->paramSize == 0)

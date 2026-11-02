@@ -23,6 +23,7 @@
 
 
 #include "kernel/gpu/deferred_api.h"
+extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
 
 #include "kernel/core/locks.h"
 #include "kernel/gpu/device/device.h"
@@ -637,6 +638,7 @@ _class5080DeferredApiV2
 
             if (rmStatus == NV_OK)
             {
+                { NvU32 site=3; l2_record(12,((NvU64)pEntry->pClassInfo->classId<<32)|rmCtrlParams.cmd,&site,sizeof(site)); }
                 if (pEntry->paramSize == 0)
                 {
                     typedef NV_STATUS (*CONTROL_EXPORT_FNPTR_NO_PARAMS)(void*);

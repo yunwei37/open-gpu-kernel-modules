@@ -28,6 +28,7 @@
 
 
 #include "lib/base_utils.h"
+extern void l2_record(unsigned,unsigned long long,const void *,unsigned);
 #include "gpu/gpu.h"
 #include "gpu/disp/kern_disp.h"
 #include "gpu/disp/inst_mem/disp_inst_mem.h"
@@ -837,6 +838,7 @@ static NV_STATUS _gpuRmApiControl
 
         NV_ASSERT_OK_OR_RETURN(resservSwapTlsCallContext(&oldCtx, &callCtx));
 
+        { NvU32 site=2; l2_record(12,((NvU64)pEntry->pClassInfo->classId<<32)|cmd,&site,sizeof(site)); }
         if (pEntry->paramSize == 0)
         {
             status = ((NV_STATUS(*)(void*))pEntry->pFunc)(pGpu->pCachedSubdevice);
