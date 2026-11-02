@@ -38,6 +38,7 @@
 #include "kernel/gpu/gsp/kernel_gsp_trace_rats.h"
 #include "class/cl90cdtrace.h"
 
-#define KERNEL_GSP_TRACING_RATS_ENABLED 1
+/* Fixed cubin profile omits optional GSP crash-record collection. */
+#define KERNEL_GSP_TRACING_RATS_ENABLED 0
 
 #endif // GSP_TRACE_RATS_MACRO_H

@@ -4208,6 +4208,7 @@ static NV_STATUS
 kgspInitRatsCrashBuffer(OBJGPU *pGpu, KernelGsp *pKernelGsp)
 {
     NV_STATUS status = NV_OK;
+    NV_PRINTF(LEVEL_ERROR,"L2_RATS_CRASH enabled=%u\n",KERNEL_GSP_TRACING_RATS_ENABLED);
 #if KERNEL_GSP_TRACING_RATS_ENABLED
     MEMORY_DESCRIPTOR *pMemDesc = NULL;
     void *pMemDescPriv = NULL;
