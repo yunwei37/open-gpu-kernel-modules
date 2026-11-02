@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 /* Candidate physical-SM metadata from two loss-checked 615.78.08 recordings.
  * Params SHA256 281cd60c7490f258e1595c9750bda7982c620024835611c66effd31993bff59d.
- * Observe against the native reply before any query is replaced. */
+ * Qualified against native GSP reply by driver commit 739d013.
+ * Replay only on the recorded physical GPU UUID; not a generic device profile. */
 #include "ctrl/ctrl2080/ctrl2080internal.h"
 _Static_assert(sizeof(NV2080_CTRL_INTERNAL_STATIC_KGR_GET_GLOBAL_SM_ORDER_PARAMS)==81952,"SM-order protocol size");
 static const NvU16 l2_sm_counts[8][2]={
@@ -198,18 +199,18 @@ static void l2_fill_sm_order(void *data)
             portMemCopy(&p->globalSmOrder[e].globalSmId[i],sizeof(p->globalSmOrder[e].globalSmId[i]),l2_sm_ids[k],sizeof(l2_sm_ids[k]));
     }
 }
-static void l2_observe_sm_order(OBJGPU *gpu,const void *data,NvU32 bytes)
+static NV_STATUS l2_replay_sm_order(OBJGPU *gpu,void *data,NvU32 bytes)
 {
-    NvU8 *expected;NvU32 i,diff=0;NV_STATUS uuid_status=NV_OK;
-    char uuid[2*sizeof(gpu->gpuUuid.uuid)+1];const char hex[]="0123456789abcdef";
-    if(!gpu->gpuUuid.isInitialized)uuid_status=gpuGetGidInfo(gpu,NULL,NULL,DRF_DEF(2080_GPU_CMD,_GPU_GET_GID_FLAGS,_TYPE,_SHA1));
-    for(i=0;i<sizeof(gpu->gpuUuid.uuid);i++){uuid[2*i]=hex[gpu->gpuUuid.uuid[i]>>4];uuid[2*i+1]=hex[gpu->gpuUuid.uuid[i]&15];}
-    uuid[sizeof(uuid)-1]=0;
-    if(bytes!=81952){NV_PRINTF(LEVEL_ERROR,"L2_SM_ORDER_CHECK invalid_size=%u\n",bytes);return;}
-    expected=portMemAllocNonPaged(bytes);
-    if(!expected){NV_PRINTF(LEVEL_ERROR,"L2_SM_ORDER_CHECK no_memory=1\n");return;}
-    l2_fill_sm_order(expected);
-    for(i=0;i<bytes;i++)diff+=expected[i]!=((const NvU8*)data)[i];
-    NV_PRINTF(LEVEL_ERROR,"L2_SM_ORDER_CHECK match=%u differing_bytes=%u bytes=%u uuid_status=0x%x uuid_initialized=%u uuid=%s\n",diff==0,diff,bytes,uuid_status,gpu->gpuUuid.isInitialized,uuid);
-    portMemFree(expected);
+    static const NvU8 expected_uuid[16]={0x9e,0x3a,0x17,0x05,0x1f,0x25,0x5d,0xb8,0xc5,0xbe,0x3a,0xf0,0xbd,0x57,0xde,0xd4};
+    NvU32 i;NV_STATUS status=NV_OK;
+    _Static_assert(sizeof(gpu->gpuUuid.uuid)==sizeof(expected_uuid),"GPU UUID size");
+    if(IS_VIRTUAL(gpu) || !data || bytes!=81952)return NV_ERR_NOT_SUPPORTED;
+    if(!gpu->gpuUuid.isInitialized)
+        status=gpuGetGidInfo(gpu,NULL,NULL,DRF_DEF(2080_GPU_CMD,_GPU_GET_GID_FLAGS,_TYPE,_SHA1));
+    if(status!=NV_OK || !gpu->gpuUuid.isInitialized)return NV_ERR_NOT_SUPPORTED;
+    for(i=0;i<sizeof(expected_uuid);i++)
+        if(gpu->gpuUuid.uuid[i]!=expected_uuid[i])return NV_ERR_NOT_SUPPORTED;
+    l2_fill_sm_order(data);
+    NV_PRINTF(LEVEL_ERROR,"L2_SM_ORDER_REPLAY bytes=%u uuid_match=1 physical_gpu=1 recorded_sm=170 recorded_tpc=85\n",bytes);
+    return NV_OK;
 }
