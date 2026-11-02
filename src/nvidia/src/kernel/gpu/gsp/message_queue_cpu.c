@@ -252,9 +252,10 @@ GspMsgQueuesInit
                     pRmQueueInfo->commandQueueSize +
                     pRmQueueInfo->statusQueueSize;
 
-    /* No CC/decrypted-memory fallback: only the qualified physical profile. */
-    if (pRmQueueInfo->bEncryptionEnabled || confComputeForceUnprotAlloc(pGpu) ||
-        IS_VIRTUAL(pGpu) || RM_PAGE_SIZE != 4096)
+    /* No encrypted/virtual fallback: only the qualified physical profile. */
+    /* confComputeForceUnprotAlloc is always true in this profile: it requests
+     * ordinary unprotected RAM, which dma_alloc_coherent supplies here. */
+    if (pRmQueueInfo->bEncryptionEnabled || IS_VIRTUAL(pGpu) || RM_PAGE_SIZE != 4096)
     {
         nvStatus = NV_ERR_NOT_SUPPORTED;
         goto error_ret;

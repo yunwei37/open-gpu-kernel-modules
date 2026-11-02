@@ -37,24 +37,34 @@ int l2_queue_allocate(unsigned long long bytes, unsigned long long entries,
     BUILD_BUG_ON(PAGE_SIZE != 4096);
     if (!cpu || !dma || !owner || !bytes || bytes > SZ_1M ||
         bytes % PAGE_SIZE || entries != bytes / PAGE_SIZE ||
-        entries * sizeof(u64) > PAGE_SIZE)
+        entries * sizeof(u64) > PAGE_SIZE) {
+        pr_err("L2_QUEUE_REJECT reason=layout bytes=%llu entries=%llu\n", bytes, entries);
         return -EINVAL;
+    }
     *cpu = NULL; *dma = 0; *owner = NULL;
     q = kzalloc(sizeof(*q), GFP_KERNEL);
-    if (!q)
+    if (!q) {
+        pr_err("L2_QUEUE_REJECT reason=owner_allocation\n");
         return -ENOMEM;
+    }
     q->dev = pci_get_device(0x10de, 0x2b85, NULL);
-    if (!q->dev)
+    if (!q->dev) {
+        pr_err("L2_QUEUE_REJECT reason=physical_device\n");
         goto fail;
+    }
     q->allocation_bytes = bytes + prefix;
     q->allocation = dma_alloc_coherent(&q->dev->dev, q->allocation_bytes,
                                        &q->allocation_dma, GFP_KERNEL);
-    if (!q->allocation)
+    if (!q->allocation) {
+        pr_err("L2_QUEUE_REJECT reason=dma_allocation bytes=%zu\n", q->allocation_bytes);
         goto put_dev;
+    }
     queue_cpu = (char *)q->allocation + prefix;
     queue_dma = q->allocation_dma + prefix;
-    if (!queue_dma || (queue_dma & (PAGE_SIZE - 1)))
+    if (!queue_dma || (queue_dma & (PAGE_SIZE - 1))) {
+        pr_err("L2_QUEUE_REJECT reason=dma_alignment dma=%pad\n", &queue_dma);
         goto free_dma;
+    }
     memset(q->allocation, 0, q->allocation_bytes);
     dma_wmb();
     valid = virt_addr_valid(queue_cpu);
