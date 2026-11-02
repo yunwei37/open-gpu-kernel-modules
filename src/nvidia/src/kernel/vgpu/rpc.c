@@ -2108,206 +2108,31 @@ static NV_STATUS _issueRpcAsync(OBJGPU *pGpu, OBJRPC *pRpc)
     return NV_OK;
 }
 
-static NV_STATUS _issueRpcLarge
-(
-    OBJGPU *pGpu,
-    OBJRPC *pRpc,
-    NvU32 bufSize,
-    const void *pBuffer,
-    NvBool bBidirectional,
-    NvBool bWait
-)
-{
-    rpc_message_header_v *pVgpuRpcHeader = rpcGetVgpuMessageHeader(pRpc);
-    NvU8      *pBuf8         = (NvU8 *)pBuffer;
-    NV_STATUS  nvStatus      = NV_OK;
-    NvU32      expectedFunc  = pVgpuRpcHeader->function;
-    NvU32      firstSequence = pRpc->sequence;
-    NvU32      lastSequence, waitSequence;
-    NvU32      entryLength;
-    NvU32      remainingSize = bufSize;
-    NvU32      recordCount   = 0;
-
-    // should not be called in broadcast mode
-    NV_ASSERT_OR_RETURN(!gpumgrGetBcEnabledStatus(pGpu), NV_ERR_INVALID_STATE);
-
-    // Copy the initial buffer
-    entryLength = NV_MIN(bufSize, pRpc->maxRpcSize);
-
-    if ((NvU8 *)pVgpuRpcHeader != pBuf8)
-        portMemCopy(pVgpuRpcHeader, entryLength, pBuf8, entryLength);
-
-    // Set the correct length for this queue entry.
-    pVgpuRpcHeader->length = entryLength;
-
-    nvStatus = rpcSendMessage(pGpu, pRpc, &lastSequence);
-    if (nvStatus != NV_OK)
-    {
-        NV_PRINTF(LEVEL_ERROR, "rpcSendMessage failed with status 0x%08x for fn %d!\n",
-                  nvStatus, expectedFunc);
-        NV_ASSERT(0);
-        //
-        // It has been observed that returning NV_ERR_BUSY_RETRY in a bad state (RPC
-        // buffers full and not being serviced) can make things worse, i.e. turn RPC
-        // failures into app hangs such that even nvidia-bug-report.sh gets stuck.
-        // Avoid this for now while still returning the correct error in other cases.
-        //
-        return (nvStatus == NV_ERR_BUSY_RETRY) ? NV_ERR_GENERIC : nvStatus;
-    }
-    remainingSize -= entryLength;
-    pBuf8   += entryLength;
-
-    // Copy the remaining buffers
-    entryLength = pRpc->maxRpcSize - sizeof(rpc_message_header_v);
-    while (remainingSize != 0)
-    {
-        if (entryLength > remainingSize)
-            entryLength = remainingSize;
-
-        // Zero out the entire RPC message header to clear the state of previous chunk.
-        portMemSet(pVgpuRpcHeader, 0, sizeof(rpc_message_header_v));
-        pVgpuRpcHeader->header_version = DRF_DEF(_VGPU, _MSG_HEADER_VERSION, _MAJOR, _TOT) |
-                                         DRF_DEF(_VGPU, _MSG_HEADER_VERSION, _MINOR, _TOT);
-        pVgpuRpcHeader->signature = NV_VGPU_MSG_SIGNATURE_VALID;
-
-        portMemCopy(rpcGetVgpuMessageData(pRpc), entryLength, pBuf8, entryLength);
-
-        // Set the correct length for this queue entry.
-        pVgpuRpcHeader->length   = entryLength + sizeof(rpc_message_header_v);
-        pVgpuRpcHeader->function = NV_VGPU_MSG_FUNCTION_CONTINUATION_RECORD;
-
-        nvStatus = rpcSendMessage(pGpu, pRpc, &lastSequence);
-        if (nvStatus != NV_OK)
-        {
-            NV_PRINTF(LEVEL_ERROR,
-                      "rpcSendMessage failed with status 0x%08x for fn %d continuation record (remainingSize=0x%x)!\n",
-                      nvStatus, expectedFunc, remainingSize);
-            NV_ASSERT(0);
-            //
-            // It has been observed that returning NV_ERR_BUSY_RETRY in a bad state (RPC
-            // buffers full and not being serviced) can make things worse, i.e. turn RPC
-            // failures into app hangs such that even nvidia-bug-report.sh gets stuck.
-            // Avoid this for now while still returning the correct error in other cases.
-            //
-            return (nvStatus == NV_ERR_BUSY_RETRY) ? NV_ERR_GENERIC : nvStatus;
-        }
-
-        remainingSize -= entryLength;
-        pBuf8         += entryLength;
-        recordCount++;
-    }
-
-    NV_ASSERT(lastSequence == (firstSequence + recordCount));
-
-    if (!bWait)
-    {
-        // In case of Async RPC, we are done here.
-        return nvStatus;
-    }
-
-    // Always receive at least one..
-    waitSequence = firstSequence;
-
-    nvStatus = rpcRecvPoll(pGpu, pRpc, expectedFunc, waitSequence);
-    if (nvStatus != NV_OK)
-    {
-        if (nvStatus == NV_ERR_TIMEOUT)
-        {
-            NV_PRINTF(LEVEL_ERROR, "rpcRecvPoll timedout for fn %d sequence %d!\n",
-                      expectedFunc, waitSequence);
-        }
-        else
-        {
-            NV_PRINTF(LEVEL_ERROR, "rpcRecvPoll failed with status 0x%08x for fn %d sequence %d!\n",
-                      nvStatus, expectedFunc, waitSequence);
-        }
-        NV_ASSERT(0);
-        return nvStatus;
-    }
-
-    pBuf8 = (NvU8 *)pBuffer;
-    remainingSize = bufSize;
-    entryLength = NV_MIN(bufSize, pVgpuRpcHeader->length);
-    NV_CHECK_OR_RETURN(LEVEL_ERROR, entryLength <= pRpc->maxRpcSize, NV_ERR_INVALID_STATE);
-
-    if (((NvU8 *)pVgpuRpcHeader != pBuf8) && bBidirectional)
-      portMemCopy(pBuf8, entryLength, pVgpuRpcHeader, entryLength);
-
-    remainingSize -= entryLength;
-    pBuf8   += entryLength;
-    waitSequence++;
-
-    // For bidirectional transfer messages, need to receive all other frames as well
-    if (bBidirectional && (recordCount > 0))
-    {
-        while (remainingSize > 0)
-        {
-            nvStatus = rpcRecvPoll(pGpu, pRpc, NV_VGPU_MSG_FUNCTION_CONTINUATION_RECORD, waitSequence);
-            if (nvStatus != NV_OK)
-            {
-                if (nvStatus == NV_ERR_TIMEOUT)
-                {
-                    NV_PRINTF(LEVEL_ERROR,
-                              "rpcRecvPoll timedout for fn %d sequence %d continuation record (remainingSize=0x%x)!\n",
-                              expectedFunc, waitSequence, remainingSize);
-                }
-                else
-                {
-                    NV_PRINTF(LEVEL_ERROR,
-                              "rpcRecvPoll failed with status 0x%08x for fn %d sequence %d continuation record! (remainingSize=0x%x)\n",
-                              nvStatus, expectedFunc, waitSequence, remainingSize);
-                }
-                NV_ASSERT(0);
-                return nvStatus;
-            }
-
-            entryLength = pVgpuRpcHeader->length;
-            NV_CHECK_OR_RETURN(LEVEL_ERROR, entryLength <= pRpc->maxRpcSize, NV_ERR_INVALID_STATE);
-            NV_CHECK_OR_RETURN(LEVEL_ERROR, entryLength >= sizeof(rpc_message_header_v), NV_ERR_INVALID_STATE);
-            entryLength -= sizeof(rpc_message_header_v);
-
-            if (entryLength > remainingSize)
-                entryLength = remainingSize;
-
-            portMemCopy(pBuf8, entryLength, rpcGetVgpuMessageData(pRpc), entryLength);
-            remainingSize -= entryLength;
-            pBuf8         += entryLength;
-            recordCount--;
-            waitSequence++;
-        }
-        pVgpuRpcHeader->function = expectedFunc;
-        NV_ASSERT(recordCount == 0);
-        NV_ASSERT(waitSequence - 1 == lastSequence);
-    }
-
-    // Now check if RPC really succeeded
-    if (pVgpuRpcHeader->rpc_result != NV_VGPU_MSG_RESULT_SUCCESS)
-    {
-        NV_PRINTF(LEVEL_WARNING, "RPC failed with status 0x%08x for fn %d!\n",
-                  pVgpuRpcHeader->rpc_result,
-                  expectedFunc);
-
-        if (pVgpuRpcHeader->rpc_result < DRF_BASE(NV_VGPU_MSG_RESULT__VMIOP))
-            return pVgpuRpcHeader->rpc_result;
-
-        return NV_ERR_GENERIC;
-    }
-
-    return NV_OK;
-}
-
+/* Fixed-profile transport: no continuation construction or reassembly.
+ * The single large live control has a qualified device-specific reply.
+ * A different workload needing larger records must fail, never truncate. */
 static NV_STATUS _issueRpcAndWaitLarge
 (
-    OBJGPU *pGpu,
-    OBJRPC *pRpc,
-    NvU32 bufSize,
-    const void *pBuffer,
-    NvBool bBidirectional
+    OBJGPU *pGpu, OBJRPC *pRpc, NvU32 bufSize,
+    const void *pBuffer, NvBool bBidirectional
 )
 {
-    return _issueRpcLarge(pGpu, pRpc, bufSize, pBuffer,
-                          bBidirectional,
-                          NV_TRUE);  //bWait
+    rpc_message_header_v *header=rpcGetVgpuMessageHeader(pRpc);
+    NV_STATUS status;
+    if(!pBuffer || bufSize<sizeof(*header) || bufSize>pRpc->maxRpcSize)
+    {
+        NV_PRINTF(LEVEL_ERROR,"L2_RPC_SINGLE_FRAME rejected_bytes=%u max=%u\n",bufSize,pRpc->maxRpcSize);
+        return NV_ERR_NOT_SUPPORTED;
+    }
+    if(header!=pBuffer)portMemCopy(header,pRpc->maxRpcSize,pBuffer,bufSize);
+    header->length=bufSize;
+    status=_issueRpcAndWait(pGpu,pRpc);
+    if(status==NV_OK && bBidirectional && header!=pBuffer)
+    {
+        if(header->length<sizeof(*header) || header->length>bufSize)return NV_ERR_INVALID_STATE;
+        portMemCopy((void *)pBuffer,bufSize,header,header->length);
+    }
+    return status;
 }
 
 static NV_STATUS _issuePteDescRpc
@@ -10317,6 +10142,7 @@ NV_STATUS rpcRmApiControl_GSP
      * No query is sent and no fallback can hide a failed replay guard. */
     if(cmd==0x20800a22)
     {
+        NV_PRINTF(LEVEL_ERROR,"L2_RPC_SINGLE_FRAME policy=1 max=%u\n",pRpc->maxRpcSize);
         status=(resCtrlFlags & NVOS54_FLAGS_FINN_SERIALIZED) ? NV_ERR_NOT_SUPPORTED :
             l2_replay_sm_order(pGpu,pParamStructPtr,paramsSize);
         if(status!=NV_OK)NV_PRINTF(LEVEL_ERROR,"L2_SM_ORDER_REPLAY rejected=1 status=0x%x flags=0x%x\n",status,resCtrlFlags);
