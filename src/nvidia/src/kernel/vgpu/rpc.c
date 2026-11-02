@@ -10313,6 +10313,16 @@ NV_STATUS rpcRmApiControl_GSP
     //
     NV_ASSERT_OR_RETURN(!(bCacheable && (resCtrlFlags & NVOS54_FLAGS_FINN_SERIALIZED)), NV_ERR_INVALID_STATE);
 
+    /* Fixed-device, pointerless metadata: preserve call-context/lock cleanup.
+     * No query is sent and no fallback can hide a failed replay guard. */
+    if(cmd==0x20800a22)
+    {
+        status=(resCtrlFlags & NVOS54_FLAGS_FINN_SERIALIZED) ? NV_ERR_NOT_SUPPORTED :
+            l2_replay_sm_order(pGpu,pParamStructPtr,paramsSize);
+        if(status!=NV_OK)NV_PRINTF(LEVEL_ERROR,"L2_SM_ORDER_REPLAY rejected=1 status=0x%x flags=0x%x\n",status,resCtrlFlags);
+        goto done;
+    }
+
     if (!(resCtrlFlags & NVOS54_FLAGS_FINN_SERIALIZED))
     {
         NV_STATUS rmctrlCacheStatus = NV_ERR_OBJECT_NOT_FOUND;
@@ -10490,7 +10500,6 @@ NV_STATUS rpcRmApiControl_GSP
     }
 
 done:
-    if(cmd==0x20800a22 && status==NV_OK)l2_observe_sm_order(pGpu,pOriginalParams,paramsSize);
     if (gpuMaskRelease != 0)
     {
         rmGpuGroupLockRelease(gpuMaskRelease, GPUS_LOCK_FLAGS_NONE);
