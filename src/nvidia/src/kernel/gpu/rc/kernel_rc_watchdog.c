@@ -39,6 +39,8 @@
 #include "platform/sli/sli.h"
 #include "rmapi/rmapi_utils.h"
 #include "mem_mgr/mem.h"
+#include "vgpu/rpc.h"
+#include "class/cl0070.h"
 #include "mem_mgr/vaspace.h"
 #include "gpu/mem_mgr/virt_mem_allocator.h"
 #include "gpu/fifo/kernel_ctxshare.h"
@@ -490,6 +492,16 @@ static NV_STATUS l2WatchdogMap(OBJGPU *gpu,NvHandle client,NvHandle device,
     L2_WATCH(clientGetResourceRef(c,WATCHDOG_MEM_ID,&ref));
     memory=dynamicCast(ref->pResource,Memory);
     if(!memory || !memory->pMemDesc || memory->pGpu!=gpu){status=NV_ERR_INVALID_OBJECT;goto done;}
+    /* Keep the GSP's virtual-range child, but construct no CPU proxy.
+     * The all-zero parameter payload is identical to the former constructor.
+     * GSP owns it under the current client; root Free retires it recursively. */
+    {
+        NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS range={0};
+        NV_RM_RPC_ALLOC_OBJECT(gpu,client,device,WATCHDOG_GROBJ_ID+3,
+                              NV01_MEMORY_VIRTUAL,&range,sizeof(range),status);
+        NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_GSP_RANGE cpu_proxy=0 bytes=%u status=0x%x\n",(NvU32)sizeof(range),status);
+        if(status!=NV_OK)goto done;
+    }
     L2_WATCH(vaspaceGetByHandleOrDeviceDefault(c,device,NV01_NULL_OBJECT,&vas));
     before=vaspaceGetHeap(vas)->free;
     L2_WATCH(dmaMapBuffer_HAL(gpu,GPU_GET_DMA(gpu),vas,memory->pMemDesc,&info->pGpuAddr,0,0));
