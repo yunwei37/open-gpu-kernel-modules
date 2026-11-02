@@ -1673,6 +1673,16 @@ NV_STATUS NV_API_CALL l2_watchdog_roundtrip(void)
  done:
     if(state && state->notifierToken && watchdog->watchdogChannelInfo.pControlGPFifo[0])NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_QUEUE token=0x%x get=%u put=%u\n",state->notifierToken->info32,MEM_RD32(&watchdog->watchdogChannelInfo.pControlGPFifo[0]->GPGet),MEM_RD32(&watchdog->watchdogChannelInfo.pControlGPFifo[0]->GPPut));
     NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_DIRECT_STATUS status=0x%x\n",status);
+    /* Matched lifecycle gate: test the existing owner teardown before
+     * replacing its mapping. Read queue witnesses before freeing them. */
+    if(status==NV_OK)
+    {
+        NvHandle oldClient=state->hClient;
+        status=krcWatchdogShutdown(gpu,rc,watchdog);
+        NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_SHUTDOWN status=0x%x client=0x%x initialized=%u\n",
+                  status,oldClient,!!(state->flags&WATCHDOG_FLAGS_INITIALIZED));
+    }
+
     rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
  api_out:
     rmapiLockRelease();return status;
