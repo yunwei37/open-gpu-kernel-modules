@@ -810,6 +810,11 @@ static NV_STATUS _gpuRmApiControl
         NV_ASSERT_OR_RETURN(pEntry != NULL, NV_ERR_NOT_SUPPORTED);
 
         NV_ASSERT_OR_RETURN(pEntry->paramSize == paramsSize, NV_ERR_INVALID_PARAM_STRUCT);
+        if (pEntry->pFunc == NULL)
+        {
+            NV_PRINTF(LEVEL_ERROR, "L2_CPU_HANDLER_UNSUPPORTED site=2 class=0x%x cmd=0x%x\n", pEntry->pClassInfo->classId, cmd);
+            return NV_ERR_NOT_SUPPORTED;
+        }
         NV_PRINTF(LEVEL_INFO, "GPU Internal RM control 0x%08x on gpuInst:%x hClient:0x%08x hSubdevice:0x%08x\n",
                   cmd, pGpu->gpuInstance, hClient, hObject);
 

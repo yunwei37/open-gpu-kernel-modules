@@ -635,6 +635,12 @@ _class5080DeferredApiV2
                 resservSwapTlsCallContext(&pOldContext, &callContext), cleanup);
 
             rmStatus = serverControl_Prologue(&g_resServ, &rmCtrlParams, &access, &releaseFlags);
+            if (rmStatus == NV_OK && pEntry->pFunc == NULL)
+            {
+                NV_PRINTF(LEVEL_ERROR, "L2_CPU_HANDLER_UNSUPPORTED site=3 class=0x%x cmd=0x%x\n", pEntry->pClassInfo->classId, rmCtrlParams.cmd);
+                rmStatus = NV_ERR_NOT_SUPPORTED;
+            }
+
 
             if (rmStatus == NV_OK)
             {

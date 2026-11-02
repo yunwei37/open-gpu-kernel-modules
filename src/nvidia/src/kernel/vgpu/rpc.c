@@ -10326,6 +10326,11 @@ NV_STATUS rpcRmApiControl_GSP
     }
 
 done:
+    if (cmd == 0x20800a61 && status == NV_OK && paramsSize == 8 && pParamStructPtr != NULL)
+    {
+        NvU32 *v = pParamStructPtr;
+        NV_PRINTF(LEVEL_ERROR, "L2_FIFO_CAPACITY_OBSERVED runlist=%u channels=%u\n", v[0], v[1]);
+    }
     if (gpuMaskRelease != 0)
     {
         rmGpuGroupLockRelease(gpuMaskRelease, GPUS_LOCK_FLAGS_NONE);

@@ -140,11 +140,6 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_Subdevice =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00060048u)
-static NV_STATUS subdeviceCtrlCmdBiosGetInfoV2__EXPORT(void *pSubdevice, void *pBiosInfoParams) {
-    return subdeviceCtrlCmdBiosGetInfoV2_DISPATCH(pSubdevice, pBiosInfoParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00060048u)
 
 
 
@@ -163,11 +158,6 @@ static NV_STATUS subdeviceCtrlCmdBiosGetInfoV2__EXPORT(void *pSubdevice, void *p
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010518u)
-static NV_STATUS subdeviceCtrlCmdBusGetPciBarInfo__EXPORT(void *pSubdevice, void *pBarInfoParams) {
-    return subdeviceCtrlCmdBusGetPciBarInfo_IMPL(pSubdevice, pBarInfoParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010518u)
 
 
 
@@ -308,20 +298,10 @@ static NV_STATUS subdeviceCtrlCmdBusGetPciBarInfo__EXPORT(void *pSubdevice, void
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0005c0c0u)
-static NV_STATUS subdeviceCtrlCmdMemSysGetStaticConfig__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdMemSysGetStaticConfig_DISPATCH(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0005c0c0u)
 
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdMemSysL2InvalidateEvict__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdMemSysL2InvalidateEvict_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -358,22 +338,12 @@ static NV_STATUS subdeviceCtrlCmdMemSysL2InvalidateEvict__EXPORT(void *pSubdevic
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0005c040u)
-static NV_STATUS subdeviceCtrlCmdFifoGetDeviceInfoTable__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdFifoGetDeviceInfoTable_DISPATCH(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0005c040u)
 
 
 
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000001d8u)
-static NV_STATUS subdeviceCtrlCmdInternalFifoGetNumChannels__EXPORT(void *pSubdevice, void *pNumChannelsParams) {
-    return subdeviceCtrlCmdInternalFifoGetNumChannels_IMPL(pSubdevice, pNumChannelsParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000001d8u)
 
 
 
@@ -422,89 +392,19 @@ static NV_STATUS subdeviceCtrlCmdInternalFifoGetNumChannels__EXPORT(void *pSubde
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000100c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetCaps__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetCaps_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000100c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetGlobalSmOrder__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetGlobalSmOrder_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetFloorsweepingMasks__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetFloorsweepingMasks_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetPpcMasks__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetPpcMasks_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetZcullInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetZcullInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetRopInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetRopInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c1c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetContextBuffersInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetContextBuffersInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c1c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetSmIssueRateModifier__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetSmIssueRateModifier_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetSmIssueRateModifierV2__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetSmIssueRateModifierV2_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetSmIssueThrottleCtrl__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetSmIssueThrottleCtrl_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetFecsRecordSize__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetFecsRecordSize_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetFecsTraceDefines__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetFecsTraceDefines_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
-static NV_STATUS subdeviceCtrlCmdKGrInternalStaticGetPdbProperties__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdKGrInternalStaticGetPdbProperties_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c0c0u)
 
 
 
@@ -551,11 +451,6 @@ static NV_STATUS subdeviceCtrlCmdGpuGetInfoV2__EXPORT(void *pSubdevice, void *pG
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000448u)
-static NV_STATUS subdeviceCtrlCmdGpuGetOEMBoardInfo__EXPORT(void *pSubdevice, void *pBoardInfo) {
-    return subdeviceCtrlCmdGpuGetOEMBoardInfo_IMPL(pSubdevice, pBoardInfo);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000448u)
 
 
 
@@ -605,11 +500,6 @@ static NV_STATUS subdeviceCtrlCmdGpuGetMaxSupportedPageSize__EXPORT(void *pSubde
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
-static NV_STATUS subdeviceCtrlCmdGpuGetConstructedFalconInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdGpuGetConstructedFalconInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
 
 
 
@@ -676,18 +566,8 @@ static NV_STATUS subdeviceCtrlCmdEventSetNotification__EXPORT(void *pSubdevice, 
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000004u)
-static NV_STATUS subdeviceCtrlCmdCeUpdatePceLceMappingsV2__EXPORT(void *pSubdevice, void *pCeUpdatePceLceMappingsParams) {
-    return subdeviceCtrlCmdCeUpdatePceLceMappingsV2_KERNEL(pSubdevice, pCeUpdatePceLceMappingsParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000004u)
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000100c0u)
-static NV_STATUS subdeviceCtrlCmdCeGetPceConfigForLceType__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdCeGetPceConfigForLceType_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000100c0u)
 
 
 
@@ -716,11 +596,6 @@ static NV_STATUS subdeviceCtrlCmdCeGetPceConfigForLceType__EXPORT(void *pSubdevi
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00040549u)
-static NV_STATUS subdeviceCtrlCmdGspGetFeatures__EXPORT(void *pSubdevice, void *pGspFeaturesParams) {
-    return subdeviceCtrlCmdGspGetFeatures_DISPATCH(pSubdevice, pGspFeaturesParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00040549u)
 
 
 
@@ -748,24 +623,9 @@ static NV_STATUS subdeviceCtrlCmdGspGetFeatures__EXPORT(void *pSubdevice, void *
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdDisplayGetIpVersion__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdDisplayGetIpVersion_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdDisplayGetStaticInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdDisplayGetStaticInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdDisplayWriteInstMem__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdDisplayWriteInstMem_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -783,17 +643,7 @@ static NV_STATUS subdeviceCtrlCmdDisplayWriteInstMem__EXPORT(void *pSubdevice, v
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000004c0u)
-static NV_STATUS subdeviceCtrlCmdInternalGetUserRegisterAccessMap__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalGetUserRegisterAccessMap_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000004c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c4c0u)
-static NV_STATUS subdeviceCtrlCmdInternalGetDeviceInfoTable__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalGetDeviceInfoTable_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c4c0u)
 
 
 
@@ -808,58 +658,23 @@ static NV_STATUS subdeviceCtrlCmdInternalGetDeviceInfoTable__EXPORT(void *pSubde
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000400c0u)
-static NV_STATUS subdeviceCtrlCmdGmmuGetStaticInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdGmmuGetStaticInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000400c0u)
 
 
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalGmmuCopyReservedSplitGVASpacePdesServer__EXPORT(void *pSubdevice, void *pCopyServerReservedPdesParams) {
-    return subdeviceCtrlCmdInternalGmmuCopyReservedSplitGVASpacePdesServer_IMPL(pSubdevice, pCopyServerReservedPdesParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdCeUpdateClassDB__EXPORT(void *pSubdevice, void *params) {
-    return subdeviceCtrlCmdCeUpdateClassDB_IMPL(pSubdevice, params);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c040u)
-static NV_STATUS subdeviceCtrlCmdCeGetFaultMethodBufferSize__EXPORT(void *pSubdevice, void *params) {
-    return subdeviceCtrlCmdCeGetFaultMethodBufferSize_IMPL(pSubdevice, params);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0001c040u)
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000044u)
-static NV_STATUS subdeviceCtrlCmdCeGetHubPceMaskV2__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdCeGetHubPceMaskV2_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000044u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdIntrGetKernelTable__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdIntrGetKernelTable_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalPerfGpuBoostSyncGetInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalPerfGpuBoostSyncGetInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -868,11 +683,6 @@ static NV_STATUS subdeviceCtrlCmdInternalPerfGpuBoostSyncGetInfo__EXPORT(void *p
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000400c0u)
-static NV_STATUS subdeviceCtrlCmdBifGetStaticInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdBifGetStaticInfo_DISPATCH(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000400c0u)
 
 
 
@@ -907,11 +717,6 @@ static NV_STATUS subdeviceCtrlCmdBifGetStaticInfo__EXPORT(void *pSubdevice, void
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalNvlinkGetNvlinkDeviceInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalNvlinkGetNvlinkDeviceInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -929,11 +734,6 @@ static NV_STATUS subdeviceCtrlCmdInternalNvlinkGetNvlinkDeviceInfo__EXPORT(void 
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalGetPcieP2pCaps__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalGetPcieP2pCaps_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -947,17 +747,7 @@ static NV_STATUS subdeviceCtrlCmdInternalGetPcieP2pCaps__EXPORT(void *pSubdevice
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalPostInitBrightcStateLoad__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalPostInitBrightcStateLoad_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalSetStaticEdidData__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalSetStaticEdidData_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -975,11 +765,6 @@ static NV_STATUS subdeviceCtrlCmdInternalSetStaticEdidData__EXPORT(void *pSubdev
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalConfComputeGetStaticInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalConfComputeGetStaticInfo_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -988,17 +773,7 @@ static NV_STATUS subdeviceCtrlCmdInternalConfComputeGetStaticInfo__EXPORT(void *
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalInitUserSharedData__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalInitUserSharedData_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdInternalUserSharedDataSetDataPoll__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdInternalUserSharedDataSetDataPoll_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
@@ -1029,19 +804,9 @@ static NV_STATUS subdeviceCtrlCmdInternalUserSharedDataSetDataPoll__EXPORT(void 
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS subdeviceCtrlCmdCcuMap__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdCcuMap_IMPL(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
 
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000400c0u)
-static NV_STATUS subdeviceCtrlCmdCcuGetSampleInfo__EXPORT(void *pSubdevice, void *pParams) {
-    return subdeviceCtrlCmdCcuGetSampleInfo_DISPATCH(pSubdevice, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000400c0u)
 
 
 
@@ -1065,11 +830,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [22] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x448u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdGpuGetOEMBoardInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x448u)
         /*flags=*/      0x448u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x2080013fu,
@@ -1095,11 +856,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [86] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdGpuGetConstructedFalconInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
         /*flags=*/      0x10048u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x208001b0u,
@@ -1125,11 +882,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [128] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x60048u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdBiosGetInfoV2__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x60048u)
         /*flags=*/      0x60048u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800810u,
@@ -1140,11 +893,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [130] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdDisplayGetStaticInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a01u,
@@ -1155,11 +904,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [132] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x5c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdMemSysGetStaticConfig__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x5c0c0u)
         /*flags=*/      0x5c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a1cu,
@@ -1170,11 +915,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [135] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x100c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetCaps__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x100c0u)
         /*flags=*/      0x100c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a1fu,
@@ -1185,11 +926,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [137] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetGlobalSmOrder__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a22u,
@@ -1200,11 +937,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [140] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetFloorsweepingMasks__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a26u,
@@ -1215,11 +948,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [143] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a2au,
@@ -1230,11 +959,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [144] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetZcullInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a2cu,
@@ -1245,11 +970,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [145] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetRopInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a2eu,
@@ -1260,11 +981,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [146] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetPpcMasks__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a30u,
@@ -1275,11 +992,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [147] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c1c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetContextBuffersInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c1c0u)
         /*flags=*/      0x1c1c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a32u,
@@ -1290,11 +1003,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [148] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetSmIssueRateModifier__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a34u,
@@ -1305,11 +1014,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [154] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetFecsRecordSize__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a3du,
@@ -1320,11 +1025,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [156] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetFecsTraceDefines__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a3fu,
@@ -1335,11 +1036,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [157] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c4c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalGetDeviceInfoTable__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c4c0u)
         /*flags=*/      0x1c4c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a40u,
@@ -1350,11 +1047,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [158] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalGetUserRegisterAccessMap__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4c0u)
         /*flags=*/      0x4c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a41u,
@@ -1365,11 +1058,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [163] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetPdbProperties__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a48u,
@@ -1380,11 +1069,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [164] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdDisplayWriteInstMem__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a49u,
@@ -1395,11 +1080,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [166] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdDisplayGetIpVersion__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a4bu,
@@ -1410,11 +1091,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [178] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdGmmuGetStaticInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400c0u)
         /*flags=*/      0x400c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a59u,
@@ -1425,11 +1102,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [180] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdIntrGetKernelTable__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a5cu,
@@ -1440,11 +1113,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [183] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1d8u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalFifoGetNumChannels__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1d8u)
         /*flags=*/      0x1d8u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a61u,
@@ -1455,11 +1124,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [193] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdMemSysL2InvalidateEvict__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a6cu,
@@ -1470,11 +1135,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [212] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalPerfGpuBoostSyncGetInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a80u,
@@ -1485,11 +1146,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [219] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalNvlinkGetNvlinkDeviceInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a87u,
@@ -1500,11 +1157,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [242] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalGmmuCopyReservedSplitGVASpacePdesServer__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800a9fu,
@@ -1515,11 +1168,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [248] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdBifGetStaticInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400c0u)
         /*flags=*/      0x400c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800aacu,
@@ -1530,11 +1179,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [253] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdCcuGetSampleInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400c0u)
         /*flags=*/      0x400c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800ab2u,
@@ -1545,11 +1190,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [254] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdCcuMap__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800ab3u,
@@ -1560,11 +1201,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [258] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalGetPcieP2pCaps__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800ab8u,
@@ -1575,11 +1212,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [270] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalPostInitBrightcStateLoad__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800ac6u,
@@ -1590,11 +1223,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [294] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalSetStaticEdidData__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800adfu,
@@ -1605,11 +1234,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [310] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalConfComputeGetStaticInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800af3u,
@@ -1620,11 +1245,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [316] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalInitUserSharedData__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800afeu,
@@ -1635,11 +1256,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [317] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdInternalUserSharedDataSetDataPoll__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800affu,
@@ -1650,11 +1267,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [319] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetSmIssueRateModifierV2__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800b03u,
@@ -1665,11 +1278,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [320] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdKGrInternalStaticGetSmIssueThrottleCtrl__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c0c0u)
         /*flags=*/      0x1c0c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20800b05u,
@@ -1680,11 +1289,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [338] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x5c040u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdFifoGetDeviceInfoTable__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x5c040u)
         /*flags=*/      0x5c040u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20801112u,
@@ -1695,11 +1300,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [443] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10518u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdBusGetPciBarInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10518u)
         /*flags=*/      0x10518u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20801803u,
@@ -1710,11 +1311,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [522] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdCeUpdateClassDB__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
         /*flags=*/      0xc0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20802a06u,
@@ -1725,11 +1322,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [524] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c040u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdCeGetFaultMethodBufferSize__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x1c040u)
         /*flags=*/      0x1c040u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20802a08u,
@@ -1740,11 +1333,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [529] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdCeUpdatePceLceMappingsV2__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4u)
         /*flags=*/      0x4u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20802a0du,
@@ -1755,11 +1344,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [530] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x44u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdCeGetHubPceMaskV2__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x44u)
         /*flags=*/      0x44u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20802a0eu,
@@ -1770,11 +1355,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [531] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x100c0u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdCeGetPceConfigForLceType__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x100c0u)
         /*flags=*/      0x100c0u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20802a0fu,
@@ -1785,11 +1366,7 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Subdevic
 #endif
     },
     {               /*  [618] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40549u)
         /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &subdeviceCtrlCmdGspGetFeatures__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40549u)
         /*flags=*/      0x40549u,
         /*accessRight=*/0x0u,
         /*methodId=*/   0x20803601u,

@@ -203,6 +203,12 @@ resControl_IMPL
     }
     else
     {
+        if (pEntry->pFunc == NULL)
+        {
+            NV_PRINTF(LEVEL_ERROR, "L2_CPU_HANDLER_UNSUPPORTED site=1 class=0x%x cmd=0x%x\n", pEntry->pClassInfo->classId, pRsParams->cmd);
+            status = NV_ERR_NOT_SUPPORTED;
+            goto l2_control_epilogue;
+        }
         /* Count invocation, not merely metadata lookup or prologue handling. */
         { NvU32 site=1; l2_record(12,((NvU64)pEntry->pClassInfo->classId<<32)|pRsParams->cmd,&site,sizeof(site)); }
         // Check the size of paramSize while it is non-zero.
@@ -220,6 +226,7 @@ resControl_IMPL
         }
     }
 
+l2_control_epilogue:
     resControl_Epilogue(pResource, pCallContext, pRsParams);
 
 done:
