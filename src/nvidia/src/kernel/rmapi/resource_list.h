@@ -289,16 +289,7 @@ RS_ENTRY(
     /* Flags                  */ RS_FLAGS_ALLOC_NON_PRIVILEGED | RS_FLAGS_ACQUIRE_GPUS_LOCK | RS_FLAGS_ALLOC_RPC_TO_PHYS_RM,
     /* Required Access Rights */ RS_ACCESS_NONE
 )
-RS_ENTRY(
-    /* External Class         */ HOPPER_USERMODE_A,
-    /* Internal Class         */ UserModeApi,
-    /* Multi-Instance         */ NV_TRUE,
-    /* Parents                */ RS_LIST(classId(Subdevice)),
-    /* Alloc Param Info       */ RS_OPTIONAL(NV_HOPPER_USERMODE_A_PARAMS),
-    /* Resource Free Priority */ RS_FREE_PRIORITY_DEFAULT,
-    /* Flags                  */ RS_FLAGS_ALLOC_NON_PRIVILEGED | RS_FLAGS_ACQUIRE_GPUS_LOCK,
-    /* Required Access Rights */ RS_ACCESS_NONE
-)
+
     /* Display classes: */
 RS_ENTRY(
     /* External Class         */ NV04_DISPLAY_COMMON,
