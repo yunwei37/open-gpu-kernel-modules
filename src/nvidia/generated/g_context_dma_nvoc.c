@@ -114,72 +114,12 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_ContextDma =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
-static NV_STATUS ctxdmaCtrlCmdUpdateContextdma__EXPORT(void *pContextDma, void *pUpdateCtxtDmaParams) {
-    return ctxdmaCtrlCmdUpdateContextdma_IMPL(pContextDma, pUpdateCtxtDmaParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS ctxdmaCtrlCmdBindContextdma__EXPORT(void *pContextDma, void *pBindCtxtDmaParams) {
-    return ctxdmaCtrlCmdBindContextdma_IMPL(pContextDma, pBindCtxtDmaParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS ctxdmaCtrlCmdUnbindContextdma__EXPORT(void *pContextDma, void *pUnbindCtxtDmaParams) {
-    return ctxdmaCtrlCmdUnbindContextdma_IMPL(pContextDma, pUnbindCtxtDmaParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_ContextDma[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &ctxdmaCtrlCmdUpdateContextdma__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*flags=*/      0x0u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x20101u,
-        /*paramSize=*/  sizeof(NV0002_CTRL_UPDATE_CONTEXTDMA_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ContextDma.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "ctxdmaCtrlCmdUpdateContextdma"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &ctxdmaCtrlCmdBindContextdma__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x20102u,
-        /*paramSize=*/  sizeof(NV0002_CTRL_BIND_CONTEXTDMA_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ContextDma.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "ctxdmaCtrlCmdBindContextdma"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &ctxdmaCtrlCmdUnbindContextdma__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x20103u,
-        /*paramSize=*/  sizeof(NV0002_CTRL_UNBIND_CONTEXTDMA_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ContextDma.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "ctxdmaCtrlCmdUnbindContextdma"
-#endif
-    },
 };
 
 
@@ -437,7 +377,7 @@ NV_STATUS __nvoc_up_thunk_Notifier_ctxdmaGetOrAllocNotifShare(struct ContextDma 
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__ContextDma = 
 {
-    .numEntries=     3,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_ContextDma
 };
 

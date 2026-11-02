@@ -140,30 +140,10 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_TimerApi =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS tmrapiCtrlCmdTmrSetAlarmNotify__EXPORT(void *pTimerApi, void *pParams) {
-    return tmrapiCtrlCmdTmrSetAlarmNotify_IMPL(pTimerApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_TimerApi[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &tmrapiCtrlCmdTmrSetAlarmNotify__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x40110u,
-        /*paramSize=*/  sizeof(NV0004_CTRL_TMR_SET_ALARM_NOTIFY_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_TimerApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "tmrapiCtrlCmdTmrSetAlarmNotify"
-#endif
-    },
 };
 
 
@@ -474,7 +454,7 @@ NV_STATUS __nvoc_up_thunk_Notifier_tmrapiGetOrAllocNotifShare(struct TimerApi *p
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__TimerApi = 
 {
-    .numEntries=     1,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_TimerApi
 };
 

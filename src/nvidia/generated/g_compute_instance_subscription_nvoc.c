@@ -127,30 +127,10 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_ComputeInstanceSubscription =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS cisubscriptionCtrlCmdGetUuid__EXPORT(void *arg_this, void *arg2) {
-    return cisubscriptionCtrlCmdGetUuid_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_ComputeInstanceSubscription[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &cisubscriptionCtrlCmdGetUuid__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc6380101u,
-        /*paramSize=*/  sizeof(NVC638_CTRL_GET_UUID_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ComputeInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "cisubscriptionCtrlCmdGetUuid"
-#endif
-    },
 };
 
 
@@ -413,7 +393,7 @@ void __nvoc_up_thunk_RsResource_cisubscriptionAddAdditionalDependants(struct RsC
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__ComputeInstanceSubscription = 
 {
-    .numEntries=     1,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_ComputeInstanceSubscription
 };
 

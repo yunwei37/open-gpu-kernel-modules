@@ -127,177 +127,17 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_GPUInstanceSubscription =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS gisubscriptionCtrlCmdExecPartitionsCreate__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdExecPartitionsCreate_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS gisubscriptionCtrlCmdExecPartitionsDelete__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdExecPartitionsDelete_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS gisubscriptionCtrlCmdExecPartitionsGet__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdExecPartitionsGet_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS gisubscriptionCtrlCmdExecPartitionsGetProfileCapacity__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdExecPartitionsGetProfileCapacity_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS gisubscriptionCtrlCmdExecPartitionsGetActiveIds__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdExecPartitionsGetActiveIds_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS gisubscriptionCtrlCmdExecPartitionsExport__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdExecPartitionsExport_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000080u)
-static NV_STATUS gisubscriptionCtrlCmdExecPartitionsImport__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdExecPartitionsImport_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000080u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS gisubscriptionCtrlCmdGetUuid__EXPORT(void *arg_this, void *arg2) {
-    return gisubscriptionCtrlCmdGetUuid_IMPL(arg_this, arg2);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_GPUInstanceSubscription[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdExecPartitionsCreate__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc6370101u,
-        /*paramSize=*/  sizeof(NVC637_CTRL_EXEC_PARTITIONS_CREATE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdExecPartitionsCreate"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdExecPartitionsDelete__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc6370102u,
-        /*paramSize=*/  sizeof(NVC637_CTRL_EXEC_PARTITIONS_DELETE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdExecPartitionsDelete"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdExecPartitionsGet__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc6370103u,
-        /*paramSize=*/  sizeof(NVC637_CTRL_EXEC_PARTITIONS_GET_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdExecPartitionsGet"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdExecPartitionsGetActiveIds__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc6370104u,
-        /*paramSize=*/  sizeof(NVC637_CTRL_EXEC_PARTITIONS_GET_ACTIVE_IDS_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdExecPartitionsGetActiveIds"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdExecPartitionsExport__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc6370105u,
-        /*paramSize=*/  sizeof(NVC637_CTRL_EXEC_PARTITIONS_IMPORT_EXPORT_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdExecPartitionsExport"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x80u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdExecPartitionsImport__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x80u)
-        /*flags=*/      0x80u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc6370106u,
-        /*paramSize=*/  sizeof(NVC637_CTRL_EXEC_PARTITIONS_IMPORT_EXPORT_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdExecPartitionsImport"
-#endif
-    },
-    {               /*  [6] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdExecPartitionsGetProfileCapacity__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc63701a9u,
-        /*paramSize=*/  sizeof(NVC637_CTRL_EXEC_PARTITIONS_GET_PROFILE_CAPACITY_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdExecPartitionsGetProfileCapacity"
-#endif
-    },
-    {               /*  [7] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gisubscriptionCtrlCmdGetUuid__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc63701aau,
-        /*paramSize=*/  sizeof(NVC637_CTRL_GET_UUID_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GPUInstanceSubscription.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gisubscriptionCtrlCmdGetUuid"
-#endif
-    },
 };
 
 
@@ -560,7 +400,7 @@ void __nvoc_up_thunk_RsResource_gisubscriptionAddAdditionalDependants(struct RsC
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__GPUInstanceSubscription = 
 {
-    .numEntries=     8,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_GPUInstanceSubscription
 };
 

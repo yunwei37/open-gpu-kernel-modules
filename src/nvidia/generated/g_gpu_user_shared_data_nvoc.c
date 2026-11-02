@@ -128,51 +128,11 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_GpuUserSharedData =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS gpushareddataCtrlCmdRequestDataPoll__EXPORT(void *pData, void *pParams) {
-    return gpushareddataCtrlCmdRequestDataPoll_IMPL(pData, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000004u)
-static NV_STATUS gpushareddataCtrlCmdRequestPollInterval__EXPORT(void *pData, void *pParams) {
-    return gpushareddataCtrlCmdRequestPollInterval_IMPL(pData, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000004u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_GpuUserSharedData[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gpushareddataCtrlCmdRequestDataPoll__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xde0001u,
-        /*paramSize=*/  sizeof(NV00DE_CTRL_REQUEST_DATA_POLL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_GpuUserSharedData.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gpushareddataCtrlCmdRequestDataPoll"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &gpushareddataCtrlCmdRequestPollInterval__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4u)
-        /*flags=*/      0x4u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xde0002u,
-        /*paramSize=*/  sizeof(NV00DE_CTRL_REQUEST_POLL_INTERVAL_PARAM),
-        /*pClassInfo=*/ &(__nvoc_class_def_GpuUserSharedData.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "gpushareddataCtrlCmdRequestPollInterval"
-#endif
-    },
 };
 
 
@@ -442,7 +402,7 @@ void __nvoc_up_thunk_RsResource_gpushareddataAddAdditionalDependants(struct RsCl
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__GpuUserSharedData = 
 {
-    .numEntries=     2,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_GpuUserSharedData
 };
 

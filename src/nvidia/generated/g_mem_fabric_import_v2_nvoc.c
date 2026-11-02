@@ -128,30 +128,10 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_MemoryFabricImportV2 =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
-static NV_STATUS memoryfabricimportv2CtrlGetInfo__EXPORT(void *pMemoryFabricImportV2, void *pParams) {
-    return memoryfabricimportv2CtrlGetInfo_IMPL(pMemoryFabricImportV2, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_MemoryFabricImportV2[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memoryfabricimportv2CtrlGetInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*flags=*/      0x10bu,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xf90101u,
-        /*paramSize=*/  sizeof(NV00F9_CTRL_GET_INFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryFabricImportV2.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memoryfabricimportv2CtrlGetInfo"
-#endif
-    },
 };
 
 
@@ -422,7 +402,7 @@ void __nvoc_up_thunk_RsResource_memoryfabricimportv2AddAdditionalDependants(stru
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__MemoryFabricImportV2 = 
 {
-    .numEntries=     1,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_MemoryFabricImportV2
 };
 

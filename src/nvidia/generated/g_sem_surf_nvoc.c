@@ -127,135 +127,15 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_SemaphoreSurface =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS semsurfCtrlCmdRefMemory__EXPORT(void *pSemaphoreSurf, void *pParams) {
-    return semsurfCtrlCmdRefMemory_IMPL(pSemaphoreSurf, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000108u)
-static NV_STATUS semsurfCtrlCmdBindChannel__EXPORT(void *pSemaphoreSurf, void *pParams) {
-    return semsurfCtrlCmdBindChannel_IMPL(pSemaphoreSurf, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000108u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000108u)
-static NV_STATUS semsurfCtrlCmdUnbindChannel__EXPORT(void *pSemaphoreSurf, void *pParams) {
-    return semsurfCtrlCmdUnbindChannel_IMPL(pSemaphoreSurf, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000108u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00400009u)
-static NV_STATUS semsurfCtrlCmdRegisterWaiter__EXPORT(void *pSemaphoreSurf, void *pParams) {
-    return semsurfCtrlCmdRegisterWaiter_IMPL(pSemaphoreSurf, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00400009u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS semsurfCtrlCmdSetValue__EXPORT(void *pSemaphoreSurf, void *pParams) {
-    return semsurfCtrlCmdSetValue_IMPL(pSemaphoreSurf, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS semsurfCtrlCmdUnregisterWaiter__EXPORT(void *pSemaphoreSurf, void *pParams) {
-    return semsurfCtrlCmdUnregisterWaiter_IMPL(pSemaphoreSurf, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_SemaphoreSurface[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &semsurfCtrlCmdRefMemory__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xda0001u,
-        /*paramSize=*/  sizeof(NV_SEMAPHORE_SURFACE_CTRL_REF_MEMORY_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SemaphoreSurface.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "semsurfCtrlCmdRefMemory"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x108u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &semsurfCtrlCmdBindChannel__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x108u)
-        /*flags=*/      0x108u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xda0002u,
-        /*paramSize=*/  sizeof(NV_SEMAPHORE_SURFACE_CTRL_BIND_CHANNEL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SemaphoreSurface.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "semsurfCtrlCmdBindChannel"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400009u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &semsurfCtrlCmdRegisterWaiter__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x400009u)
-        /*flags=*/      0x400009u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xda0003u,
-        /*paramSize=*/  sizeof(NV_SEMAPHORE_SURFACE_CTRL_REGISTER_WAITER_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SemaphoreSurface.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "semsurfCtrlCmdRegisterWaiter"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &semsurfCtrlCmdSetValue__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xda0004u,
-        /*paramSize=*/  sizeof(NV_SEMAPHORE_SURFACE_CTRL_SET_VALUE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SemaphoreSurface.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "semsurfCtrlCmdSetValue"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &semsurfCtrlCmdUnregisterWaiter__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xda0005u,
-        /*paramSize=*/  sizeof(NV_SEMAPHORE_SURFACE_CTRL_UNREGISTER_WAITER_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SemaphoreSurface.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "semsurfCtrlCmdUnregisterWaiter"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x108u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &semsurfCtrlCmdUnbindChannel__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x108u)
-        /*flags=*/      0x108u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xda0006u,
-        /*paramSize=*/  sizeof(NV_SEMAPHORE_SURFACE_CTRL_UNBIND_CHANNEL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SemaphoreSurface.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "semsurfCtrlCmdUnbindChannel"
-#endif
-    },
 };
 
 
@@ -518,7 +398,7 @@ void __nvoc_up_thunk_RsResource_semsurfAddAdditionalDependants(struct RsClient *
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__SemaphoreSurface = 
 {
-    .numEntries=     6,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_SemaphoreSurface
 };
 

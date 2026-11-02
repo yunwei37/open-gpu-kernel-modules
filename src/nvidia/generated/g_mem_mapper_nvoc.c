@@ -127,51 +127,11 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_MemoryMapper =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000808u)
-static NV_STATUS memmapperCtrlCmdSubmitOperations__EXPORT(void *pMemoryMapper, void *pParams) {
-    return memmapperCtrlCmdSubmitOperations_IMPL(pMemoryMapper, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000808u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS memmapperCtrlCmdResizeQueue__EXPORT(void *pMemoryMapper, void *pParams) {
-    return memmapperCtrlCmdResizeQueue_IMPL(pMemoryMapper, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_MemoryMapper[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x808u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memmapperCtrlCmdSubmitOperations__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x808u)
-        /*flags=*/      0x808u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfe0101u,
-        /*paramSize=*/  sizeof(NV00FE_CTRL_SUBMIT_OPERATIONS_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMapper.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memmapperCtrlCmdSubmitOperations"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memmapperCtrlCmdResizeQueue__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfe0102u,
-        /*paramSize=*/  sizeof(NV00FE_CTRL_RESIZE_QUEUE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMapper.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memmapperCtrlCmdResizeQueue"
-#endif
-    },
 };
 
 
@@ -431,7 +391,7 @@ void __nvoc_up_thunk_RsResource_memmapperAddAdditionalDependants(struct RsClient
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__MemoryMapper = 
 {
-    .numEntries=     2,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_MemoryMapper
 };
 

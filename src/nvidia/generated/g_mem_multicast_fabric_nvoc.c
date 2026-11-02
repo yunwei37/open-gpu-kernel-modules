@@ -128,156 +128,16 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_MemoryMulticastFabric =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
-static NV_STATUS memorymulticastfabricCtrlGetInfo__EXPORT(void *pMemoryMulticastFabric, void *pParams) {
-    return memorymulticastfabricCtrlGetInfo_IMPL(pMemoryMulticastFabric, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS memorymulticastfabricCtrlAttachMem__EXPORT(void *pMemoryMulticastFabric, void *pParams) {
-    return memorymulticastfabricCtrlAttachMem_IMPL(pMemoryMulticastFabric, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS memorymulticastfabricCtrlDetachMem__EXPORT(void *pMemoryMulticastFabric, void *pParams) {
-    return memorymulticastfabricCtrlDetachMem_IMPL(pMemoryMulticastFabric, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS memorymulticastfabricCtrlAttachGpu__EXPORT(void *pMemoryMulticastFabric, void *pParams) {
-    return memorymulticastfabricCtrlAttachGpu_IMPL(pMemoryMulticastFabric, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
-static NV_STATUS memorymulticastfabricCtrlRegisterEvent__EXPORT(void *pMemoryMulticastFabric, void *pParams) {
-    return memorymulticastfabricCtrlRegisterEvent_IMPL(pMemoryMulticastFabric, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS memorymulticastfabricCtrlAttachRemoteGpu__EXPORT(void *pMemoryMulticastFabric, void *pParams) {
-    return memorymulticastfabricCtrlAttachRemoteGpu_IMPL(pMemoryMulticastFabric, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
-static NV_STATUS memorymulticastfabricCtrlSetFailure__EXPORT(void *pMemoryMulticastFabric, void *pParams) {
-    return memorymulticastfabricCtrlSetFailure_IMPL(pMemoryMulticastFabric, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0000010bu)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_MemoryMulticastFabric[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memorymulticastfabricCtrlGetInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*flags=*/      0x10bu,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfd0101u,
-        /*paramSize=*/  sizeof(NV00FD_CTRL_GET_INFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMulticastFabric.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memorymulticastfabricCtrlGetInfo"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memorymulticastfabricCtrlAttachMem__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfd0102u,
-        /*paramSize=*/  sizeof(NV00FD_CTRL_ATTACH_MEM_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMulticastFabric.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memorymulticastfabricCtrlAttachMem"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memorymulticastfabricCtrlRegisterEvent__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*flags=*/      0x10bu,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfd0103u,
-        /*paramSize=*/  sizeof(NV00FD_CTRL_REGISTER_EVENT_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMulticastFabric.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memorymulticastfabricCtrlRegisterEvent"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memorymulticastfabricCtrlAttachGpu__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfd0104u,
-        /*paramSize=*/  sizeof(NV00FD_CTRL_ATTACH_GPU_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMulticastFabric.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memorymulticastfabricCtrlAttachGpu"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memorymulticastfabricCtrlDetachMem__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfd0105u,
-        /*paramSize=*/  sizeof(NV00FD_CTRL_DETACH_MEM_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMulticastFabric.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memorymulticastfabricCtrlDetachMem"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memorymulticastfabricCtrlAttachRemoteGpu__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfd0106u,
-        /*paramSize=*/  sizeof(NV00FD_CTRL_ATTACH_REMOTE_GPU_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMulticastFabric.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memorymulticastfabricCtrlAttachRemoteGpu"
-#endif
-    },
-    {               /*  [6] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memorymulticastfabricCtrlSetFailure__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10bu)
-        /*flags=*/      0x10bu,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xfd0107u,
-        /*paramSize=*/  sizeof(NV00FD_CTRL_SET_FAILURE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_MemoryMulticastFabric.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memorymulticastfabricCtrlSetFailure"
-#endif
-    },
 };
 
 
@@ -548,7 +408,7 @@ void __nvoc_up_thunk_RsResource_memorymulticastfabricAddAdditionalDependants(str
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__MemoryMulticastFabric = 
 {
-    .numEntries=     7,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_MemoryMulticastFabric
 };
 

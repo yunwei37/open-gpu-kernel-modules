@@ -349,114 +349,14 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_ThirdPartyP2P =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS thirdpartyp2pCtrlCmdRegisterVaSpace__EXPORT(void *pThirdPartyP2P, void *pRegisterVaSpaceParams) {
-    return thirdpartyp2pCtrlCmdRegisterVaSpace_IMPL(pThirdPartyP2P, pRegisterVaSpaceParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS thirdpartyp2pCtrlCmdUnregisterVaSpace__EXPORT(void *pThirdPartyP2P, void *pUnregisterVaSpaceParams) {
-    return thirdpartyp2pCtrlCmdUnregisterVaSpace_IMPL(pThirdPartyP2P, pUnregisterVaSpaceParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS thirdpartyp2pCtrlCmdRegisterVidmem__EXPORT(void *pThirdPartyP2P, void *pRegisterVidmemParams) {
-    return thirdpartyp2pCtrlCmdRegisterVidmem_IMPL(pThirdPartyP2P, pRegisterVidmemParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS thirdpartyp2pCtrlCmdUnregisterVidmem__EXPORT(void *pThirdPartyP2P, void *pUnregisterVidmemParams) {
-    return thirdpartyp2pCtrlCmdUnregisterVidmem_IMPL(pThirdPartyP2P, pUnregisterVidmemParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS thirdpartyp2pCtrlCmdRegisterPid__EXPORT(void *pThirdPartyP2P, void *pParams) {
-    return thirdpartyp2pCtrlCmdRegisterPid_IMPL(pThirdPartyP2P, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_ThirdPartyP2P[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &thirdpartyp2pCtrlCmdRegisterVaSpace__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x503c0102u,
-        /*paramSize=*/  sizeof(NV503C_CTRL_REGISTER_VA_SPACE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ThirdPartyP2P.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "thirdpartyp2pCtrlCmdRegisterVaSpace"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &thirdpartyp2pCtrlCmdUnregisterVaSpace__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x503c0103u,
-        /*paramSize=*/  sizeof(NV503C_CTRL_UNREGISTER_VA_SPACE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ThirdPartyP2P.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "thirdpartyp2pCtrlCmdUnregisterVaSpace"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &thirdpartyp2pCtrlCmdRegisterVidmem__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x503c0104u,
-        /*paramSize=*/  sizeof(NV503C_CTRL_REGISTER_VIDMEM_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ThirdPartyP2P.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "thirdpartyp2pCtrlCmdRegisterVidmem"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &thirdpartyp2pCtrlCmdUnregisterVidmem__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x503c0105u,
-        /*paramSize=*/  sizeof(NV503C_CTRL_UNREGISTER_VIDMEM_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ThirdPartyP2P.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "thirdpartyp2pCtrlCmdUnregisterVidmem"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &thirdpartyp2pCtrlCmdRegisterPid__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x503c0106u,
-        /*paramSize=*/  sizeof(NV503C_CTRL_REGISTER_PID_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_ThirdPartyP2P.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "thirdpartyp2pCtrlCmdRegisterPid"
-#endif
-    },
 };
 
 
@@ -716,7 +616,7 @@ void __nvoc_up_thunk_RsResource_thirdpartyp2pAddAdditionalDependants(struct RsCl
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__ThirdPartyP2P = 
 {
-    .numEntries=     5,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_ThirdPartyP2P
 };
 

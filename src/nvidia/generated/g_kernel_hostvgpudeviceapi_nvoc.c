@@ -362,261 +362,21 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_KernelHostVgpuDeviceApi =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdSetVgpuDeviceInfo__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdSetVgpuDeviceInfo_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdSetVgpuGuestLifeCycleState__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdSetVgpuGuestLifeCycleState_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdSetOfflinedPagePatchInfo__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdSetOfflinedPagePatchInfo_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdVfConfigSpaceAccess__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdVfConfigSpaceAccess_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000808u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdBindFecsEvtbuf__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdBindFecsEvtbuf_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000808u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdTriggerPrivDoorbell__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdTriggerPrivDoorbell_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000118u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdEventSetNotification__EXPORT(void *pKernelHostVgpuDeviceApi, void *pSetEventParams) {
-    return kernelhostvgpudeviceapiCtrlCmdEventSetNotification_IMPL(pKernelHostVgpuDeviceApi, pSetEventParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000118u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdGetBarMappingRanges__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdGetBarMappingRanges_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdRestoreDefaultExecPartition__EXPORT(void *pKernelHostVgpuDeviceApi) {
-    return kernelhostvgpudeviceapiCtrlCmdRestoreDefaultExecPartition_IMPL(pKernelHostVgpuDeviceApi);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdFreeStates__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdFreeStates_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdBootloadVgpuTask__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdBootloadVgpuTask_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kernelhostvgpudeviceapiCtrlCmdSetPlacementId__EXPORT(void *pKernelHostVgpuDeviceApi, void *pParams) {
-    return kernelhostvgpudeviceapiCtrlCmdSetPlacementId_IMPL(pKernelHostVgpuDeviceApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_KernelHostVgpuDeviceApi[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdSetVgpuDeviceInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa0840101u,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_SET_VGPU_DEVICE_INFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdSetVgpuDeviceInfo"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdSetVgpuGuestLifeCycleState__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa0840102u,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_SET_VGPU_GUEST_LIFE_CYCLE_STATE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdSetVgpuGuestLifeCycleState"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdSetOfflinedPagePatchInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa0840103u,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_SET_OFFLINED_PAGE_PATCHINFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdSetOfflinedPagePatchInfo"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdVfConfigSpaceAccess__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa0840104u,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_VF_CONFIG_SPACE_ACCESS_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdVfConfigSpaceAccess"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x808u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdBindFecsEvtbuf__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x808u)
-        /*flags=*/      0x808u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa0840105u,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_BIND_FECS_EVTBUF_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdBindFecsEvtbuf"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdTriggerPrivDoorbell__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa0840106u,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_TRIGGER_PRIV_DOORBELL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdTriggerPrivDoorbell"
-#endif
-    },
-    {               /*  [6] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x118u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdEventSetNotification__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x118u)
-        /*flags=*/      0x118u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa0840107u,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_EVENT_SET_NOTIFICATION_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdEventSetNotification"
-#endif
-    },
-    {               /*  [7] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdGetBarMappingRanges__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa084010au,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_GET_BAR_MAPPING_RANGES_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdGetBarMappingRanges"
-#endif
-    },
-    {               /*  [8] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdRestoreDefaultExecPartition__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa084010bu,
-        /*paramSize=*/  0 /* Singleton parameter list */,
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdRestoreDefaultExecPartition"
-#endif
-    },
-    {               /*  [9] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdFreeStates__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa084010cu,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_FREE_STATES_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdFreeStates"
-#endif
-    },
-    {               /*  [10] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdBootloadVgpuTask__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa084010du,
-        /*paramSize=*/  sizeof(NVA084_CTRL_KERNEL_HOST_VGPU_DEVICE_BOOTLOAD_VGPU_TASK_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdBootloadVgpuTask"
-#endif
-    },
-    {               /*  [11] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kernelhostvgpudeviceapiCtrlCmdSetPlacementId__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa084010eu,
-        /*paramSize=*/  sizeof(NVA084_CTRL_CMD_KERNEL_HOST_VGPU_DEVICE_SET_PLACEMENT_ID_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelHostVgpuDeviceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kernelhostvgpudeviceapiCtrlCmdSetPlacementId"
-#endif
-    },
 };
 
 
@@ -927,7 +687,7 @@ NV_STATUS __nvoc_up_thunk_Notifier_kernelhostvgpudeviceapiGetOrAllocNotifShare(s
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__KernelHostVgpuDeviceApi = 
 {
-    .numEntries=     12,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_KernelHostVgpuDeviceApi
 };
 

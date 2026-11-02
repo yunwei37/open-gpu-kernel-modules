@@ -368,72 +368,12 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_KernelCtxShareApi =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000040u)
-static NV_STATUS kctxshareapiCtrlCmdSetTpcPartitionTable__EXPORT(void *pKernelCtxShareApi, void *pParams) {
-    return kctxshareapiCtrlCmdSetTpcPartitionTable_IMPL(pKernelCtxShareApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000040u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000040u)
-static NV_STATUS kctxshareapiCtrlCmdGetCwdWatermark__EXPORT(void *pKernelCtxShareApi, void *pParams) {
-    return kctxshareapiCtrlCmdGetCwdWatermark_IMPL(pKernelCtxShareApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000040u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000040u)
-static NV_STATUS kctxshareapiCtrlCmdSetCwdWatermark__EXPORT(void *pKernelCtxShareApi, void *pParams) {
-    return kctxshareapiCtrlCmdSetCwdWatermark_IMPL(pKernelCtxShareApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000040u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_KernelCtxShareApi[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kctxshareapiCtrlCmdSetTpcPartitionTable__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40u)
-        /*flags=*/      0x40u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90670102u,
-        /*paramSize=*/  sizeof(NV9067_CTRL_TPC_PARTITION_TABLE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelCtxShareApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kctxshareapiCtrlCmdSetTpcPartitionTable"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kctxshareapiCtrlCmdGetCwdWatermark__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40u)
-        /*flags=*/      0x40u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90670201u,
-        /*paramSize=*/  sizeof(NV9067_CTRL_CWD_WATERMARK_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelCtxShareApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kctxshareapiCtrlCmdGetCwdWatermark"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kctxshareapiCtrlCmdSetCwdWatermark__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x40u)
-        /*flags=*/      0x40u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90670202u,
-        /*paramSize=*/  sizeof(NV9067_CTRL_CWD_WATERMARK_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelCtxShareApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kctxshareapiCtrlCmdSetCwdWatermark"
-#endif
-    },
 };
 
 
@@ -696,7 +636,7 @@ void __nvoc_up_thunk_RsResource_kctxshareapiAddAdditionalDependants(struct RsCli
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__KernelCtxShareApi = 
 {
-    .numEntries=     3,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_KernelCtxShareApi
 };
 

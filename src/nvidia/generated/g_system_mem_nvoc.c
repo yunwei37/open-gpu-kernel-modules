@@ -155,51 +155,11 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_SystemMemory =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000101u)
-static NV_STATUS sysmemCtrlCmdGetSurfaceNumPhysPages__EXPORT(void *pStandardMemory, void *pParams) {
-    return sysmemCtrlCmdGetSurfaceNumPhysPages_IMPL(pStandardMemory, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000101u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000101u)
-static NV_STATUS sysmemCtrlCmdGetSurfacePhysPages__EXPORT(void *pStandardMemory, void *pParams) {
-    return sysmemCtrlCmdGetSurfacePhysPages_IMPL(pStandardMemory, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000101u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_SystemMemory[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x101u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &sysmemCtrlCmdGetSurfaceNumPhysPages__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x101u)
-        /*flags=*/      0x101u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x3e0102u,
-        /*paramSize=*/  sizeof(NV003E_CTRL_GET_SURFACE_NUM_PHYS_PAGES_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SystemMemory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "sysmemCtrlCmdGetSurfaceNumPhysPages"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x101u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &sysmemCtrlCmdGetSurfacePhysPages__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x101u)
-        /*flags=*/      0x101u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x3e0103u,
-        /*paramSize=*/  sizeof(NV003E_CTRL_GET_SURFACE_PHYS_PAGES_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_SystemMemory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "sysmemCtrlCmdGetSurfacePhysPages"
-#endif
-    },
 };
 
 
@@ -496,7 +456,7 @@ void __nvoc_up_thunk_RsResource_sysmemAddAdditionalDependants(struct RsClient *p
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__SystemMemory = 
 {
-    .numEntries=     2,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_SystemMemory
 };
 

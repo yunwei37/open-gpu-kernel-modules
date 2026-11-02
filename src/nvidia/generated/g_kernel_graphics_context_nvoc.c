@@ -127,135 +127,15 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_KernelGraphicsContext =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kgrctxCtrlGetTpcPartitionMode__EXPORT(void *pKernelGraphicsContext, void *pParams) {
-    return kgrctxCtrlGetTpcPartitionMode_IMPL(pKernelGraphicsContext, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kgrctxCtrlSetTpcPartitionMode__EXPORT(void *pKernelGraphicsContext, void *pParams) {
-    return kgrctxCtrlSetTpcPartitionMode_IMPL(pKernelGraphicsContext, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS kgrctxCtrlGetMMUDebugMode__EXPORT(void *pKernelGraphicsContext, void *pParams) {
-    return kgrctxCtrlGetMMUDebugMode_IMPL(pKernelGraphicsContext, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kgrctxCtrlProgramVidmemPromote__EXPORT(void *pKernelGraphicsContext, void *pParams) {
-    return kgrctxCtrlProgramVidmemPromote_IMPL(pKernelGraphicsContext, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kgrctxCtrlProgramSysmemPromote__EXPORT(void *pKernelGraphicsContext, void *pParams) {
-    return kgrctxCtrlProgramSysmemPromote_IMPL(pKernelGraphicsContext, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kgrctxCtrlSetLgSectorPromotion__EXPORT(void *pKernelGraphicsContext, void *pParams) {
-    return kgrctxCtrlSetLgSectorPromotion_IMPL(pKernelGraphicsContext, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_KernelGraphicsContext[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kgrctxCtrlSetTpcPartitionMode__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900101u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_TPC_PARTITION_MODE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelGraphicsContext.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kgrctxCtrlSetTpcPartitionMode"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kgrctxCtrlGetTpcPartitionMode__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900103u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_TPC_PARTITION_MODE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelGraphicsContext.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kgrctxCtrlGetTpcPartitionMode"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kgrctxCtrlGetMMUDebugMode__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900105u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_GET_MMU_DEBUG_MODE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelGraphicsContext.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kgrctxCtrlGetMMUDebugMode"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kgrctxCtrlProgramVidmemPromote__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900107u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_PROGRAM_VIDMEM_PROMOTE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelGraphicsContext.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kgrctxCtrlProgramVidmemPromote"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kgrctxCtrlSetLgSectorPromotion__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90010bu,
-        /*paramSize=*/  sizeof(NV0090_CTRL_SET_LG_SECTOR_PROMOTION_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelGraphicsContext.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kgrctxCtrlSetLgSectorPromotion"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kgrctxCtrlProgramSysmemPromote__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90010eu,
-        /*paramSize=*/  sizeof(NV0090_CTRL_PROGRAM_SYSMEM_PROMOTE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelGraphicsContext.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kgrctxCtrlProgramSysmemPromote"
-#endif
-    },
 };
 
 
@@ -518,7 +398,7 @@ void __nvoc_up_thunk_RsResource_kgrctxAddAdditionalDependants(struct RsClient *p
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__KernelGraphicsContext = 
 {
-    .numEntries=     6,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_KernelGraphicsContext
 };
 

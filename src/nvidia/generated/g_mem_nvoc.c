@@ -101,198 +101,18 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_Memory =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010208u)
-static NV_STATUS memCtrlCmdGetSurfaceCompressionCoverageLvm__EXPORT(void *pMemory, void *pParams) {
-    return memCtrlCmdGetSurfaceCompressionCoverageLvm_IMPL(pMemory, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010208u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS memCtrlCmdSurfaceFlushGpuCache__EXPORT(void *pMemory, void *pCacheFlushParams) {
-    return memCtrlCmdSurfaceFlushGpuCache_IMPL(pMemory, pCacheFlushParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS memCtrlCmdGetMemPageSize__EXPORT(void *pMemory, void *pPageSizeParams) {
-    return memCtrlCmdGetMemPageSize_IMPL(pMemory, pPageSizeParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS memCtrlCmdSetTag__EXPORT(void *pMemory, void *pParams) {
-    return memCtrlCmdSetTag_IMPL(pMemory, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS memCtrlCmdGetTag__EXPORT(void *pMemory, void *pParams) {
-    return memCtrlCmdGetTag_IMPL(pMemory, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000004u)
-static NV_STATUS memCtrlCmdGetSurfacePhysAttrLvm__EXPORT(void *pMemory, void *pGPAP) {
-    return memCtrlCmdGetSurfacePhysAttrLvm_IMPL(pMemory, pGPAP);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000004u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS memCtrlCmdGetSurfaceInfoLvm__EXPORT(void *pMemory, void *pSurfaceInfoParams) {
-    return memCtrlCmdGetSurfaceInfoLvm_IMPL(pMemory, pSurfaceInfoParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
-static NV_STATUS memCtrlCmdMapMemoryForGpuAccess__EXPORT(void *pMemory, void *pParams) {
-    return memCtrlCmdMapMemoryForGpuAccess_IMPL(pMemory, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
-static NV_STATUS memCtrlCmdUnmapMemoryForGpuAccess__EXPORT(void *pMemory, void *pParams) {
-    return memCtrlCmdUnmapMemoryForGpuAccess_IMPL(pMemory, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_Memory[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdGetSurfacePhysAttrLvm__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x4u)
-        /*flags=*/      0x4u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410103u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_GET_SURFACE_PHYS_ATTR_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdGetSurfacePhysAttrLvm"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdGetSurfaceInfoLvm__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410110u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_GET_SURFACE_INFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdGetSurfaceInfoLvm"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10208u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdGetSurfaceCompressionCoverageLvm__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10208u)
-        /*flags=*/      0x10208u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410112u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_GET_SURFACE_COMPRESSION_COVERAGE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdGetSurfaceCompressionCoverageLvm"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdSurfaceFlushGpuCache__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410116u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_SURFACE_FLUSH_GPU_CACHE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdSurfaceFlushGpuCache"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdGetMemPageSize__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410118u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_GET_MEM_PAGE_SIZE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdGetMemPageSize"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdSetTag__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410120u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_CMD_SET_TAG_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdSetTag"
-#endif
-    },
-    {               /*  [6] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdGetTag__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410121u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_CMD_GET_TAG_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdGetTag"
-#endif
-    },
-    {               /*  [7] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdMapMemoryForGpuAccess__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*flags=*/      0x0u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410122u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_MAP_MEMORY_FOR_GPU_ACCESS_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdMapMemoryForGpuAccess"
-#endif
-    },
-    {               /*  [8] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &memCtrlCmdUnmapMemoryForGpuAccess__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*flags=*/      0x0u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x410153u,
-        /*paramSize=*/  sizeof(NV0041_CTRL_UNMAP_MEMORY_FOR_GPU_ACCESS_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_Memory.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "memCtrlCmdUnmapMemoryForGpuAccess"
-#endif
-    },
 };
 
 
@@ -507,7 +327,7 @@ void __nvoc_up_thunk_RsResource_memAddAdditionalDependants(struct RsClient *pCli
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__Memory = 
 {
-    .numEntries=     9,
+    .numEntries=     0,
     .pExportEntries= __nvoc_exported_method_def_Memory
 };
 
