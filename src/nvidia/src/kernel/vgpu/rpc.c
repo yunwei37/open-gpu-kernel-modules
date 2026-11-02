@@ -10079,6 +10079,9 @@ NV_STATUS rpcRmApiControl_GSP
     NvU32 resCtrlFlags = NVOS54_FLAGS_NONE;
     NvBool bPreSerialized = NV_FALSE;
     void *pOriginalParams = pParamStructPtr;
+    if (cmd == 0x20800a61)
+        NV_PRINTF(LEVEL_ERROR, "L2_FIFO_API_ENTER bytes=%u\n", paramsSize);
+
 
     if (!rmDeviceGpuLockIsOwner(pGpu->gpuInstance))
     {

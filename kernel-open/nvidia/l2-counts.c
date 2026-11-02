@@ -9,6 +9,8 @@ static u64 rpc[2][8192],other[16],overflow;
 static bool frozen;
 static struct {u32 bytes;u8 data[1024];} promotes[16];
 static u32 promote_count;
+static struct {u32 type,length,sequence,params,status,header_status,client,object,a,b;} fifo[64];
+static u32 fifo_count;
 static struct {u32 cmd,lo,hi;bool used;u64 sends,replies,failed;} controls[512];
 static struct {u32 cls,cmd;bool used;u64 hits,misses,executes[3];} methods[4096];
 static struct {u32 id;bool used;u64 cpu,rpc,ok,failed,lookups,misses;} classes[1024];
@@ -32,6 +34,15 @@ void l2_record(unsigned type,unsigned long long address,const void *data,unsigne
   if(i==512){overflow++;goto out;}
   if(!controls[i].used){controls[i].used=true;controls[i].cmd=cmd;controls[i].lo=n;}
   controls[i].lo=min(controls[i].lo,n);controls[i].hi=max(controls[i].hi,n);
+  if(cmd==0x20800a61){
+   if(fifo_count==64)overflow++;
+   else{
+    unsigned x=fifo_count++;fifo[x].type=type;fifo[x].length=length;fifo[x].params=n;
+    memcpy(&fifo[x].sequence,(char *)data+24,4);memcpy(&fifo[x].status,(char *)data+44,4);
+    memcpy(&fifo[x].header_status,(char *)data+16,4);memcpy(&fifo[x].client,(char *)data+32,4);memcpy(&fifo[x].object,(char *)data+36,4);
+    if(length>=80){memcpy(&fifo[x].a,(char *)data+72,4);memcpy(&fifo[x].b,(char *)data+76,4);}
+   }
+  }
   if(type==1)controls[i].sends++;
   else{controls[i].replies++;memcpy(&status,(char *)data+44,4);memcpy(&header_status,(char *)data+16,4);
    if(status||header_status)controls[i].failed++;}
@@ -81,6 +92,7 @@ void l2_counts_dump(void)
  pr_info("L2_NATIVE_COUNTS sends=%llu replies=%llu reads=%llu writes=%llu overflow=%llu\n",other[1],other[2],other[3],other[4],overflow);
  for(i=0;i<8192;i++)if(rpc[0][i]||rpc[1][i])pr_info("L2_NATIVE_RPC id=%u sends=%llu replies=%llu\n",i,rpc[0][i],rpc[1][i]);
  for(i=0;i<512;i++)if(controls[i].used)pr_info("L2_NATIVE_CTRL cmd=0x%x sends=%llu replies=%llu failed=%llu params_min=%u params_max=%u\n",controls[i].cmd,controls[i].sends,controls[i].replies,controls[i].failed,controls[i].lo,controls[i].hi);
+ for(i=0;i<fifo_count;i++)pr_info("L2_FIFO_WIRE index=%u kind=%u bytes=%u seq=%u params=%u status=0x%x header_status=0x%x client=0x%x object=0x%x runlist=%u channels=%u\n",i,fifo[i].type,fifo[i].length,fifo[i].sequence,fifo[i].params,fifo[i].status,fifo[i].header_status,fifo[i].client,fifo[i].object,fifo[i].a,fifo[i].b);
  for(i=0;i<4096;i++)if(methods[i].used)pr_info("L2_NATIVE_METHOD class=0x%x cmd=0x%x hits=%llu misses=%llu\n",methods[i].cls,methods[i].cmd,methods[i].hits,methods[i].misses);
  pr_info("L2_NATIVE_EXEC_CENSUS enabled=1 sites=3 dispatches=%llu\n",other[12]);
  for(i=0;i<4096;i++)for(j=0;j<3;j++)if(methods[i].executes[j])pr_info("L2_NATIVE_EXEC site=%u class=0x%x cmd=0x%x calls=%llu\n",j+1,methods[i].cls,methods[i].cmd,methods[i].executes[j]);
