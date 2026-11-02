@@ -140,41 +140,11 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_KernelChannel =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS kchannelCtrlCmdResetIsolatedChannel__EXPORT(void *pKernelChannel, void *pResetParams) {
-    return kchannelCtrlCmdResetIsolatedChannel_IMPL(pKernelChannel, pResetParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c8u)
-static NV_STATUS kchannelCtrlCmdInternalResetIsolatedChannel__EXPORT(void *pKernelChannel, void *pResetParams) {
-    return kchannelCtrlCmdInternalResetIsolatedChannel_IMPL(pKernelChannel, pResetParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c8u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS kchannelCtrlCmdGetClassEngineid__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlCmdGetClassEngineid_IMPL(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS kchannelCtrlCmdResetChannel__EXPORT(void *pKernelChannel, void *pResetChannelParams) {
-    return kchannelCtrlCmdResetChannel_IMPL(pKernelChannel, pResetChannelParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS kchannelCtrlCmdGetDeferRCState__EXPORT(void *pKernelChannel, void *pStateParams) {
-    return kchannelCtrlCmdGetDeferRCState_IMPL(pKernelChannel, pStateParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
-static NV_STATUS kchannelCtrlCmdGetMmuFaultInfo__EXPORT(void *pKernelChannel, void *pFaultInfoParams) {
-    return kchannelCtrlCmdGetMmuFaultInfo_IMPL(pKernelChannel, pFaultInfoParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
 
 #if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 static NV_STATUS kchannelCtrlCmdGpFifoSchedule__EXPORT(void *pKernelChannel, void *pSchedParams) {
@@ -188,77 +158,17 @@ static NV_STATUS kchannelCtrlCmdBind__EXPORT(void *pKernelChannel, void *pParams
 }
 #endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlCmdSetErrorNotifier__EXPORT(void *pKernelChannel, void *pSetErrorNotifierParams) {
-    return kchannelCtrlCmdSetErrorNotifier_IMPL(pKernelChannel, pSetErrorNotifierParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010028u)
-static NV_STATUS kchannelCtrlCmdSetInterleaveLevel__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlCmdSetInterleaveLevel_IMPL(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010028u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
-static NV_STATUS kchannelCtrlCmdGetContextId__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlCmdGetContextId_IMPL(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000109u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS kchannelCtrlCmdRestartRunlist__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlCmdRestartRunlist_IMPL(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
-static NV_STATUS kchannelCtrlCmdGetEngineCtxSize__EXPORT(void *pKernelChannel, void *pCtxSizeParams) {
-    return kchannelCtrlCmdGetEngineCtxSize_IMPL(pKernelChannel, pCtxSizeParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
-static NV_STATUS kchannelCtrlCmdGetEngineCtxData__EXPORT(void *pKernelChannel, void *pCtxBuffParams) {
-    return kchannelCtrlCmdGetEngineCtxData_IMPL(pKernelChannel, pCtxBuffParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014044u)
-static NV_STATUS kchannelCtrlCmdMigrateEngineCtxData__EXPORT(void *pKernelChannel, void *pCtxBuffParams) {
-    return kchannelCtrlCmdMigrateEngineCtxData_IMPL(pKernelChannel, pCtxBuffParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014044u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
-static NV_STATUS kchannelCtrlCmdGetEngineCtxState__EXPORT(void *pKernelChannel, void *pCtxStateParams) {
-    return kchannelCtrlCmdGetEngineCtxState_IMPL(pKernelChannel, pCtxStateParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
-static NV_STATUS kchannelCtrlCmdGetChannelHwState__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlCmdGetChannelHwState_IMPL(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014044u)
-static NV_STATUS kchannelCtrlCmdSetChannelHwState__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlCmdSetChannelHwState_IMPL(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014044u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
-static NV_STATUS kchannelCtrlCmdSaveEngineCtxData__EXPORT(void *pKernelChannel, void *pCtxBuffParams) {
-    return kchannelCtrlCmdSaveEngineCtxData_IMPL(pKernelChannel, pCtxBuffParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014044u)
-static NV_STATUS kchannelCtrlCmdRestoreEngineCtxData__EXPORT(void *pKernelChannel, void *pCtxBuffParams) {
-    return kchannelCtrlCmdRestoreEngineCtxData_IMPL(pKernelChannel, pCtxBuffParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014044u)
 
 #if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 static NV_STATUS kchannelCtrlCmdGpfifoGetWorkSubmitToken__EXPORT(void *pKernelChannel, void *pTokenParams) {
@@ -266,261 +176,21 @@ static NV_STATUS kchannelCtrlCmdGpfifoGetWorkSubmitToken__EXPORT(void *pKernelCh
 }
 #endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
-static NV_STATUS kchannelCtrlCmdInternalGpFifoGetWorkSubmitToken__EXPORT(void *pKernelChannel, void *pTokenParams) {
-    return kchannelCtrlCmdInternalGpFifoGetWorkSubmitToken_IMPL(pKernelChannel, pTokenParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x000000c0u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010244u)
-static NV_STATUS kchannelCtrlCmdGpfifoUpdateFaultMethodBuffer__EXPORT(void *pKernelChannel, void *pFaultMthdBufferParams) {
-    return kchannelCtrlCmdGpfifoUpdateFaultMethodBuffer_IMPL(pKernelChannel, pFaultMthdBufferParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010244u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlCmdGpfifoSetWorkSubmitTokenNotifIndex__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlCmdGpfifoSetWorkSubmitTokenNotifIndex_IMPL(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS kchannelCtrlCmdStopChannel__EXPORT(void *pKernelChannel, void *pStopChannelParams) {
-    return kchannelCtrlCmdStopChannel_IMPL(pKernelChannel, pStopChannelParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlCmdGetKmb__EXPORT(void *pKernelChannel, void *pGetKmbParams) {
-    return kchannelCtrlCmdGetKmb_DISPATCH(pKernelChannel, pGetKmbParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlRotateSecureChannelIv__EXPORT(void *pKernelChannel, void *pRotateIvParams) {
-    return kchannelCtrlRotateSecureChannelIv_DISPATCH(pKernelChannel, pRotateIvParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlGetTpcPartitionMode__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlGetTpcPartitionMode_a094e1(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlSetTpcPartitionMode__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlSetTpcPartitionMode_a094e1(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
-static NV_STATUS kchannelCtrlGetMMUDebugMode__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlGetMMUDebugMode_a094e1(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00010008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlProgramVidmemPromote__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlProgramVidmemPromote_a094e1(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlProgramSysmemPromote__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlProgramSysmemPromote_a094e1(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS kchannelCtrlSetLgSectorPromotion__EXPORT(void *pKernelChannel, void *pParams) {
-    return kchannelCtrlSetLgSectorPromotion_a094e1(pKernelChannel, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_KernelChannel[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlSetTpcPartitionMode__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900101u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_TPC_PARTITION_MODE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlSetTpcPartitionMode"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlGetTpcPartitionMode__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900103u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_TPC_PARTITION_MODE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlGetTpcPartitionMode"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlGetMMUDebugMode__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900105u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_GET_MMU_DEBUG_MODE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlGetMMUDebugMode"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlProgramVidmemPromote__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x900107u,
-        /*paramSize=*/  sizeof(NV0090_CTRL_PROGRAM_VIDMEM_PROMOTE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlProgramVidmemPromote"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlSetLgSectorPromotion__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90010bu,
-        /*paramSize=*/  sizeof(NV0090_CTRL_SET_LG_SECTOR_PROMOTION_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlSetLgSectorPromotion"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlProgramSysmemPromote__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90010eu,
-        /*paramSize=*/  sizeof(NV0090_CTRL_PROGRAM_SYSMEM_PROMOTE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlProgramSysmemPromote"
-#endif
-    },
-    {               /*  [6] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdResetIsolatedChannel__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x506f0105u,
-        /*paramSize=*/  sizeof(NV506F_CTRL_CMD_RESET_ISOLATED_CHANNEL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdResetIsolatedChannel"
-#endif
-    },
-    {               /*  [7] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdInternalResetIsolatedChannel__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc8u)
-        /*flags=*/      0xc8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x506f0106u,
-        /*paramSize=*/  sizeof(NV506F_CTRL_CMD_INTERNAL_RESET_ISOLATED_CHANNEL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdInternalResetIsolatedChannel"
-#endif
-    },
-    {               /*  [8] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetClassEngineid__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x906f0101u,
-        /*paramSize=*/  sizeof(NV906F_CTRL_GET_CLASS_ENGINEID_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetClassEngineid"
-#endif
-    },
-    {               /*  [9] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdResetChannel__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x906f0102u,
-        /*paramSize=*/  sizeof(NV906F_CTRL_CMD_RESET_CHANNEL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdResetChannel"
-#endif
-    },
-    {               /*  [10] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetDeferRCState__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*flags=*/      0x48u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x906f0105u,
-        /*paramSize=*/  sizeof(NV906F_CTRL_CMD_GET_DEFER_RC_STATE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetDeferRCState"
-#endif
-    },
-    {               /*  [11] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetMmuFaultInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*flags=*/      0x10048u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x906f0106u,
-        /*paramSize=*/  sizeof(NV906F_CTRL_GET_MMU_FAULT_INFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetMmuFaultInfo"
-#endif
-    },
     {               /*  [12] */
 #if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
         /*pFunc=*/      (void (*)(void)) NULL,
@@ -551,201 +221,6 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_KernelCh
         /*func=*/       "kchannelCtrlCmdBind"
 #endif
     },
-    {               /*  [14] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdSetErrorNotifier__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa06f0108u,
-        /*paramSize=*/  sizeof(NVA06F_CTRL_SET_ERROR_NOTIFIER_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdSetErrorNotifier"
-#endif
-    },
-    {               /*  [15] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10028u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdSetInterleaveLevel__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10028u)
-        /*flags=*/      0x10028u,
-        /*accessRight=*/0x2u,
-        /*methodId=*/   0xa06f0109u,
-        /*paramSize=*/  sizeof(NVA06F_CTRL_INTERLEAVE_LEVEL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdSetInterleaveLevel"
-#endif
-    },
-    {               /*  [16] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdRestartRunlist__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*flags=*/      0x48u,
-        /*accessRight=*/0x2u,
-        /*methodId=*/   0xa06f0111u,
-        /*paramSize=*/  sizeof(NVA06F_CTRL_RESTART_RUNLIST_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdRestartRunlist"
-#endif
-    },
-    {               /*  [17] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdStopChannel__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
-        /*flags=*/      0x10008u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa06f0112u,
-        /*paramSize=*/  sizeof(NVA06F_CTRL_STOP_CHANNEL_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdStopChannel"
-#endif
-    },
-    {               /*  [18] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetContextId__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x109u)
-        /*flags=*/      0x109u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xa06f0113u,
-        /*paramSize=*/  sizeof(NVA06F_CTRL_GET_CONTEXT_ID_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetContextId"
-#endif
-    },
-    {               /*  [19] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetEngineCtxSize__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*flags=*/      0x10048u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f010bu,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_GET_ENGINE_CTX_SIZE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetEngineCtxSize"
-#endif
-    },
-    {               /*  [20] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetEngineCtxData__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*flags=*/      0x10048u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f010cu,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_GET_ENGINE_CTX_DATA_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetEngineCtxData"
-#endif
-    },
-    {               /*  [21] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14044u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdMigrateEngineCtxData__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14044u)
-        /*flags=*/      0x14044u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f010du,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_MIGRATE_ENGINE_CTX_DATA_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdMigrateEngineCtxData"
-#endif
-    },
-    {               /*  [22] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetEngineCtxState__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*flags=*/      0x10048u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f010eu,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_GET_ENGINE_CTX_STATE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetEngineCtxState"
-#endif
-    },
-    {               /*  [23] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetChannelHwState__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*flags=*/      0x10048u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f010fu,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_GET_CHANNEL_HW_STATE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetChannelHwState"
-#endif
-    },
-    {               /*  [24] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14044u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdSetChannelHwState__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14044u)
-        /*flags=*/      0x14044u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f0110u,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_SET_CHANNEL_HW_STATE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdSetChannelHwState"
-#endif
-    },
-    {               /*  [25] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdSaveEngineCtxData__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10048u)
-        /*flags=*/      0x10048u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f0111u,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_SAVE_ENGINE_CTX_DATA_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdSaveEngineCtxData"
-#endif
-    },
-    {               /*  [26] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14044u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdRestoreEngineCtxData__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14044u)
-        /*flags=*/      0x14044u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xb06f0112u,
-        /*paramSize=*/  sizeof(NVB06F_CTRL_RESTORE_ENGINE_CTX_DATA_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdRestoreEngineCtxData"
-#endif
-    },
     {               /*  [27] */
 #if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10008u)
         /*pFunc=*/      (void (*)(void)) NULL,
@@ -759,81 +234,6 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_KernelCh
         /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
 #if NV_PRINTF_STRINGS_ALLOWED
         /*func=*/       "kchannelCtrlCmdGpfifoGetWorkSubmitToken"
-#endif
-    },
-    {               /*  [28] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10244u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGpfifoUpdateFaultMethodBuffer__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x10244u)
-        /*flags=*/      0x10244u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc36f0109u,
-        /*paramSize=*/  sizeof(NVC36F_CTRL_GPFIFO_UPDATE_FAULT_METHOD_BUFFER_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGpfifoUpdateFaultMethodBuffer"
-#endif
-    },
-    {               /*  [29] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGpfifoSetWorkSubmitTokenNotifIndex__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc36f010au,
-        /*paramSize=*/  sizeof(NVC36F_CTRL_GPFIFO_SET_WORK_SUBMIT_TOKEN_NOTIF_INDEX_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGpfifoSetWorkSubmitTokenNotifIndex"
-#endif
-    },
-    {               /*  [30] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdInternalGpFifoGetWorkSubmitToken__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0xc0u)
-        /*flags=*/      0xc0u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc36f0301u,
-        /*paramSize=*/  sizeof(NVC36F_CTRL_INTERNAL_GPFIFO_GET_WORK_SUBMIT_TOKEN_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdInternalGpFifoGetWorkSubmitToken"
-#endif
-    },
-    {               /*  [31] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlCmdGetKmb__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc56f010bu,
-        /*paramSize=*/  sizeof(NVC56F_CTRL_CMD_GET_KMB_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlCmdGetKmb"
-#endif
-    },
-    {               /*  [32] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &kchannelCtrlRotateSecureChannelIv__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0xc56f010cu,
-        /*paramSize=*/  sizeof(NVC56F_CTRL_ROTATE_SECURE_CHANNEL_IV_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_KernelChannel.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "kchannelCtrlRotateSecureChannelIv"
 #endif
     },
 };
@@ -1143,7 +543,7 @@ NV_STATUS __nvoc_up_thunk_Notifier_kchannelGetOrAllocNotifShare(struct KernelCha
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__KernelChannel = 
 {
-    .numEntries=     33,
+    .numEntries=     3,
     .pExportEntries= __nvoc_exported_method_def_KernelChannel
 };
 
