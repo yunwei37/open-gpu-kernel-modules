@@ -39,8 +39,8 @@
 #include "platform/sli/sli.h"
 #include "rmapi/rmapi_utils.h"
 #include "mem_mgr/mem.h"
-#include "vgpu/rpc.h"
-#include "class/cl0070.h"
+#include "gpu/mem_mgr/vaspace_api.h"
+#include "class/cl90f1.h"
 #include "mem_mgr/vaspace.h"
 #include "gpu/mem_mgr/virt_mem_allocator.h"
 #include "gpu/fifo/kernel_ctxshare.h"
@@ -83,6 +83,7 @@
 #define WATCHDOG_GROBJ_ID              (WATCHDOG_SUB_DEVICE_0_ID + NV_MAX_SUBDEVICES)
 #define WATCHDOG_ERROR_DMA_ID          (WATCHDOG_GROBJ_ID + 1)
 #define WATCHDOG_MEM_ID                (WATCHDOG_GROBJ_ID + 2)
+#define WATCHDOG_VASPACE_ID            (WATCHDOG_GROBJ_ID + 3)
 #define WATCHDOG_USERD_PHYS_MEM_ID     (WATCHDOG_GROBJ_ID + 4)
 
 // Push buffer size in dwords
@@ -480,7 +481,7 @@ krcWatchdogResume_IMPL
     pWatchdogState->flags &= ~WATCHDOG_FLAGS_PAUSED;
 }
 
-static NV_STATUS l2WatchdogMap(OBJGPU *gpu,NvHandle client,NvHandle device,
+static NV_STATUS l2WatchdogMap(OBJGPU *gpu,NvHandle client,
                                 KernelWatchdogChannelInfo *info)
 {
     RsClient *c;RsResourceRef *ref;Memory *memory;OBJVASPACE *vas;
@@ -492,17 +493,12 @@ static NV_STATUS l2WatchdogMap(OBJGPU *gpu,NvHandle client,NvHandle device,
     L2_WATCH(clientGetResourceRef(c,WATCHDOG_MEM_ID,&ref));
     memory=dynamicCast(ref->pResource,Memory);
     if(!memory || !memory->pMemDesc || memory->pGpu!=gpu){status=NV_ERR_INVALID_OBJECT;goto done;}
-    /* Keep the GSP's virtual-range child, but construct no CPU proxy.
-     * The all-zero parameter payload is identical to the former constructor.
-     * GSP owns it under the current client; root Free retires it recursively. */
+    L2_WATCH(clientGetResourceRef(c,WATCHDOG_VASPACE_ID,&ref));
     {
-        NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS range={0};
-        NV_RM_RPC_ALLOC_OBJECT(gpu,client,device,WATCHDOG_GROBJ_ID+3,
-                              NV01_MEMORY_VIRTUAL,&range,sizeof(range),status);
-        NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_GSP_RANGE cpu_proxy=0 bytes=%u status=0x%x\n",(NvU32)sizeof(range),status);
-        if(status!=NV_OK)goto done;
+        VaSpaceApi *api=dynamicCast(ref->pResource,VaSpaceApi);
+        if(!api || !api->pVASpace){status=NV_ERR_INVALID_OBJECT;goto done;}
+        vas=api->pVASpace;
     }
-    L2_WATCH(vaspaceGetByHandleOrDeviceDefault(c,device,NV01_NULL_OBJECT,&vas));
     before=vaspaceGetHeap(vas)->free;
     L2_WATCH(dmaMapBuffer_HAL(gpu,GPU_GET_DMA(gpu),vas,memory->pMemDesc,&info->pGpuAddr,0,0));
     after=vaspaceGetHeap(vas)->free;
@@ -843,6 +839,28 @@ krcWatchdogInit_IMPL
         pushBufBytes = WATCHDOG_PB_SIZE_DEFAULT;
     }
 
+    {
+        NV_VASPACE_ALLOCATION_PARAMETERS vas={0};
+        vas.index=NV_VASPACE_ALLOCATION_INDEX_GPU_NEW;
+        if(rmGpuLockIsOwner())
+        {
+            bAcquireLock=NV_TRUE;
+            rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+            pRmApi=rmapiGetInterface(RMAPI_API_LOCK_INTERNAL);
+        }
+        status=pRmApi->AllocWithHandle(pRmApi,hClient,hDevice,WATCHDOG_VASPACE_ID,
+                                      FERMI_VASPACE_A,&vas,sizeof(vas));
+        if(bAcquireLock)
+        {
+            if(rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_RC)!=NV_OK)
+            {status=NV_ERR_GENERIC;goto error;}
+            pRmApi=rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
+            bAcquireLock=NV_FALSE;
+        }
+        NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_VAS_ALLOC explicit_owner=1 status=0x%x\n",status);
+        if(status!=NV_OK)goto error;
+    }
+
     //
     // Calculate the system memory allocation size based on size of push
     // buffers, notifers, GPFIFOs, etc., taking alignment requirements into
@@ -984,7 +1002,7 @@ krcWatchdogInit_IMPL
 
         portMemSet(pWatchdogChannelInfo->pCpuAddr, 0, pMem->size);
 
-        status=l2WatchdogMap(pGpu,hClient,hDevice,pWatchdogChannelInfo);
+        status=l2WatchdogMap(pGpu,hClient,pWatchdogChannelInfo);
         if(status!=NV_OK)goto error;
     }
 
@@ -1134,6 +1152,7 @@ krcWatchdogInit_IMPL
         portMemSet(pChannelGPFifo, 0, sizeof *pChannelGPFifo);
         pChannelGPFifo->hObjectError  = WATCHDOG_ERROR_DMA_ID;
         pChannelGPFifo->hObjectBuffer = NV01_NULL_OBJECT;
+        pChannelGPFifo->hVASpace = WATCHDOG_VASPACE_ID;
         pChannelGPFifo->gpFifoOffset  = (
             pWatchdogChannelInfo->pGpuAddr +
             WATCHDOG_GPFIFO_OFFSET(pWatchdogChannelInfo->pbBytes));
@@ -1292,7 +1311,7 @@ krcWatchdogInit_IMPL
 
     if(pKernelChannel->pKernelCtxShareApi->pShareData->pVAS!=pWatchdogChannelInfo->pDirectVaSpace)
     {status=NV_ERR_INVALID_STATE;goto error;}
-    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_VAS virtual_range_proxy=0 same_channel_vas=1 group=0x%x\n",pWatchdogChannelInfo->directChannelGroup);
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_VAS virtual_range_proxy=0 same_channel_vas=1 explicit_owner=1 group=0x%x\n",pWatchdogChannelInfo->directChannelGroup);
 
     pWatchdogState->hClient   = hClient;
     pWatchdogState->runlistId = kchannelGetRunlistId(pKernelChannel);
