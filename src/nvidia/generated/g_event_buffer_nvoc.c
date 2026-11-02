@@ -107,23 +107,8 @@ static NV_STATUS eventbuffertBufferCtrlCmdEnableEvent__EXPORT(void *pEventBuffer
 }
 #endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000009u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000009u)
-static NV_STATUS eventbuffertBufferCtrlCmdUpdateGet__EXPORT(void *pEventBuffer, void *pUpdateParams) {
-    return eventbuffertBufferCtrlCmdUpdateGet_IMPL(pEventBuffer, pUpdateParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000009u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS eventbuffertBufferCtrlCmdFlush__EXPORT(void *pEventBuffer) {
-    return eventbuffertBufferCtrlCmdFlush_IMPL(pEventBuffer);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
-static NV_STATUS eventbuffertBufferCtrlCmdPostTelemetryEvent__EXPORT(void *pEventBuffer, void *pPostTelemetryEvent) {
-    return eventbuffertBufferCtrlCmdPostTelemetryEvent_IMPL(pEventBuffer, pPostTelemetryEvent);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000008u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_EventBuffer[] = 
@@ -141,51 +126,6 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_EventBuf
         /*pClassInfo=*/ &(__nvoc_class_def_EventBuffer.classInfo),
 #if NV_PRINTF_STRINGS_ALLOWED
         /*func=*/       "eventbuffertBufferCtrlCmdEnableEvent"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x9u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &eventbuffertBufferCtrlCmdUpdateGet__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x9u)
-        /*flags=*/      0x9u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90cd0102u,
-        /*paramSize=*/  sizeof(NV_EVENT_BUFFER_CTRL_CMD_UPDATE_GET_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_EventBuffer.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "eventbuffertBufferCtrlCmdUpdateGet"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &eventbuffertBufferCtrlCmdFlush__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90cd0104u,
-        /*paramSize=*/  0 /* Singleton parameter list */,
-        /*pClassInfo=*/ &(__nvoc_class_def_EventBuffer.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "eventbuffertBufferCtrlCmdFlush"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &eventbuffertBufferCtrlCmdPostTelemetryEvent__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x8u)
-        /*flags=*/      0x8u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90cd0105u,
-        /*paramSize=*/  sizeof(NV_EVENT_BUFFER_CTRL_CMD_POST_TELEMETRY_EVENT_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_EventBuffer.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "eventbuffertBufferCtrlCmdPostTelemetryEvent"
 #endif
     },
 };
@@ -394,7 +334,7 @@ void __nvoc_up_thunk_RsResource_eventbufferAddAdditionalDependants(struct RsClie
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__EventBuffer = 
 {
-    .numEntries=     4,
+    .numEntries=     1,
     .pExportEntries= __nvoc_exported_method_def_EventBuffer
 };
 
