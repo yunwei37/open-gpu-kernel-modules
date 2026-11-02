@@ -2913,6 +2913,7 @@ static void nv_pci_remove_helper(struct pci_dev *pci_dev, bool block_if_gpu_in_u
 
     rm_i2c_remove_adapters(sp, nv);
     rm_free_private_state(sp, nv);
+    { extern void l2_flush_release(struct pci_dev *); l2_flush_release(pci_dev); }
 
     /* BAR0 was never claimed for CXL devices; skip the matching release. */
     if (nv_pcie_is_cxl(pci_dev))

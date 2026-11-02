@@ -86,52 +86,12 @@ kmemsysInitFlushSysmemBuffer_GA100
     KernelMemorySystem *pKernelMemorySystem
 )
 {
-    NV_STATUS status;
-
-    //
-    // In case of suspend/resume, the buffer might be already allocated, but
-    // the HW still needs to be programmed below.
-    //
-    if (pKernelMemorySystem->pSysmemFlushBufferMemDesc == NULL)
-    {
-        NvU64 flags = MEMDESC_FLAGS_NONE;
-
-    if (confComputeForceUnprotAlloc(pGpu))
-    {
-        flags |= MEMDESC_FLAGS_ALLOC_IN_UNPROTECTED_MEMORY;
-    }
-        //
-        // Sysmem flush buffer
-        // The sysmembar flush does a zero byte read of sysmem if there was a
-        // sysmem write since the last flush. The actual memory does have
-        // to be valid and allocated at all times because an actual read may
-        // be issued.
-        //
-        status = memdescCreate(&pKernelMemorySystem->pSysmemFlushBufferMemDesc,
-                               pGpu, RM_PAGE_SIZE,
-                               1 << kmemsysGetFlushSysmemBufferAddrShift_HAL(pGpu, pKernelMemorySystem),
-                               NV_TRUE,
-                               ADDR_SYSMEM,
-                               NV_MEMORY_UNCACHED,
-                               flags);
-        if (status != NV_OK)
-            return status;
-
-        memdescTagAlloc(status, NV_FB_ALLOC_RM_INTERNAL_OWNER_UNNAMED_TAG_139, 
-                        pKernelMemorySystem->pSysmemFlushBufferMemDesc);
-
-        if (status != NV_OK)
-        {
-            NV_PRINTF(LEVEL_ERROR,
-                      "Could not allocate sysmem flush buffer: %x\n", status);
-            DBG_BREAKPOINT();
-            return status;
-        }
-
-        pKernelMemorySystem->sysmemFlushBuffer = memdescGetPhysAddr(pKernelMemorySystem->pSysmemFlushBufferMemDesc, AT_GPU, 0);
-    }
-
-    kmemsysProgramSysmemFlushBuffer_HAL(pGpu, pKernelMemorySystem);
+    extern NvU64 l2_flush_allocate(void);
+    if(!pKernelMemorySystem->sysmemFlushBuffer)
+        pKernelMemorySystem->sysmemFlushBuffer=l2_flush_allocate();
+    if(!pKernelMemorySystem->sysmemFlushBuffer)return NV_ERR_NO_MEMORY;
+    NV_PRINTF(LEVEL_ERROR,"L2_FLUSH_OWNER rm_memdesc=%u dma=0x%llx\n",pKernelMemorySystem->pSysmemFlushBufferMemDesc!=NULL,pKernelMemorySystem->sysmemFlushBuffer);
+    kmemsysProgramSysmemFlushBuffer_HAL(pGpu,pKernelMemorySystem);
     return NV_OK;
 }
 
