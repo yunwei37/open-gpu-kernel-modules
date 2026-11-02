@@ -2910,6 +2910,8 @@ const void* NV_API_CALL nv_get_firmware(
                          nvl->dev) != 0)
         return NULL;
 
+    pr_info("L2_FIRMWARE_USED name=%s bytes=%zu\n",
+            nv_firmware_for_chip_family(fw_type, fw_chip_family), fw->size);
     *fw_size = fw->size;
     *fw_buf = fw->data;
 
