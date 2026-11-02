@@ -133,29 +133,9 @@ static NV_STATUS i2capiCtrlCmdI2cGetPortInfo__EXPORT(void *pI2cApi, void *pParam
 }
 #endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS i2capiCtrlCmdI2cIndexed__EXPORT(void *pI2cApi, void *pParams) {
-    return i2capiCtrlCmdI2cIndexed_IMPL(pI2cApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS i2capiCtrlCmdI2cGetPortSpeed__EXPORT(void *pI2cApi, void *pParams) {
-    return i2capiCtrlCmdI2cGetPortSpeed_IMPL(pI2cApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS i2capiCtrlCmdI2cTableGetDevInfo__EXPORT(void *pI2cApi, void *pParams) {
-    return i2capiCtrlCmdI2cTableGetDevInfo_IMPL(pI2cApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
-static NV_STATUS i2capiCtrlCmdI2cTransaction__EXPORT(void *pI2cApi, void *pParams) {
-    return i2capiCtrlCmdI2cTransaction_IMPL(pI2cApi, pParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000048u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_I2cApi[] = 
@@ -173,66 +153,6 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_I2cApi[]
         /*pClassInfo=*/ &(__nvoc_class_def_I2cApi.classInfo),
 #if NV_PRINTF_STRINGS_ALLOWED
         /*func=*/       "i2capiCtrlCmdI2cGetPortInfo"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &i2capiCtrlCmdI2cIndexed__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*flags=*/      0x48u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x402c0102u,
-        /*paramSize=*/  sizeof(NV402C_CTRL_I2C_INDEXED_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_I2cApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "i2capiCtrlCmdI2cIndexed"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &i2capiCtrlCmdI2cGetPortSpeed__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*flags=*/      0x48u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x402c0103u,
-        /*paramSize=*/  sizeof(NV402C_CTRL_I2C_GET_PORT_SPEED_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_I2cApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "i2capiCtrlCmdI2cGetPortSpeed"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &i2capiCtrlCmdI2cTableGetDevInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*flags=*/      0x48u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x402c0104u,
-        /*paramSize=*/  sizeof(NV402C_CTRL_I2C_TABLE_GET_DEV_INFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_I2cApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "i2capiCtrlCmdI2cTableGetDevInfo"
-#endif
-    },
-    {               /*  [4] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &i2capiCtrlCmdI2cTransaction__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x48u)
-        /*flags=*/      0x48u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x402c0105u,
-        /*paramSize=*/  sizeof(NV402C_CTRL_I2C_TRANSACTION_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_I2cApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "i2capiCtrlCmdI2cTransaction"
 #endif
     },
 };
@@ -494,7 +414,7 @@ void __nvoc_up_thunk_RsResource_i2capiAddAdditionalDependants(struct RsClient *p
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__I2cApi = 
 {
-    .numEntries=     5,
+    .numEntries=     1,
     .pExportEntries= __nvoc_exported_method_def_I2cApi
 };
 
