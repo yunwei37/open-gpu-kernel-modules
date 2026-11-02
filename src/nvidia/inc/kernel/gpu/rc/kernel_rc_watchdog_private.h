@@ -117,6 +117,7 @@ typedef struct
     struct OBJVASPACE *pDirectVaSpace;
     NvU64 directReservation;
     NvHandle directChannelGroup;
+    NvBool directChannelAllocated;
 } KernelWatchdogChannelInfo;
 
 #endif // ifndef KERNEL_RC_WATCHDOG_PRIVATE_H

@@ -525,6 +525,11 @@ static NV_STATUS l2WatchdogUnmap(OBJGPU *gpu,KernelWatchdog *watchdog)
         if(status!=NV_OK)goto done;
         info->directChannelGroup=0;
     }
+    else if(info->directChannelAllocated){
+        status=api->Free(api,watchdog->watchdogState.hClient,WATCHDOG_PUSHBUFFER_CHANNEL_ID);
+        if(status!=NV_OK)goto done;
+    }
+    info->directChannelAllocated=NV_FALSE;
     before=vaspaceGetHeap(info->pDirectVaSpace)->free;
     dmaUnmapBuffer_HAL(gpu,GPU_GET_DMA(gpu),info->pDirectVaSpace,info->pGpuAddr);
     after=vaspaceGetHeap(info->pDirectVaSpace)->free;
@@ -1204,7 +1209,12 @@ krcWatchdogInit_IMPL
             }
             goto error;
         }
-        pWatchdogChannelInfo->directChannelGroup=pChannelGPFifo->hPhysChannelGroup;
+        pWatchdogChannelInfo->directChannelAllocated=NV_TRUE;
+        status=serverGetClientUnderLock(&g_resServ,hClient,&pClient);
+        if(status==NV_OK)status=CliGetKernelChannelWithDevice(pClient,hDevice,WATCHDOG_PUSHBUFFER_CHANNEL_ID,&pKernelChannel);
+        if(status!=NV_OK)goto error;
+        pWatchdogChannelInfo->directChannelGroup=RES_GET_HANDLE(pKernelChannel->pKernelChannelGroupApi);
+        NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_CHANNEL_GROUP handle=0x%x alloc_param=0x%x\n",pWatchdogChannelInfo->directChannelGroup,pChannelGPFifo->hPhysChannelGroup);
         if(!pWatchdogChannelInfo->directChannelGroup){status=NV_ERR_INVALID_STATE;goto error;}
 
     }
