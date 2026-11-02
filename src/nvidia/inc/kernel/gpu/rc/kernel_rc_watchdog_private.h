@@ -113,6 +113,10 @@ typedef struct
     NvU32 gpEntry1[2];
     NvU32 pbBytes;
     NvU32 classSubch;
+    /* Direct default-VAS mapping; backing stays client-owned until unmap. */
+    struct OBJVASPACE *pDirectVaSpace;
+    NvU64 directReservation;
+    NvHandle directChannelGroup;
 } KernelWatchdogChannelInfo;
 
 #endif // ifndef KERNEL_RC_WATCHDOG_PRIVATE_H

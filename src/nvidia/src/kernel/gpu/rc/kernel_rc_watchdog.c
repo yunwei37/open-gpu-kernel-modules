@@ -38,12 +38,16 @@
 #include "kernel/os/os.h"
 #include "platform/sli/sli.h"
 #include "rmapi/rmapi_utils.h"
+#include "mem_mgr/mem.h"
+#include "mem_mgr/vaspace.h"
+#include "gpu/mem_mgr/virt_mem_allocator.h"
+#include "gpu/fifo/kernel_ctxshare.h"
+#include "containers/eheap_old.h"
 
 #include "class/cl0000.h" // NV01_NULL_OBJECT
 #include "class/cl0002.h" // NV01_CONTEXT_DMA
 #include "class/cl003e.h" // NV01_MEMORY_SYSTEM
 #include "class/cl0040.h" // NV01_MEMORY_LOCAL_USER
-#include "class/cl0070.h" // NV01_MEMORY_VIRTUAL
 #include "class/cl0080.h" // NV01_DEVICE_0
 #include "class/cl2080.h" // NV20_SUBDEVICE_0
 #include "class/cl902d.h" // FERMI_TWOD_A
@@ -77,7 +81,6 @@
 #define WATCHDOG_GROBJ_ID              (WATCHDOG_SUB_DEVICE_0_ID + NV_MAX_SUBDEVICES)
 #define WATCHDOG_ERROR_DMA_ID          (WATCHDOG_GROBJ_ID + 1)
 #define WATCHDOG_MEM_ID                (WATCHDOG_GROBJ_ID + 2)
-#define WATCHDOG_VIRTUAL_CTX_ID        (WATCHDOG_GROBJ_ID + 3)
 #define WATCHDOG_USERD_PHYS_MEM_ID     (WATCHDOG_GROBJ_ID + 4)
 
 // Push buffer size in dwords
@@ -475,6 +478,57 @@ krcWatchdogResume_IMPL
     pWatchdogState->flags &= ~WATCHDOG_FLAGS_PAUSED;
 }
 
+static NV_STATUS l2WatchdogMap(OBJGPU *gpu,NvHandle client,NvHandle device,
+                                KernelWatchdogChannelInfo *info)
+{
+    RsClient *c;RsResourceRef *ref;Memory *memory;OBJVASPACE *vas;
+    NvBool acquired=!rmGpuLockIsOwner();NvU64 before,after;
+    NV_STATUS status=NV_OK;
+    if(acquired){status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_RC);if(status!=NV_OK)return status;}
+#define L2_WATCH(expr) do{status=(expr);if(status!=NV_OK)goto done;}while(0)
+    L2_WATCH(serverGetClientUnderLock(&g_resServ,client,&c));
+    L2_WATCH(clientGetResourceRef(c,WATCHDOG_MEM_ID,&ref));
+    memory=dynamicCast(ref->pResource,Memory);
+    if(!memory || !memory->pMemDesc || memory->pGpu!=gpu){status=NV_ERR_INVALID_OBJECT;goto done;}
+    L2_WATCH(vaspaceGetByHandleOrDeviceDefault(c,device,NV01_NULL_OBJECT,&vas));
+    before=vaspaceGetHeap(vas)->free;
+    L2_WATCH(dmaMapBuffer_HAL(gpu,GPU_GET_DMA(gpu),vas,memory->pMemDesc,&info->pGpuAddr,0,0));
+    after=vaspaceGetHeap(vas)->free;
+    info->pDirectVaSpace=vas;info->directReservation=before-after;
+    if(before<=after){status=NV_ERR_INVALID_STATE;goto done;}
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_DMA unmap=0 va=0x%llx heap_before=%llu heap_after=%llu reserved=%llu status=0x%x\n",info->pGpuAddr,before,after,info->directReservation,status);
+ done:
+    if(acquired)rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+    return status;
+#undef L2_WATCH
+}
+
+static NV_STATUS l2WatchdogUnmap(OBJGPU *gpu,KernelWatchdog *watchdog)
+{
+    KernelWatchdogChannelInfo *info=&watchdog->watchdogChannelInfo;
+    NvBool acquired;NvU64 before,after;NV_STATUS status=NV_OK;RM_API *api;
+    if(!info->pDirectVaSpace)return info->directReservation?NV_ERR_INVALID_STATE:NV_OK;
+    acquired=!rmGpuLockIsOwner();
+    if(acquired){status=rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE,RM_LOCK_MODULES_RC);if(status!=NV_OK)return status;}
+    api=rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
+    if(info->directChannelGroup){
+        status=api->Free(api,watchdog->watchdogState.hClient,info->directChannelGroup);
+        NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_GROUP_FREE group=0x%x status=0x%x\n",info->directChannelGroup,status);
+        if(status!=NV_OK)goto done;
+        info->directChannelGroup=0;
+    }
+    before=vaspaceGetHeap(info->pDirectVaSpace)->free;
+    dmaUnmapBuffer_HAL(gpu,GPU_GET_DMA(gpu),info->pDirectVaSpace,info->pGpuAddr);
+    after=vaspaceGetHeap(info->pDirectVaSpace)->free;
+    status=(info->directReservation && after>=before && after-before==info->directReservation)?NV_OK:NV_ERR_INVALID_STATE;
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_DMA unmap=1 va=0x%llx heap_before=%llu heap_after=%llu reserved=%llu returned=%llu status=0x%x\n",info->pGpuAddr,before,after,info->directReservation,after-before,status);
+    /* Unmap has run even if its accounting check fails: never unmap twice. */
+    info->pDirectVaSpace=NULL;info->directReservation=0;
+ done:
+    if(acquired)rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE,NULL);
+    return status;
+}
+
 NV_STATUS
 krcWatchdogShutdown_IMPL
 (
@@ -483,6 +537,7 @@ krcWatchdogShutdown_IMPL
     KernelWatchdog *pKernelWatchdog
 )
 {
+    NV_STATUS status;
     RM_API *pRmApi = rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
     KernelWatchdogState *pWatchdogState = &pKernelWatchdog->watchdogState;
     KernelWatchdogChannelInfo *pWatchdogChannelInfo = &pKernelWatchdog->watchdogChannelInfo;
@@ -493,17 +548,22 @@ krcWatchdogShutdown_IMPL
     krcWatchdogDisable(pKernelRc, pKernelWatchdog);
     osRemove1HzCallback(pGpu, krcWatchdogTimerProc, pKernelWatchdog /* pData */);
 
+    status=l2WatchdogUnmap(pGpu,pKernelWatchdog);
+    if(status!=NV_OK)return status;
+
     // This should free the client and all associated resources
-    pRmApi->Free(pRmApi,
+    status=pRmApi->Free(pRmApi,
                  pWatchdogState->hClient,
                  pWatchdogState->hClient);
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_ROOT_FREE status=0x%x\n",status);
+    if(status!=NV_OK)return status;
 
     //
     // Make sure to clear any old watchdog data this also clears
     // WATCHDOG_FLAGS_INITIALIZED, bHandleValid, and hClient
     //
     portMemSet(pWatchdogState, 0, sizeof(KernelWatchdogState));
-    portMemSet(pWatchdogChannelInfo, 0, sizeof(KernelWatchdogPersistent));
+    portMemSet(pWatchdogChannelInfo, 0, sizeof(*pWatchdogChannelInfo));
 
     return NV_OK;
 }
@@ -567,7 +627,6 @@ krcWatchdogInit_IMPL
         NV2080_ALLOC_PARAMETERS                nv2080;
         NV_CHANNEL_ALLOC_PARAMS                channelGPFifo;
         NV_CONTEXT_DMA_ALLOCATION_PARAMS       ctxDma;
-        NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS    virtual;
         NV_MEMORY_ALLOCATION_PARAMS            mem;
     } *pParams = NULL;
 
@@ -772,26 +831,6 @@ krcWatchdogInit_IMPL
         pushBufBytes = WATCHDOG_PB_SIZE_DEFAULT;
     }
 
-    // Allocate a virtual context handle
-    {
-        NV_MEMORY_VIRTUAL_ALLOCATION_PARAMS *pVirtual = &pParams->virtual;
-
-        portMemSet(pVirtual, 0, sizeof *pVirtual);
-        status = pRmApi->AllocWithHandle(pRmApi,
-                                         hClient                 /* hClient */,
-                                         hDevice                 /* hParent */,
-                                         WATCHDOG_VIRTUAL_CTX_ID /* hObject */,
-                                         NV01_MEMORY_VIRTUAL,
-                                         pVirtual,
-                                         sizeof(*pVirtual));
-        if (status != NV_OK)
-        {
-            NV_PRINTF(LEVEL_WARNING,
-                      "Unable to allocate unified heap for watchdog\n");
-            goto error;
-        }
-    }
-
     //
     // Calculate the system memory allocation size based on size of push
     // buffers, notifers, GPFIFOs, etc., taking alignment requirements into
@@ -814,7 +853,6 @@ krcWatchdogInit_IMPL
     {
         NV_MEMORY_ALLOCATION_PARAMS *pMem = &pParams->mem;
         NvU32 hClass = NV01_MEMORY_SYSTEM;
-        NVOS46_PARAMETERS mapDmaParams = {0};
 
         portMemSet(pMem, 0, sizeof *pMem);
         pMem->owner = HEAP_OWNER_RM_CLIENT_GENERIC;
@@ -934,24 +972,8 @@ krcWatchdogInit_IMPL
 
         portMemSet(pWatchdogChannelInfo->pCpuAddr, 0, pMem->size);
 
-        mapDmaParams.hClient   = hClient;
-        mapDmaParams.hDevice   = hDevice;
-        mapDmaParams.hDma      = WATCHDOG_VIRTUAL_CTX_ID;
-        mapDmaParams.hMemory   = WATCHDOG_MEM_ID;
-        mapDmaParams.length    = allocationSize;
-        mapDmaParams.flags     = (bCacheSnoop ? DRF_DEF(OS46, _FLAGS, _CACHE_SNOOP, _ENABLE) :
-                                     DRF_DEF(OS46, _FLAGS, _CACHE_SNOOP, _DISABLE)) |
-                                     DRF_DEF(OS46, _FLAGS, _ACCESS, _READ_WRITE);
-        // Map the allocation into the unified heap.
-        status = pRmApi->Map(pRmApi, &mapDmaParams);
-
-        if (status != NV_OK)
-        {
-            NV_PRINTF(LEVEL_ERROR,
-                      "Unable to map memory into watchdog's heap\n");
-            goto error;
-        }
-        pWatchdogChannelInfo->pGpuAddr = mapDmaParams.dmaOffset;
+        status=l2WatchdogMap(pGpu,hClient,hDevice,pWatchdogChannelInfo);
+        if(status!=NV_OK)goto error;
     }
 
     // Allocate the error notifier context DMA.
@@ -1099,7 +1121,7 @@ krcWatchdogInit_IMPL
         //
         portMemSet(pChannelGPFifo, 0, sizeof *pChannelGPFifo);
         pChannelGPFifo->hObjectError  = WATCHDOG_ERROR_DMA_ID;
-        pChannelGPFifo->hObjectBuffer = WATCHDOG_VIRTUAL_CTX_ID;
+        pChannelGPFifo->hObjectBuffer = NV01_NULL_OBJECT;
         pChannelGPFifo->gpFifoOffset  = (
             pWatchdogChannelInfo->pGpuAddr +
             WATCHDOG_GPFIFO_OFFSET(pWatchdogChannelInfo->pbBytes));
@@ -1151,6 +1173,9 @@ krcWatchdogInit_IMPL
             }
             goto error;
         }
+        pWatchdogChannelInfo->directChannelGroup=pChannelGPFifo->hPhysChannelGroup;
+        if(!pWatchdogChannelInfo->directChannelGroup){status=NV_ERR_INVALID_STATE;goto error;}
+
     }
 
     SLI_LOOP_START(SLI_LOOP_FLAGS_NONE)
@@ -1253,6 +1278,10 @@ krcWatchdogInit_IMPL
     pWatchdogChannelInfo->classEngineID = DRF_NUM(906F, _SET_OBJECT, _NVCLASS, grObj);
 
 
+    if(pKernelChannel->pKernelCtxShareApi->pShareData->pVAS!=pWatchdogChannelInfo->pDirectVaSpace)
+    {status=NV_ERR_INVALID_STATE;goto error;}
+    NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_VAS virtual_range_proxy=0 same_channel_vas=1 group=0x%x\n",pWatchdogChannelInfo->directChannelGroup);
+
     pWatchdogState->hClient   = hClient;
     pWatchdogState->runlistId = kchannelGetRunlistId(pKernelChannel);
 
@@ -1307,7 +1336,10 @@ krcWatchdogInit_IMPL
 error:
     if (status != NV_OK)
     {
-        pRmApi->Free(pRmApi, hClient, hClient);
+        NV_STATUS cleanup=l2WatchdogUnmap(pGpu,pKernelWatchdog);
+        NV_PRINTF(LEVEL_ERROR,"L2_WATCHDOG_INIT_CLEANUP status=0x%x\n",cleanup);
+        if(cleanup==NV_OK)pRmApi->Free(pRmApi, hClient, hClient);
+        else {portMemFree(pParams);return cleanup;}
         pWatchdogState->bHandleValid = NV_FALSE;
     }
 
