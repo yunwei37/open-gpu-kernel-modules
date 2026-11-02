@@ -2125,7 +2125,7 @@ kbusTeardownBar2GpuVaSpace_GM107
             // delete the PDE3[0] value from GSP-RM's page table (by wrinting 0
             // to GSP-RM's PDE3[0].
             //
-            NV_RM_RPC_UPDATE_BAR_PDE(pGpu, NV_RPC_UPDATE_PDE_BAR_2, 0, pKernelBus->bar2[gfid].pFmt->pRoot->virtAddrBitLo, status);
+            { extern NV_STATUS NV_API_CALL l2_gsp_update_bar2(OBJGPU *,NvU64,NvU64); status=l2_gsp_update_bar2(pGpu,0,pKernelBus->bar2[gfid].pFmt->pRoot->virtAddrBitLo); }
         }
 
         if (IS_GFID_VF(gfid) && (pKernelBus->bar2[gfid].pInstBlkMemDesc != NULL))

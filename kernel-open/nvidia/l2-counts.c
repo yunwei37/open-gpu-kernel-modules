@@ -15,7 +15,8 @@ static struct {u32 kind,bytes;u8 data[80];} bif[8];
 static u32 bif_count;
 static struct {u32 kind,bytes;u8 data[56];} bar2[8];
 static u32 bar2_count,bar2_contexts;
-static u64 bar2_context[5];
+static u64 bar2_context[5],bar2_direct_entry,bar2_direct_witness[2];
+static u32 bar2_direct_calls;
 static struct {u32 cmd,lo,hi;bool used;u64 sends,replies,failed;} controls[512];
 static struct {u32 cls,cmd;bool used;u64 hits,misses,executes[3];} methods[4096];
 static struct {u32 id;bool used;u64 cpu,rpc,ok,failed,lookups,misses;} classes[1024];
@@ -35,6 +36,10 @@ void l2_record(unsigned type,unsigned long long address,const void *data,unsigne
  if((type==1||type==2)&&length>=32&&function==70){
   if((type==1&&length!=56)||(type==2&&length!=32&&length!=56)||bar2_count==8)overflow++;
   else{bar2[bar2_count].kind=type;bar2[bar2_count].bytes=length;memcpy(bar2[bar2_count++].data,data,length);}
+ }
+ if(type==19){
+  if(length!=sizeof(bar2_direct_witness) || bar2_direct_calls++)overflow++;
+  else{bar2_direct_entry=address;memcpy(bar2_direct_witness,data,length);}
  }
  if(type==18){
   if(length!=sizeof(bar2_context) || bar2_contexts++)overflow++;
@@ -109,6 +114,7 @@ void l2_counts_dump(void)
  pr_info("L2_NATIVE_COUNTS sends=%llu replies=%llu reads=%llu writes=%llu overflow=%llu\n",other[1],other[2],other[3],other[4],overflow);
  for(i=0;i<8192;i++)if(rpc[0][i]||rpc[1][i])pr_info("L2_NATIVE_RPC id=%u sends=%llu replies=%llu\n",i,rpc[0][i],rpc[1][i]);
  for(i=0;i<512;i++)if(controls[i].used)pr_info("L2_NATIVE_CTRL cmd=0x%x sends=%llu replies=%llu failed=%llu params_min=%u params_max=%u\n",controls[i].cmd,controls[i].sends,controls[i].replies,controls[i].failed,controls[i].lo,controls[i].hi);
+ pr_info("L2_BAR2_DIRECT calls=%u entry=0x%llx shift=%llu status=0x%llx\n",bar2_direct_calls,bar2_direct_entry,bar2_direct_witness[0],bar2_direct_witness[1]);
  pr_info("L2_BAR2_CONTEXT count=%u entry=0x%llx shift=%llu cpu_root=0x%llx gsp_root=0x%llx window=0x%llx\n",bar2_contexts,bar2_context[0],bar2_context[1],bar2_context[2],bar2_context[3],bar2_context[4]);
  for(i=0;i<bar2_count;i++)pr_info("L2_BAR2_WIRE index=%u kind=%u bytes=%u data=%*phN\n",i,bar2[i].kind,bar2[i].bytes,bar2[i].bytes,bar2[i].data);
  for(i=0;i<bif_count;i++)pr_info("L2_BIF_WIRE index=%u kind=%u bytes=%u data=%*phN%*phN\n",i,bif[i].kind,bif[i].bytes,64,bif[i].data,bif[i].bytes-64,bif[i].data+64);

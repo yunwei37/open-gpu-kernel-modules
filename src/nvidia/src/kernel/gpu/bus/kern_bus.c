@@ -906,9 +906,9 @@ kbusPatchBar2Pdb_GSPCLIENT
             pKernelBus->bar2[GPU_GFID_PF].bar2OffsetInBar0Window};
         l2_record(18,0,witness,sizeof(witness));
     }
-    NV_RM_RPC_UPDATE_BAR_PDE(pGpu, NV_RPC_UPDATE_PDE_BAR_2, entryValue, pRootFmt->virtAddrBitLo, status);
+    { extern NV_STATUS NV_API_CALL l2_gsp_update_bar2(OBJGPU *,NvU64,NvU64); status=l2_gsp_update_bar2(pGpu,entryValue,pRootFmt->virtAddrBitLo); }
 
-    return NV_OK;
+    return status;
 }
 
 //

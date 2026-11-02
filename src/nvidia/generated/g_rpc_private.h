@@ -3276,8 +3276,7 @@ static NV_STATUS rpc_iGrp_ipVersions_Wrapup(IGRP_IP_VERSIONS_TABLE_INFO *pInfo)
        pRpcHal->rpcCtrlFifoSetChannelProperties = rpcCtrlFifoSetChannelProperties_v1A_16;
     if (IsIPVersionInRange(pRpc, 0x21020000, 0xFFFFFFFF))
        pRpcHal->rpcCtrlSubdeviceGetP2pCaps = rpcCtrlSubdeviceGetP2pCaps_v21_02;
-    if (IsIPVersionInRange(pRpc, 0x15000000, 0xFFFFFFFF))
-       pRpcHal->rpcUpdateBarPde = rpcUpdateBarPde_v15_00;
+    /* L2 BAR2 call sites use typed transport; the generic HAL slot stays STUB. */
     if (IsIPVersionInRange(pRpc, 0x1A0F0000, 0xFFFFFFFF))
        pRpcHal->rpcCtrlBindPmResources = rpcCtrlBindPmResources_v1A_0F;
     if (IsIPVersionInRange(pRpc, 0x2C050000, 0xFFFFFFFF))

@@ -7879,3 +7879,29 @@ NV_STATUS NV_API_CALL l2_gsp_promote_context(OBJGPU *gpu,NvHandle client,
     NV_PRINTF(LEVEL_ERROR,"L2_DIRECT_PROMOTE status=0x%x entries=%u\n",status,params->entryCount);
     return status;
 }
+
+/* Typed BAR2 bridge: layout is pinned; entry/shift and queue sequence are live.
+ * CPU/GSP page-table ownership and the underlying queue remain RM-owned. */
+NV_STATUS NV_API_CALL l2_gsp_update_bar2(OBJGPU *gpu,NvU64 entry,NvU64 shift)
+{
+    KernelGsp *gsp=GPU_GET_KERNEL_GSP(gpu);
+    OBJRPC *rpc;
+    rpc_message_header_v *header;
+    NV_STATUS status;
+    NvU64 witness[2];
+    _Static_assert(sizeof(rpc_update_bar_pde_v15_00)==24,"BAR2 wire size");
+    _Static_assert(NV_OFFSETOF(UpdateBarPde_v15_00,entryValue)==8,"BAR2 entry offset");
+    _Static_assert(NV_OFFSETOF(UpdateBarPde_v15_00,entryLevelShift)==16,"BAR2 shift offset");
+    if(!IS_GSP_CLIENT(gpu) || IS_VIRTUAL(gpu) || !gsp || !(rpc=gsp->pRpc))return NV_ERR_NOT_SUPPORTED;
+    if(sizeof(*header)+sizeof(rpc_update_bar_pde_v15_00)>rpc->maxRpcSize)return NV_ERR_BUFFER_TOO_SMALL;
+    status=rpcWriteCommonHeader(gpu,rpc,NV_VGPU_MSG_FUNCTION_UPDATE_BAR_PDE,sizeof(rpc_update_bar_pde_v15_00));
+    if(status!=NV_OK)return status;
+    rpcGetVgpuMessageData(rpc)->update_bar_pde_v15_00.info.barType=NV_RPC_UPDATE_PDE_BAR_2;
+    rpcGetVgpuMessageData(rpc)->update_bar_pde_v15_00.info.entryValue=entry;
+    rpcGetVgpuMessageData(rpc)->update_bar_pde_v15_00.info.entryLevelShift=shift;
+    header=rpcGetVgpuMessageHeader(rpc);header->sequence=rpc->sequence++;
+    status=kgspSendRpc(gpu,gsp,NVDM_TYPE_RM_RPC,header->length,NV_TRUE);
+    if(status==NV_OK)status=rpcGetVgpuMessageHeader(rpc)->rpc_result;
+    witness[0]=shift;witness[1]=status;l2_record(19,entry,witness,sizeof(witness));
+    return status;
+}
