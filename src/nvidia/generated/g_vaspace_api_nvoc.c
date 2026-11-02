@@ -127,29 +127,9 @@ const struct NVOC_CLASS_DEF __nvoc_class_def_VaSpaceApi =
 #endif
 
 // Exported trampoline function definitions
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
-static NV_STATUS vaspaceapiCtrlCmdVaspaceGetGmmuFormat__EXPORT(void *pVaspaceApi, void *pGmmuFormatParams) {
-    return vaspaceapiCtrlCmdVaspaceGetGmmuFormat_IMPL(pVaspaceApi, pGmmuFormatParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00018000u)
-static NV_STATUS vaspaceapiCtrlCmdVaspaceGetPageLevelInfo__EXPORT(void *pVaspaceApi, void *pPageLevelInfoParams) {
-    return vaspaceapiCtrlCmdVaspaceGetPageLevelInfo_IMPL(pVaspaceApi, pPageLevelInfoParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00018000u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00018000u)
-static NV_STATUS vaspaceapiCtrlCmdVaspaceReserveEntries__EXPORT(void *pVaspaceApi, void *pReserveEntriesParams) {
-    return vaspaceapiCtrlCmdVaspaceReserveEntries_IMPL(pVaspaceApi, pReserveEntriesParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00018000u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00018000u)
-static NV_STATUS vaspaceapiCtrlCmdVaspaceReleaseEntries__EXPORT(void *pVaspaceApi, void *pReleaseEntriesParams) {
-    return vaspaceapiCtrlCmdVaspaceReleaseEntries_IMPL(pVaspaceApi, pReleaseEntriesParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00018000u)
 
 #if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014004u)
 static NV_STATUS vaspaceapiCtrlCmdVaspaceCopyServerReservedPdes__EXPORT(void *pVaspaceApi, void *pCopyServerReservedPdesParams) {
@@ -157,75 +137,10 @@ static NV_STATUS vaspaceapiCtrlCmdVaspaceCopyServerReservedPdes__EXPORT(void *pV
 }
 #endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00014004u)
 
-#if !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
-static NV_STATUS vaspaceapiCtrlCmdVaspaceGetHostRmManagedSize__EXPORT(void *pVaspaceApi, void *pVaspaceGetHostRmManagedSizeParams) {
-    return vaspaceapiCtrlCmdVaspaceGetHostRmManagedSize_IMPL(pVaspaceApi, pVaspaceGetHostRmManagedSizeParams);
-}
-#endif // !NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x00000000u)
 
 // Exported method array
 static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_VaSpaceApi[] = 
 {
-    {               /*  [0] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &vaspaceapiCtrlCmdVaspaceGetGmmuFormat__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*flags=*/      0x0u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90f10101u,
-        /*paramSize=*/  sizeof(NV90F1_CTRL_VASPACE_GET_GMMU_FORMAT_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_VaSpaceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "vaspaceapiCtrlCmdVaspaceGetGmmuFormat"
-#endif
-    },
-    {               /*  [1] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x18000u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &vaspaceapiCtrlCmdVaspaceGetPageLevelInfo__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x18000u)
-        /*flags=*/      0x18000u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90f10102u,
-        /*paramSize=*/  sizeof(NV90F1_CTRL_VASPACE_GET_PAGE_LEVEL_INFO_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_VaSpaceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "vaspaceapiCtrlCmdVaspaceGetPageLevelInfo"
-#endif
-    },
-    {               /*  [2] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x18000u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &vaspaceapiCtrlCmdVaspaceReserveEntries__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x18000u)
-        /*flags=*/      0x18000u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90f10103u,
-        /*paramSize=*/  sizeof(NV90F1_CTRL_VASPACE_RESERVE_ENTRIES_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_VaSpaceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "vaspaceapiCtrlCmdVaspaceReserveEntries"
-#endif
-    },
-    {               /*  [3] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x18000u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &vaspaceapiCtrlCmdVaspaceReleaseEntries__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x18000u)
-        /*flags=*/      0x18000u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90f10104u,
-        /*paramSize=*/  sizeof(NV90F1_CTRL_VASPACE_RELEASE_ENTRIES_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_VaSpaceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "vaspaceapiCtrlCmdVaspaceReleaseEntries"
-#endif
-    },
     {               /*  [4] */
 #if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x14004u)
         /*pFunc=*/      (void (*)(void)) NULL,
@@ -239,21 +154,6 @@ static const struct NVOC_EXPORTED_METHOD_DEF __nvoc_exported_method_def_VaSpaceA
         /*pClassInfo=*/ &(__nvoc_class_def_VaSpaceApi.classInfo),
 #if NV_PRINTF_STRINGS_ALLOWED
         /*func=*/       "vaspaceapiCtrlCmdVaspaceCopyServerReservedPdes"
-#endif
-    },
-    {               /*  [5] */
-#if NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*pFunc=*/      (void (*)(void)) NULL,
-#else
-        /*pFunc=*/      (void (*)(void)) &vaspaceapiCtrlCmdVaspaceGetHostRmManagedSize__EXPORT,
-#endif // NVOC_EXPORTED_METHOD_DISABLED_BY_FLAG(0x0u)
-        /*flags=*/      0x0u,
-        /*accessRight=*/0x0u,
-        /*methodId=*/   0x90f10107u,
-        /*paramSize=*/  sizeof(NV90F1_CTRL_VASPACE_GET_HOST_RM_MANAGED_SIZE_PARAMS),
-        /*pClassInfo=*/ &(__nvoc_class_def_VaSpaceApi.classInfo),
-#if NV_PRINTF_STRINGS_ALLOWED
-        /*func=*/       "vaspaceapiCtrlCmdVaspaceGetHostRmManagedSize"
 #endif
     },
 };
@@ -518,7 +418,7 @@ void __nvoc_up_thunk_RsResource_vaspaceapiAddAdditionalDependants(struct RsClien
 
 const struct NVOC_EXPORT_INFO __nvoc_export_info__VaSpaceApi = 
 {
-    .numEntries=     6,
+    .numEntries=     1,
     .pExportEntries= __nvoc_exported_method_def_VaSpaceApi
 };
 
