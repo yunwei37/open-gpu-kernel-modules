@@ -10,7 +10,7 @@
 #include <linux/string.h>
 #include <linux/sizes.h>
 
-#define L2_QUEUE_PREFIX_PAGES 0
+#define L2_QUEUE_PREFIX_PAGES 16
 struct l2_queue_owner {
     struct pci_dev *dev;
     void *allocation;
@@ -70,6 +70,8 @@ int l2_queue_allocate(unsigned long long bytes, unsigned long long entries,
     valid = virt_addr_valid(queue_cpu);
     if (valid)
         phys = page_to_phys(virt_to_page(queue_cpu));
+    pr_info("L2_QUEUE_BACKING allocation_cpu=%px allocation_dma=%pad prefix=%zu bytes=%zu\n",
+            q->allocation, &q->allocation_dma, prefix, q->allocation_bytes);
     pr_info("L2_QUEUE_OWNER bytes=%llu entries=%llu prefix=%zu allocation_bytes=%zu cpu=%px dma=%pad phys=%pa phys_valid=%u iommu=%u all_zero=%u rm_memdesc=0\n",
             bytes, entries, prefix, q->allocation_bytes, queue_cpu, &queue_dma,
             &phys, valid, device_iommu_mapped(&q->dev->dev),
