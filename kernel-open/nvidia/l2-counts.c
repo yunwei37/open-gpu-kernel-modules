@@ -143,3 +143,24 @@ void l2_counts_phase(unsigned end)
  spin_unlock_irqrestore(&count_lock,flags);
  if(end)pr_info("L2_LAUNCH_DELTA sends=%llu replies=%llu rm_reads=%llu rm_writes=%llu\n",delta[0],delta[1],delta[2],delta[3]);
 }
+
+/* Adjacent aggregate snapshots, including asynchronous driver contexts.
+ * These count the existing RM hooks; they are not an instruction/cycle trace. */
+void l2_counts_snapshot(unsigned long long values[4]);
+void l2_counts_report(const char *name, const unsigned long long before[4],
+                      unsigned long long elapsed_ns);
+void l2_counts_snapshot(unsigned long long values[4])
+{
+ unsigned long flags;unsigned i;
+ spin_lock_irqsave(&count_lock,flags);
+ for(i=0;i<4;i++)values[i]=other[i+1];
+ spin_unlock_irqrestore(&count_lock,flags);
+}
+void l2_counts_report(const char *name, const unsigned long long before[4],
+                      unsigned long long elapsed_ns)
+{
+ unsigned long long after[4];
+ l2_counts_snapshot(after);
+ pr_info("L2_DPS_WINDOW name=%s sends=%llu replies=%llu rm_reads=%llu rm_writes=%llu elapsed_ns=%llu\n",
+         name,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],elapsed_ns);
+}
