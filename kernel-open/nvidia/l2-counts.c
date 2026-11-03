@@ -112,6 +112,7 @@ void l2_counts_dump(void)
  unsigned long f;unsigned i,j;
  spin_lock_irqsave(&count_lock,f);frozen=true;spin_unlock_irqrestore(&count_lock,f);
  pr_info("L2_NATIVE_COUNTS sends=%llu replies=%llu reads=%llu writes=%llu overflow=%llu\n",other[1],other[2],other[3],other[4],overflow);
+ pr_info("L2_NATIVE_GMC sends=%llu replies=%llu\n",other[9],other[10]);
  for(i=0;i<8192;i++)if(rpc[0][i]||rpc[1][i])pr_info("L2_NATIVE_RPC id=%u sends=%llu replies=%llu\n",i,rpc[0][i],rpc[1][i]);
  for(i=0;i<512;i++)if(controls[i].used)pr_info("L2_NATIVE_CTRL cmd=0x%x sends=%llu replies=%llu failed=%llu params_min=%u params_max=%u\n",controls[i].cmd,controls[i].sends,controls[i].replies,controls[i].failed,controls[i].lo,controls[i].hi);
  pr_info("L2_BAR2_DIRECT calls=%u entry=0x%llx shift=%llu status=0x%llx\n",bar2_direct_calls,bar2_direct_entry,bar2_direct_witness[0],bar2_direct_witness[1]);
@@ -146,21 +147,22 @@ void l2_counts_phase(unsigned end)
 
 /* Adjacent aggregate snapshots, including asynchronous driver contexts.
  * These count the existing RM hooks; they are not an instruction/cycle trace. */
-void l2_counts_snapshot(unsigned long long values[4]);
-void l2_counts_report(const char *name, const unsigned long long before[4],
+void l2_counts_protocol_snapshot(unsigned long long values[6]);
+void l2_counts_protocol_report(const char *name, const unsigned long long before[6],
                       unsigned long long elapsed_ns);
-void l2_counts_snapshot(unsigned long long values[4])
+void l2_counts_protocol_snapshot(unsigned long long values[6])
 {
  unsigned long flags;unsigned i;
  spin_lock_irqsave(&count_lock,flags);
  for(i=0;i<4;i++)values[i]=other[i+1];
+ values[4]=other[9];values[5]=other[10];
  spin_unlock_irqrestore(&count_lock,flags);
 }
-void l2_counts_report(const char *name, const unsigned long long before[4],
+void l2_counts_protocol_report(const char *name, const unsigned long long before[6],
                       unsigned long long elapsed_ns)
 {
- unsigned long long after[4];
- l2_counts_snapshot(after);
- pr_info("L2_DPS_WINDOW name=%s sends=%llu replies=%llu rm_reads=%llu rm_writes=%llu elapsed_ns=%llu\n",
-         name,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],elapsed_ns);
+ unsigned long long after[6];
+ l2_counts_protocol_snapshot(after);
+ pr_info("L2_DPS_WINDOW name=%s sends=%llu replies=%llu rm_reads=%llu rm_writes=%llu gmc_sends=%llu gmc_replies=%llu elapsed_ns=%llu\n",
+         name,after[0]-before[0],after[1]-before[1],after[2]-before[2],after[3]-before[3],after[4]-before[4],after[5]-before[5],elapsed_ns);
 }
