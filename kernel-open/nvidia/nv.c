@@ -1,3 +1,4 @@
+#include <linux/modelos_m3.h>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1999-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -417,7 +418,7 @@ nv_alloc_t *nvos_create_alloc(
     if (pt_size > (NvU64)INT_MAX)
         at->page_table = nv_vmalloc(pt_size, NV_GFP_KERNEL | __GFP_ZERO);
     else
-        at->page_table = kvzalloc(pt_size, NV_GFP_KERNEL);
+        at->page_table = modelos_m3_alloc(pt_size, 16, 3, false);
 
     if (at->page_table == NULL)
     {
@@ -451,7 +452,7 @@ int nvos_free_alloc(
     if (pt_size > (NvU64)INT_MAX)
         nv_vfree(at->page_table, pt_size);
     else
-        kvfree(at->page_table);
+        modelos_m3_free(at->page_table);
 
     NV_KFREE(at, sizeof(nv_alloc_t));
 

@@ -1,3 +1,4 @@
+extern void modelos_m3_snapshot(const char *);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2021-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -967,6 +968,7 @@ kgspBootstrap_GH100
         }
 
         NV_PRINTF(LEVEL_NOTICE, "Starting to boot GSP via FSP.\n");
+        modelos_m3_snapshot("before-fsp-boot-commands");
         NV_CHECK_OK_OR_RETURN(LEVEL_ERROR, kfspSendBootCommands_HAL(pGpu, pKernelFsp));
     }
     else if (pKernelSec2 != NULL && pKernelSec2->getProperty(pKernelSec2, PDB_PROP_KSEC2_BOOT_GSPFMC))

@@ -1,3 +1,8 @@
+/* M3 direct MMIO scalars: include pointer-based register access. */
+extern void modelos_m3_cpu_scalar(void *, unsigned long long, unsigned);
+extern void modelos_m3_cpu_read_value(void *, unsigned long long, unsigned);
+/* M3 mapped CPU stores, including persistent RAMFC/PTE mappings. */
+extern void modelos_m3_cpu_write(void *, unsigned long long);
 
 #ifndef _G_GPU_ACCESS_NVOC_H_
 #define _G_GPU_ACCESS_NVOC_H_
@@ -49,14 +54,14 @@ extern "C" {
 #include "gpu/gpu_device_mapping.h"
 
 // Go straight at the memory or hardware.
-#define MEM_RD08(a) (*(const volatile NvU8  *)(a))
-#define MEM_RD16(a) (*(const volatile NvU16 *)(a))
-#define MEM_RD32(a) (*(const volatile NvU32 *)(a))
-#define MEM_RD64(a) (*(const volatile NvU64 *)(a))
-#define MEM_WR08(a, d) do { *(volatile NvU8  *)(a) = (d); } while (0)
-#define MEM_WR16(a, d) do { *(volatile NvU16 *)(a) = (d); } while (0)
-#define MEM_WR32(a, d) do { *(volatile NvU32 *)(a) = (d); } while (0)
-#define MEM_WR64(a, d) do { *(volatile NvU64 *)(a) = (d); } while (0)
+#define MEM_RD08(a) ({ const volatile NvU8 *_m3_p = (const volatile NvU8 *)(a); NvU8 _m3_v = *_m3_p; modelos_m3_cpu_read_value((void *)_m3_p, _m3_v, sizeof(_m3_v)); _m3_v; })
+#define MEM_RD16(a) ({ const volatile NvU16 *_m3_p = (const volatile NvU16 *)(a); NvU16 _m3_v = *_m3_p; modelos_m3_cpu_read_value((void *)_m3_p, _m3_v, sizeof(_m3_v)); _m3_v; })
+#define MEM_RD32(a) ({ const volatile NvU32 *_m3_p = (const volatile NvU32 *)(a); NvU32 _m3_v = *_m3_p; modelos_m3_cpu_read_value((void *)_m3_p, _m3_v, sizeof(_m3_v)); _m3_v; })
+#define MEM_RD64(a) ({ const volatile NvU64 *_m3_p = (const volatile NvU64 *)(a); NvU64 _m3_v = *_m3_p; modelos_m3_cpu_read_value((void *)_m3_p, _m3_v, sizeof(_m3_v)); _m3_v; })
+#define MEM_WR08(a, d) do { volatile NvU8 *_m3_p = (volatile NvU8 *)(a); NvU8 _m3_v = (d); *_m3_p = _m3_v; modelos_m3_cpu_scalar((void *)_m3_p, _m3_v, sizeof(_m3_v)); } while (0)
+#define MEM_WR16(a, d) do { volatile NvU16 *_m3_p = (volatile NvU16 *)(a); NvU16 _m3_v = (d); *_m3_p = _m3_v; modelos_m3_cpu_scalar((void *)_m3_p, _m3_v, sizeof(_m3_v)); } while (0)
+#define MEM_WR32(a, d) do { volatile NvU32 *_m3_p = (volatile NvU32 *)(a); NvU32 _m3_v = (d); *_m3_p = _m3_v; modelos_m3_cpu_scalar((void *)_m3_p, _m3_v, sizeof(_m3_v)); } while (0)
+#define MEM_WR64(a, d) do { volatile NvU64 *_m3_p = (volatile NvU64 *)(a); NvU64 _m3_v = (d); *_m3_p = _m3_v; modelos_m3_cpu_scalar((void *)_m3_p, _m3_v, sizeof(_m3_v)); } while (0)
 
 //
 // Define the signature of the register filter callback function

@@ -1,3 +1,4 @@
+#include <linux/modelos_m3.h>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1999-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -1062,6 +1063,9 @@ nv_free_system_pages
                 break;
             }
 
+            if (modelos_m3_owned((void *)page_ptr->virt_addr))
+                modelos_m3_free((void *)page_ptr->virt_addr);
+            else
             NV_FREE_PAGES(page_ptr->virt_addr, at->order);
         }
     }
@@ -1089,7 +1093,7 @@ nv_alloc_system_pages
     // Remember if pool allocation was attempted and use it on free to avoid hoarding memory
     // Avoid unwanted scrubbing, especially important for onlined FB
     // Cross-node cache invalidation at remap can be dramatically slower if memory is not cached locally
-    at->flags.pool = !(gfp_mask & NV_GFP_DMA32) &&
+    at->flags.pool = false && !(gfp_mask & NV_GFP_DMA32) &&
                      at->flags.zeroed &&
                      (at->cache_type == NV_MEMORY_CACHED || num_online_nodes() <= 1);
 
@@ -1105,7 +1109,11 @@ nv_alloc_system_pages
     {
         unsigned long virt_addr = 0;
 
-        if (at->flags.node)
+        if (true) {
+            virt_addr = (unsigned long)modelos_m3_alloc(PAGE_SIZE << at->order,
+                PAGE_SIZE << at->order, 2, !!(gfp_mask & NV_GFP_DMA32));
+        }
+        else if (at->flags.node)
         {
             unsigned long ptr = 0ULL;
             NV_ALLOC_PAGES_NODE(ptr, at->node_id, at->order, gfp_mask);

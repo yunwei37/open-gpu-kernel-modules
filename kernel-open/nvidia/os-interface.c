@@ -1,3 +1,4 @@
+#include <linux/modelos_m3.h>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1999-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -642,6 +643,10 @@ NV_STATUS NV_API_CALL os_alloc_mem(
     if (alloc_size != size)
         return NV_ERR_INVALID_PARAMETER;
 
+    *address = modelos_m3_alloc(alloc_size, 16, 1, false);
+    NV_MEM_TRACKING_HIDE_SIZE(address, alloc_size);
+    return *address ? NV_OK : NV_ERR_NO_MEMORY;
+
     if (!NV_MAY_SLEEP())
     {
         if (alloc_size <= KMALLOC_LIMIT)
@@ -670,6 +675,7 @@ void NV_API_CALL os_free_mem(void *address)
     NvU64 size;
 
     NV_MEM_TRACKING_RETRIEVE_SIZE(address, size);
+    if (modelos_m3_owned(address)) { modelos_m3_free(address); return; }
 
     if (size & VMALLOC_ALLOCATION_SIZE_FLAG)
     {
