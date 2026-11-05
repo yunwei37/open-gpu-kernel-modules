@@ -750,6 +750,12 @@ NV_STATUS NV_API_CALL os_delay(NvU32 MilliSeconds)
 NvU64 NV_API_CALL os_get_cpu_frequency(void)
 {
     NvU64 cpu_hz = 0;
+#if defined(CONFIG_MODELOS_NVIDIA) && defined(NVCPU_X86_64) && !defined(CONFIG_CPU_FREQ)
+    /* The original fallback measures TSC, not a changing core clock. */
+    extern unsigned int tsc_khz;
+    if (tsc_khz)
+        return (NvU64)tsc_khz * 1000;
+#endif
 #if defined(CONFIG_CPU_FREQ)
     cpu_hz = (cpufreq_get(0) * 1000);
 #elif defined(NVCPU_X86_64)
