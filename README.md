@@ -1,5 +1,14 @@
 # NVIDIA Linux Open GPU Kernel Module Source
 
+## ModelOS kernel-only branch
+
+This branch integrates RM directly into the ModelOS Linux kernel. Its user
+character-device and ioctl/VMA/procfs frontends are removed. Build and run the
+opt-in SM120 kernel test using [the ModelOS instructions](kernel-open/nvidia/README.modelos.md).
+The test calls RM directly and uses built-in firmware; no libcuda or CUDA user
+runtime is linked into the guest.
+
+
 This is the source release of the NVIDIA Linux open GPU kernel modules,
 version 615.78.08.
 

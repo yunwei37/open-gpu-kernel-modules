@@ -199,6 +199,7 @@ void *nvidia_stack_t_cache;
 static nvidia_stack_t *__nv_init_sp;
 
 struct semaphore nv_linux_devices_lock;
+static bool modelos_driver_ready;
 
 // True if at least one of the successfully probed devices support ATS
 // Assigned at device probe (module init) time
@@ -833,6 +834,7 @@ static int __init nvidia_init_module(void)
     rc = nv_drivers_init();
     if (rc) { nv_module_exit(sp); return rc; }
     __nv_init_sp = sp;
+    smp_store_release(&modelos_driver_ready, true);
     nv_printf(NV_DBG_ERRORS, "MODELOS_NVIDIA: RM/PCI ready, no character devices\n");
     return 0;
 }
@@ -3956,6 +3958,13 @@ NvBool nvidia_get_gpuid_list(NvU32 *gpu_ids, NvU32 *gpu_count)
     unsigned int count;
     NvBool ret = NV_TRUE;
 
+    /* A built-in caller can exist even when the initcall found no GPU. */
+    if (!smp_load_acquire(&modelos_driver_ready))
+    {
+        *gpu_count = 0;
+        return NV_TRUE;
+    }
+
     LOCK_NV_LINUX_DEVICES();
 
     count = 0;
@@ -4005,6 +4014,9 @@ int nvidia_dev_get(NvU32 gpu_id, nvidia_stack_t *sp, NvBool reset_aware)
 {
     nv_linux_state_t *nvl;
     int rc;
+
+    if (!smp_load_acquire(&modelos_driver_ready))
+        return -ENODEV;
 
     /* Takes nvl->ldata_lock */
     nvl = find_gpu_id(gpu_id);

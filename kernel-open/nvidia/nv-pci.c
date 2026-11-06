@@ -2956,9 +2956,21 @@ nv_pci_remove(struct pci_dev *pci_dev)
     nv_pci_remove_helper(pci_dev, true);
 }
 
+#ifdef CONFIG_KEXEC_CORE
+/* Guest-only kexec acceptance knob; normal device shutdown is the default. */
+static bool modelos_keep_gpu;
+module_param(modelos_keep_gpu,bool,0400);
+MODULE_PARM_DESC(modelos_keep_gpu,"Skip NVIDIA shutdown for the experimental kexec adoption test");
+#endif
+
 static void
 nv_pci_shutdown(struct pci_dev *pci_dev)
 {
+#ifdef CONFIG_KEXEC_CORE
+    pr_info("KEXEC_NVIDIA_SHUTDOWN keep=%u\n",modelos_keep_gpu);
+    if (modelos_keep_gpu) { pr_info("KEXEC_NVIDIA_SHUTDOWN_SKIP\n"); return; }
+#endif
+
     nv_linux_state_t *nvl = pci_get_drvdata(pci_dev);
     
     if (!nvl || (nvl->pci_dev != pci_dev))

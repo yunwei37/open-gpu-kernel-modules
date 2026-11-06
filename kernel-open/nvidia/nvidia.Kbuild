@@ -295,3 +295,13 @@ NV_CONFTEST_GENERIC_COMPILE_TESTS += memory_failure_mf_sw_simulated_defined
 NV_CONFTEST_GENERIC_COMPILE_TESTS += device_vm_build
 NV_CONFTEST_GENERIC_COMPILE_TESTS += pcie_reset_flr
 NV_CONFTEST_GENERIC_COMPILE_TESTS += module_import_ns_takes_constant
+
+ifeq ($(CONFIG_MODELOS_NVIDIA),y)
+PTXAS ?= ptxas
+quiet_cmd_modelos_cubin = PTXAS   $@
+      cmd_modelos_cubin = python3 $(src)/nvidia/build-modelos-test.py --ptxas "$(PTXAS)" $(src)/nvidia/modelos-store.ptx $@
+$(obj)/nvidia/modelos-test-cubin.h: $(src)/nvidia/modelos-store.ptx $(src)/nvidia/build-modelos-test.py FORCE
+	$(call if_changed,modelos_cubin)
+targets += nvidia/modelos-test-cubin.h
+$(obj)/nvidia/modelos-submit.o: $(obj)/nvidia/modelos-test-cubin.h
+endif
