@@ -16,6 +16,7 @@
 #include "class/clc361.h"
 #include "class/clc6c0.h"
 #include "class/clcec0.h"
+#include "class/clcab5.h"
 #include "alloc/alloc_channel.h"
 #include "ctrl/ctrla06c.h"
 #include "ctrl/ctrlc36f.h"
@@ -72,10 +73,10 @@ struct modelos_nv {
     NvU32 gpu_id, subindex, token, put;
     bool adapter_held, in_flight;
     NvHandle client, device, subdevice, vaspace, virtual_memory;
-    NvHandle group, ctxshare, channel, compute, usermode;
+    NvHandle group, ctxshare, channel, compute, copy, usermode;
     void *doorbell;
     struct modelos_mem arena, error;
-    NvU32 compute_class;
+    NvU32 compute_class, copy_class;
 };
 struct modelos_program {
     const void *text, *constant;
@@ -179,8 +180,9 @@ static int require_blackwell(struct modelos_nv *c, NvU32 *sass_version)
         if (classes[n] == MODELOS_BLACKWELL_GPFIFO) found |= 1;
         if (classes[n] == compute_class) found |= 2;
         if (classes[n] == HOPPER_USERMODE_A) found |= 4;
+        if (c->copy_class && classes[n] == c->copy_class) found |= 8;
     }
-    if (found != 7) { ret = -EOPNOTSUPP; goto fail; }
+    if (found != (c->copy_class ? 15 : 7)) { ret = -EOPNOTSUPP; goto fail; }
     RM_TRY("sm-version", modelos_rm_control(c->stack, c->client, c->subdevice,
         NV2080_CTRL_CMD_GR_GET_INFO, &info, sizeof(info)));
     pr_info("MODELOS_NVTEST gpu=0x%x sm_version=0x%x classes=c96f,%x,c661\n", c->gpu_id, gr.data, compute_class);
@@ -251,6 +253,8 @@ static int make_channel(struct modelos_nv *c)
     RM_TRY("gpfifo", alloc(c, c->group, &c->channel, MODELOS_BLACKWELL_GPFIFO, &fifo, sizeof(fifo)));
     RM_TRY("compute", alloc(c, c->channel, &c->compute,
         c->compute_class ?: MODELOS_BLACKWELL_COMPUTE_B, NULL, 0));
+    if (c->copy_class)
+        RM_TRY("copy", alloc(c, c->channel, &c->copy, c->copy_class, NULL, 0));
     RM_TRY("schedule", modelos_rm_control(c->stack, c->client, c->group,
         NVA06C_CTRL_CMD_GPFIFO_SCHEDULE, &schedule, sizeof(schedule)));
     RM_TRY("work-token", modelos_rm_control(c->stack, c->client, c->channel,
@@ -594,6 +598,7 @@ int modelos_nv_capture_run(unsigned int gpu_index)
     /* CEC0 is the qualified SM120 compute class, checked against this GPU's
      * actual advertised class list before creating its channel object. */
     c->compute_class = BLACKWELL_COMPUTE_B;
+    c->copy_class = BLACKWELL_DMA_COPY_B;
     ret = open_gpu(c, ids[gpu_index]); if (ret) goto cleanup;
     ret = require_blackwell(c, &sass); if (ret) goto cleanup;
     ret = memory_create(c, &c->arena, ARENA_VA, ARENA_SIZE); if (ret) goto cleanup;
@@ -623,6 +628,10 @@ int modelos_nv_capture_run(unsigned int gpu_index)
     context.error_physical = capture_physical(c->error.cpu);
     context.doorbell_physical = capture_physical(c->doorbell);
     context.doorbell_bytes = 0x10000;
+    context.copy_class = c->copy_class; context.copy_handle = c->copy;
+    /* RM returned this actual CPU BAR mapping. Unlike DMA allocations, the
+     * usermode aperture does not traverse the system-memory mapping hook. */
+    l2_map(c->doorbell, context.doorbell_bytes, context.doorbell_physical);
     l2_record(42, 0, &context, sizeof(context));
     modelos_m3_snapshot_inputs();
     l2_record(11, 0, "ready-to-submit", 15);
