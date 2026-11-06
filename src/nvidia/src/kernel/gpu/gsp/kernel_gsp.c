@@ -1,3 +1,5 @@
+
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -502,6 +504,7 @@ NV_STATUS kgspSendRpc_IMPL
         sequence = pGmcHdr->sequence;
     }
 
+    l2_record(nvdmType == NVDM_TYPE_RM_RPC ? 1 : 9, nvdmType, nvdmType == NVDM_TYPE_RM_RPC ? (void *)rpcGetVgpuMessageHeader(pRpc) : (void *)rpcGetGmcMessageHeader(pRpc), size);
     nvStatus = GspMsgQueueSendCommand(pRpc->pMessageQueueInfo, pGpu, nvdmType, size);
     if (nvStatus != NV_OK)
     {
@@ -1977,6 +1980,7 @@ _kgspRpcDrainOneEvent
     if (nvStatus == NV_OK && nvdmType == NVDM_TYPE_RM_RPC)
     {
         rpc_message_header_v *pMsgHdr = rpcGetVgpuMessageHeader(pRpc);
+        l2_record(2, nvdmType, pMsgHdr, pMsgHdr->length);
 
         if (pMsgHdr->function == expectedFunc &&
             pMsgHdr->sequence == expectedSequence)
@@ -1989,6 +1993,7 @@ _kgspRpcDrainOneEvent
     else if (nvStatus == NV_OK && nvdmType == NVDM_TYPE_GMCAPI)
     {
         GMCAPI_HEADER *pGmcHdr = rpcGetGmcMessageHeader(pRpc);
+        l2_record(10, nvdmType, pGmcHdr, sizeof(*pGmcHdr)+pGmcHdr->size);
         const NvU32 cmd = GMCAPI_HEADER_COMMAND_ID(pGmcHdr->command);
 
         // Don't allow a match if in the case where the expectedFunc

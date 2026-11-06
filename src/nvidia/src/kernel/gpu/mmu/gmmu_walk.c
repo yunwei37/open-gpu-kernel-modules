@@ -1,3 +1,5 @@
+/* M3 page-table fill inputs, before closing their CPU transfer. */
+extern void modelos_m3_page_table_write(void *, unsigned long long, const void *, unsigned long long);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2013-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -773,6 +775,9 @@ _gmmuWalkCBUpdatePde
         NV_ASSERT_OK(memmgrMemWrite(GPU_GET_MEMORY_MANAGER(pGpu), &dest,
                                     entry.v8, pLevelFmt->entrySize,
                                     transferFlags));
+        /* M3 explicit SYS directory write; generic SYS writes stay untyped. */
+        if (memdescGetAddressSpace(pMemDesc[i]) == ADDR_SYSMEM)
+            modelos_m3_page_table_write(pMemDesc[i], dest.offset, entry.v8, pLevelFmt->entrySize);
     }
 
     return NV_TRUE;
@@ -947,6 +952,7 @@ _gmmuWalkCBFillEntries
                 break;
         }
 
+        modelos_m3_page_table_write(pMemDesc[j], dest.offset, pEntries, sizeOfEntries);
         memmgrMemEndTransfer(pMemoryManager, &dest, sizeOfEntries,
                              transferFlags);
     }

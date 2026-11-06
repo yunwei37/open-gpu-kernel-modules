@@ -1,3 +1,7 @@
+/* M3 PCI config capture, serialized with the MMIO recorder. */
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
+extern unsigned long l2_mmio_enter(void);
+extern void l2_mmio_exit(unsigned long);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1999-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -105,7 +109,17 @@ NV_STATUS NV_API_CALL os_pci_write_byte(
     if (offset >= NV_PCIE_CFG_MAX_OFFSET)
         return NV_ERR_NOT_SUPPORTED;
 
+    {
+        struct pci_dev *pdev = handle;
+        unsigned long irqflags = l2_mmio_enter();
     pci_write_config_byte( (struct pci_dev *) handle, offset, value);
+        if (pdev->vendor == 0x10de && pdev->device == 0x2b85) {
+            NvU64 meta[3] = {((NvU64)pci_domain_nr(pdev->bus) << 32) |
+                ((NvU64)pdev->bus->number << 8) | pdev->devfn, 1, value};
+            l2_record(17, offset, meta, sizeof(meta));
+        }
+        l2_mmio_exit(irqflags);
+    }
     return NV_OK;
 }
 
@@ -118,7 +132,17 @@ NV_STATUS NV_API_CALL os_pci_write_word(
     if (offset >= NV_PCIE_CFG_MAX_OFFSET)
         return NV_ERR_NOT_SUPPORTED;
 
+    {
+        struct pci_dev *pdev = handle;
+        unsigned long irqflags = l2_mmio_enter();
     pci_write_config_word( (struct pci_dev *) handle, offset, value);
+        if (pdev->vendor == 0x10de && pdev->device == 0x2b85) {
+            NvU64 meta[3] = {((NvU64)pci_domain_nr(pdev->bus) << 32) |
+                ((NvU64)pdev->bus->number << 8) | pdev->devfn, 2, value};
+            l2_record(17, offset, meta, sizeof(meta));
+        }
+        l2_mmio_exit(irqflags);
+    }
     return NV_OK;
 }
 
@@ -131,7 +155,17 @@ NV_STATUS NV_API_CALL os_pci_write_dword(
     if (offset >= NV_PCIE_CFG_MAX_OFFSET)
         return NV_ERR_NOT_SUPPORTED;
 
+    {
+        struct pci_dev *pdev = handle;
+        unsigned long irqflags = l2_mmio_enter();
     pci_write_config_dword( (struct pci_dev *) handle, offset, value);
+        if (pdev->vendor == 0x10de && pdev->device == 0x2b85) {
+            NvU64 meta[3] = {((NvU64)pci_domain_nr(pdev->bus) << 32) |
+                ((NvU64)pdev->bus->number << 8) | pdev->devfn, 4, value};
+            l2_record(17, offset, meta, sizeof(meta));
+        }
+        l2_mmio_exit(irqflags);
+    }
     return NV_OK;
 }
 

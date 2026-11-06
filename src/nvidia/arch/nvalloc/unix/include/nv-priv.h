@@ -1,3 +1,5 @@
+/* M3 MMIO physical base audit. */
+extern void modelos_m3_mmio_map(void *);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1999-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -30,13 +32,31 @@
 #include <gpu/disp/kern_disp_max.h>
 #include <gpu/disp/kern_disp_type.h>
 
-#define NV_PRIV_REG_WR08(b,o,d)   (*((volatile NvV8*)&(b)->Reg008[(o)/1])=(NvV8)(d))
-#define NV_PRIV_REG_WR16(b,o,d)   (*((volatile NvV16*)&(b)->Reg016[(o)/2])=(NvV16)(d))
-#define NV_PRIV_REG_WR32(b,o,d)   (*((volatile NvV32*)&(b)->Reg032[(o)/4])=(NvV32)(d))
-
-#define NV_PRIV_REG_RD08(b,o)     ((b)->Reg008[(o)/1])
-#define NV_PRIV_REG_RD16(b,o)     ((b)->Reg016[(o)/2])
-#define NV_PRIV_REG_RD32(b,o)     ((b)->Reg032[(o)/4])
+/* Serialize the actual MMIO operation together with its record, including IRQs. */
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
+extern unsigned long l2_mmio_enter(void);
+extern void l2_mmio_exit(unsigned long);
+#define NV_PRIV_REG_WR08(b,o,d) ({ \
+    NvU32 l2o=(o); NvU8 l2d=(NvU8)(d); unsigned long l2f=l2_mmio_enter(); modelos_m3_mmio_map((void *)(b)); \
+    *((volatile NvV8*)&(b)->Reg008[l2o/1])=l2d; \
+    l2_record(4,l2o,&l2d,sizeof(l2d)); l2_mmio_exit(l2f); l2d; })
+#define NV_PRIV_REG_RD08(b,o) ({ \
+    NvU32 l2o=(o); unsigned long l2f=l2_mmio_enter(); modelos_m3_mmio_map((void *)(b)); NvU8 l2d=(b)->Reg008[l2o/1]; \
+    l2_record(3,l2o,&l2d,sizeof(l2d)); l2_mmio_exit(l2f); l2d; })
+#define NV_PRIV_REG_WR16(b,o,d) ({ \
+    NvU32 l2o=(o); NvU16 l2d=(NvU16)(d); unsigned long l2f=l2_mmio_enter(); modelos_m3_mmio_map((void *)(b)); \
+    *((volatile NvV16*)&(b)->Reg016[l2o/2])=l2d; \
+    l2_record(4,l2o,&l2d,sizeof(l2d)); l2_mmio_exit(l2f); l2d; })
+#define NV_PRIV_REG_RD16(b,o) ({ \
+    NvU32 l2o=(o); unsigned long l2f=l2_mmio_enter(); modelos_m3_mmio_map((void *)(b)); NvU16 l2d=(b)->Reg016[l2o/2]; \
+    l2_record(3,l2o,&l2d,sizeof(l2d)); l2_mmio_exit(l2f); l2d; })
+#define NV_PRIV_REG_WR32(b,o,d) ({ \
+    NvU32 l2o=(o); NvU32 l2d=(NvU32)(d); unsigned long l2f=l2_mmio_enter(); modelos_m3_mmio_map((void *)(b)); \
+    *((volatile NvV32*)&(b)->Reg032[l2o/4])=l2d; \
+    l2_record(4,l2o,&l2d,sizeof(l2d)); l2_mmio_exit(l2f); l2d; })
+#define NV_PRIV_REG_RD32(b,o) ({ \
+    NvU32 l2o=(o); unsigned long l2f=l2_mmio_enter(); modelos_m3_mmio_map((void *)(b)); NvU32 l2d=(b)->Reg032[l2o/4]; \
+    l2_record(3,l2o,&l2d,sizeof(l2d)); l2_mmio_exit(l2f); l2d; })
 
 struct OBJGPU;
 

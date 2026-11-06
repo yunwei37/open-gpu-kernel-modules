@@ -1,3 +1,4 @@
+#include <linux/modelos_m3.h>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2001-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -349,6 +350,7 @@ NV_STATUS nvos_forward_error_to_cray(struct pci_dev *, NvU32,
 
 static inline void *nv_vmalloc(unsigned long size, gfp_t flags)
 {
+    return modelos_m3_alloc(size, 16, 3, false);
 #if defined(NV_VMALLOC_HAS_PGPROT_T_ARG)
     void *ptr = __vmalloc(size, flags, PAGE_KERNEL);
 #else
@@ -361,6 +363,7 @@ static inline void *nv_vmalloc(unsigned long size, gfp_t flags)
 static inline void nv_vfree(void *ptr, NvU64 size)
 {
     NV_MEMDBG_REMOVE(ptr, size);
+    if (modelos_m3_owned(ptr)) { modelos_m3_free(ptr); return; }
     vfree(ptr);
 }
 
@@ -419,19 +422,19 @@ static NvBool nv_numa_node_has_memory(int node_id)
 
 #define NV_KMALLOC(ptr, size) \
     { \
-        (ptr) = kmalloc(size, NV_GFP_KERNEL); \
+        (ptr) = modelos_m3_alloc(size, 16, 3, false); \
         NV_MEMDBG_ADD(ptr, size);             \
     }
 
 #define NV_KZALLOC(ptr, size) \
     { \
-        (ptr) = kzalloc(size, NV_GFP_KERNEL); \
+        (ptr) = modelos_m3_alloc(size, 16, 3, false); \
         NV_MEMDBG_ADD(ptr, size);             \
     }
 
 #define NV_KMALLOC_ATOMIC(ptr, size) \
     { \
-        (ptr) = kmalloc(size, NV_GFP_ATOMIC); \
+        (ptr) = modelos_m3_alloc(size, 16, 3, false); \
         NV_MEMDBG_ADD(ptr, size);             \
     }
 
@@ -439,14 +442,14 @@ static NvBool nv_numa_node_has_memory(int node_id)
 
 #define NV_KMALLOC_NO_OOM(ptr, size) \
     { \
-        (ptr) = kmalloc(size, NV_GFP_NO_OOM); \
+        (ptr) = modelos_m3_alloc(size, 16, 3, false); \
         NV_MEMDBG_ADD(ptr, size);             \
     }
 
 #define NV_KFREE(ptr, size) \
     { \
         NV_MEMDBG_REMOVE(ptr, size); \
-        kfree((void *) (ptr)); \
+        if (modelos_m3_owned((void *)(ptr))) modelos_m3_free((void *)(ptr)); else kfree((void *) (ptr)); \
     }
 
 #define NV_ALLOC_PAGES_NODE(ptr, nid, order, gfp_mask) \

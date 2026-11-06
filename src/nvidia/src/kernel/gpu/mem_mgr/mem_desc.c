@@ -1,3 +1,10 @@
+/* M3 framebuffer CPU mapping, no GPU-produced data snapshots. */
+extern void modelos_m3_fb_map(void *, unsigned long long);
+extern void modelos_m3_fb_unmap(void *);
+
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
+extern void l2_map(void *, unsigned long long, unsigned long long);
+extern void l2_unmap(void *);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1993-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -1888,6 +1895,15 @@ memdescMap
             DBG_BREAKPOINT();
             return NV_ERR_GENERIC;
     }
+    if (Kernel && *pAddress && pMemDesc->_addressSpace == ADDR_FBMEM) modelos_m3_fb_map((void *)*pAddress, Size);
+    if (Kernel && pMemDesc->_addressSpace == ADDR_SYSMEM) {
+        NvU64 page;
+        l2_map((void *)*pAddress, Size, memdescGetPhysAddr(pMemDesc, AT_GPU, Offset));
+        for (page=0;page<Size;page+=4096) {
+            NvU64 pair[2]={(NvU64)*pAddress+page,memdescGetPhysAddr(pMemDesc, AT_GPU, Offset+page)};
+            l2_record(8, page, pair, sizeof(pair));
+        }
+    }
     return NV_OK;
 }
 void
@@ -1924,6 +1940,9 @@ memdescUnmap
     NvP64 Priv
 )
 {
+    if (Kernel && Address && pMemDesc->_addressSpace == ADDR_SYSMEM) l2_unmap((void *)Address);
+    if (Kernel && Address && pMemDesc->_addressSpace == ADDR_FBMEM) modelos_m3_fb_unmap((void *)Address);
+
     // Allow null unmaps
     if (!Address)
         return;

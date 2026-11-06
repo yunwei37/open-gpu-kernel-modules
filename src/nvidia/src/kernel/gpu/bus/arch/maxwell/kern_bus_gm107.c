@@ -1,3 +1,5 @@
+/* M3 BAR page-table CPU write inputs. */
+extern void modelos_m3_page_table_write(void *, unsigned long long, const void *, unsigned long long);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2004-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -2379,6 +2381,7 @@ _kbusWalkCBMapNextEntries_RmAperture
                                                         &entryValue,
                                                         pIter,
                                                         pageSize);
+                modelos_m3_page_table_write(pMemDesc, (NvU64)entryIndex * pLevelFmt->entrySize, entryValue.v8, pLevelFmt->entrySize);
 
                 index = (entryIndex - entryIndexLo) * pLevelFmt->entrySize;
                 portMemCopy(&pMap[index], pLevelFmt->entrySize,
@@ -2417,6 +2420,7 @@ _kbusWalkCBMapNextEntries_RmAperture
                                                        &entryValue,
                                                         pIter,
                                                         pageSize);
+                modelos_m3_page_table_write(pMemDesc, (NvU64)entryIndex * pLevelFmt->entrySize, entryValue.v8, pLevelFmt->entrySize);
 
                 entryOffset = entryIndex * pLevelFmt->entrySize;
 
@@ -2434,6 +2438,7 @@ _kbusWalkCBMapNextEntries_RmAperture
                                                         &entryValue,
                                                         pIter,
                                                         pageSize);
+                modelos_m3_page_table_write(pMemDesc, (NvU64)entryIndex * pLevelFmt->entrySize, entryValue.v8, pLevelFmt->entrySize);
 
                 entryOffset = entryIndex * pLevelFmt->entrySize;
 
@@ -2529,6 +2534,7 @@ _kbusWalkCBMapNextEntries_RmAperture
                                                         &entryValue,
                                                         pIter,
                                                         pageSize);
+                modelos_m3_page_table_write(pMemDesc, (NvU64)entryIndex * pLevelFmt->entrySize, entryValue.v8, pLevelFmt->entrySize);
 
                 entryOffset = entryIndex * pLevelFmt->entrySize;
 
@@ -2558,6 +2564,7 @@ _kbusWalkCBMapNextEntries_RmAperture
                                                     &entryValue,
                                                     pIter,
                                                     pageSize);
+                modelos_m3_page_table_write(pMemDesc, (NvU64)entryIndex * pLevelFmt->entrySize, entryValue.v8, pLevelFmt->entrySize);
 
             entryOffset = entryIndex * pLevelFmt->entrySize;
 

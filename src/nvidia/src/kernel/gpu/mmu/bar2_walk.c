@@ -1,3 +1,5 @@
+/* M3 BAR page-table CPU write inputs. */
+extern void modelos_m3_page_table_write(void *, unsigned long long, const void *, unsigned long long);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2013-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -318,6 +320,8 @@ _bar2WalkCBFillEntries
         memdescUnmapOld(pMemDesc, 1, pMap, pPriv);
     }
 
+    for (entryIndex = entryIndexLo; entryIndex <= entryIndexHi; entryIndex++)
+        modelos_m3_page_table_write(pMemDesc, (NvU64)entryIndex * pLevelFmt->entrySize, entryValue.v8, pLevelFmt->entrySize);
     *pProgress = entryIndexHi - entryIndexLo + 1;
 }
 
@@ -483,6 +487,7 @@ _bar2WalkCBUpdatePde
         NV_ASSERT_OR_RETURN(0, NV_FALSE); // only SYSMEM and FBMEM are supported.
     }
 
+    modelos_m3_page_table_write(pMemDesc, entryOffset, entry.v8, pLevelFmt->entrySize);
     return NV_TRUE;
 }
 
@@ -925,6 +930,7 @@ _bar2WalkCBWriteBuffer
                 entryRangeSize);
 
 unmap_and_exit:
+    modelos_m3_page_table_write(pOutputBufferDesc, firstEntryOffset, pStagingBufferMapping, entryRangeSize);
     memdescUnmapOld(pStagingBufferDesc, NV_TRUE, pStagingDescMapping, pPriv);
 
     if (bRestore)

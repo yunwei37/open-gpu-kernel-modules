@@ -1,3 +1,7 @@
+extern void modelos_m3_snapshot_new_inputs(void);
+extern void modelos_m3_snapshot_inputs(void);
+
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -330,6 +334,7 @@ GspMsgQueuesInit
 
     *ppMQCollection             = pMQCollection;
     pMQCollection->sharedMemPA  = pPageTbl[0];
+    l2_record(5, pPageTbl[0], (void *)pVaKernel, sharedBufSize);
 
 done:
     return nvStatus;
@@ -547,6 +552,17 @@ NV_STATUS GspMsgQueueSendCommand(MESSAGE_QUEUE_INFO *pMQI, OBJGPU *pGpu, NvU32 n
         NvU32 *pData = (NvU32 *)pSrc;
         *pData = 0xFFFFFFFF;
     }
+
+    /* M3 actual transport pages, including implicit allocation parameters. */
+    /* M3 first-consumer DMA inputs, before every staged message. */
+    modelos_m3_snapshot_new_inputs();
+    /* M3 GR input boundary: before firmware consumes new channel contexts. */
+    if (nvdmType == NVDM_TYPE_RM_RPC) {
+        const NvU32 *m3_rpc = gspMsgQueueGetRpcMessageHeader(pMQI, pCQE);
+        if (m3_rpc[3] == 0x67 && (m3_rpc[11] == 0xce97 || m3_rpc[11] == 0x902d || m3_rpc[11] == 0xcec0))
+            modelos_m3_snapshot_inputs();
+    }
+    l2_record(16, nvdmType, pCQE, nElements * pMQI->queueElementSizeMin);
 
     for (i = 0; i < nElements; i++)
     {

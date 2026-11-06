@@ -1,3 +1,5 @@
+/* M3 leaf PTE mapping inputs, distinct from directory fills. */
+extern void modelos_m3_page_table_write(void *, unsigned long long, const void *, unsigned long long);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2005-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -2031,6 +2033,7 @@ _gmmuWalkCBMapNextEntries_RmAperture
     _gmmuWalkCBMapNextEntries_Direct(pUserCtx, pTarget, pLevelMem,
                                      entryIndexLo, entryIndexHi, pProgress);
 
+    modelos_m3_page_table_write(pMemDesc, surf.offset, pIter->pMap, sizeOfEntries);
     memmgrMemEndTransfer(pMemoryManager, &surf, sizeOfEntries, transferFlags);
 }
 

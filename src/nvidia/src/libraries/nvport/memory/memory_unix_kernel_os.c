@@ -1,3 +1,5 @@
+/* M3 mapped memory copies: observe actual CPU writes, not GPU diffs. */
+extern void modelos_m3_cpu_write(void *, unsigned long long);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2014-2017 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -101,7 +103,9 @@ portMemCopy
     {
         return NULL;
     }
-    return os_mem_copy(pDestination, pSource, srcSize);
+    void *result = os_mem_copy(pDestination, pSource, srcSize);
+    modelos_m3_cpu_write(pDestination, srcSize);
+    return result;
 }
 
 void *
@@ -132,7 +136,9 @@ portMemSet
     {
         return pData;
     }
-    return os_mem_set(pData, value, lengthBytes);
+    void *result = os_mem_set(pData, value, lengthBytes);
+    modelos_m3_cpu_write(pData, lengthBytes);
+    return result;
 }
 
 NvS32

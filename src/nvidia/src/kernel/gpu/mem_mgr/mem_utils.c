@@ -1,3 +1,4 @@
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -1089,8 +1090,20 @@ memmgrMemCopy_IMPL
     TRANSFER_TYPE transferType = memmgrGetMemTransferType(pMemoryManager,
                                                           pDstInfo, pSrcInfo, flags);
 
-    return memmgrMemCopyWithTransferType(pMemoryManager, pDstInfo, pSrcInfo,
-                                         size, transferType, flags);
+    /* M3 physical memory copy operation: never snapshot GPU-produced bytes. */
+    NV_STATUS status = memmgrMemCopyWithTransferType(pMemoryManager, pDstInfo, pSrcInfo,
+                                                    size, transferType, flags);
+    if (status == NV_OK) {
+        NV_ADDRESS_SPACE src = memdescGetAddressSpace(pSrcInfo->pMemDesc);
+        NV_ADDRESS_SPACE dst = memdescGetAddressSpace(pDstInfo->pMemDesc);
+        if ((src == ADDR_FBMEM || src == ADDR_SYSMEM) &&
+            (dst == ADDR_FBMEM || dst == ADDR_SYSMEM)) {
+            NvU64 meta[4] = {memdescGetPhysAddr(pSrcInfo->pMemDesc, AT_GPU, pSrcInfo->offset),
+                             size, src == ADDR_FBMEM, dst == ADDR_FBMEM};
+            l2_record(38, memdescGetPhysAddr(pDstInfo->pMemDesc, AT_GPU, pDstInfo->offset), meta, sizeof(meta));
+        }
+    }
+    return status;
 }
 
 /*!
@@ -1226,6 +1239,20 @@ memmgrMemReadOrWriteInBlocks
  * @param[in] size      Size in bytes of the buffer
  * @param[in] flags     Flags
  */
+/* M3 physical surface writes: record CPU inputs, not a VRAM snapshot. */
+extern void l2_record(unsigned, unsigned long long, const void *, unsigned);
+void modelos_m3_surface_write(void *descriptor, unsigned long long offset,
+                              const void *data, unsigned long long bytes)
+{
+    MEMORY_DESCRIPTOR *desc = descriptor;
+    if (memdescGetAddressSpace(desc) != ADDR_FBMEM) return;
+    for (NvU64 off = 0; off < bytes;) {
+        NvU64 count = NV_MIN(bytes - off, 4096 - ((offset + off) & 4095));
+        l2_record(34, memdescGetPhysAddr(desc, AT_GPU, offset + off),
+                  (const NvU8 *)data + off, (unsigned)count);
+        off += count;
+    }
+}
 NV_STATUS
 memmgrMemWrite_IMPL
 (
@@ -1241,8 +1268,10 @@ memmgrMemWrite_IMPL
 
     NV_STATUS status = memmgrMemWriteWithTransferType(pMemoryManager, pDstInfo, pBuf,
                                                       size, transferType, flags);
-    if (status == NV_OK)
+    if (status == NV_OK) {
+        modelos_m3_surface_write(pDstInfo->pMemDesc, pDstInfo->offset, pBuf, size);
         return NV_OK;
+    }
 
     return memmgrMemReadOrWriteInBlocks(pMemoryManager, pDstInfo, pBuf,
                                         size, transferType, flags, NV_FALSE);
@@ -2043,4 +2072,22 @@ memmgrMemUtilsChannelSchedulingSetup_IMPL
         MEM_WR32(pChannel->pbCpuVA + pChannel->semaOffset, 0);
     }
     return NV_OK;
+}
+
+/* M3 explicit SYS page-table inputs; generic SYS transfers are not snapshots. */
+void modelos_m3_page_table_write(void *descriptor, unsigned long long offset,
+                                 const void *data, unsigned long long bytes)
+{
+    MEMORY_DESCRIPTOR *desc = descriptor;
+    if (memdescGetAddressSpace(desc) == ADDR_FBMEM) {
+        modelos_m3_surface_write(descriptor, offset, data, bytes);
+        return;
+    }
+    if (memdescGetAddressSpace(desc) != ADDR_SYSMEM) return;
+    for (NvU64 off = 0; off < bytes;) {
+        NvU64 count = NV_MIN(bytes - off, 4096 - ((offset + off) & 4095));
+        l2_record(37, memdescGetPhysAddr(desc, AT_GPU, offset + off),
+                  (const NvU8 *)data + off, (unsigned)count);
+        off += count;
+    }
 }
