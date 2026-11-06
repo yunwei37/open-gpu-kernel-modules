@@ -74,6 +74,12 @@ ifeq ($(NV_BUILD_TYPE),debug)
 endif
 
 $(call ASSIGN_PER_OBJ_CFLAGS, $(NVIDIA_OBJECTS), $(NVIDIA_CFLAGS))
+ifeq ($(CONFIG_MODELOS_CAPTURE_PRODUCER),y)
+ ifeq ($(MODELOS_REPOSITORY),)
+  $(error MODELOS_REPOSITORY is required for the offline native producer)
+ endif
+ $(call ASSIGN_PER_OBJ_CFLAGS, nvidia/modelos-submit.o, -DMODELOS_CAPTURE_PRODUCER -I$(MODELOS_REPOSITORY)/serve/hw/m3)
+endif
 
 #
 # Remove ftrace instrumentation from the kernel interface objects so that

@@ -14,6 +14,7 @@
 #include "class/clc661.h"
 #include "class/clc361.h"
 #include "class/clc6c0.h"
+#include "class/clcec0.h"
 #include "alloc/alloc_channel.h"
 #include "ctrl/ctrla06c.h"
 #include "ctrl/ctrlc36f.h"
@@ -26,6 +27,7 @@
 #include <linux/ktime.h>
 #include <linux/delay.h>
 #include <linux/mutex.h>
+#include <linux/vmalloc.h>
 #include <linux/device/driver.h>
 #include "modelos-submit.h"
 #include "modelos-qmd5.h"
@@ -72,6 +74,7 @@ struct modelos_nv {
     NvHandle group, ctxshare, channel, compute, usermode;
     void *doorbell;
     struct modelos_mem arena, error;
+    NvU32 compute_class;
 };
 struct modelos_program {
     const void *text, *constant;
@@ -156,6 +159,7 @@ static int require_blackwell(struct modelos_nv *c, NvU32 *sass_version)
     NV2080_CTRL_GR_INFO gr = { .index = NV2080_CTRL_GR_INFO_INDEX_SM_VERSION };
     NV2080_CTRL_GR_GET_INFO_PARAMS info = { .grInfoListSize = 1, .grInfoList = NV_PTR_TO_NvP64(&gr) };
     NvU32 *classes = NULL, n, found = 0;
+    NvU32 compute_class = c->compute_class ?: MODELOS_BLACKWELL_COMPUTE_B;
     int ret;
 
     RM_TRY("class-count", modelos_rm_control(c->stack, c->client, c->device,
@@ -172,13 +176,13 @@ static int require_blackwell(struct modelos_nv *c, NvU32 *sass_version)
     if (list.numClasses > n) { ret = -ERANGE; goto fail; }
     for (n = 0; n < list.numClasses; n++) {
         if (classes[n] == MODELOS_BLACKWELL_GPFIFO) found |= 1;
-        if (classes[n] == MODELOS_BLACKWELL_COMPUTE_B) found |= 2;
+        if (classes[n] == compute_class) found |= 2;
         if (classes[n] == HOPPER_USERMODE_A) found |= 4;
     }
     if (found != 7) { ret = -EOPNOTSUPP; goto fail; }
     RM_TRY("sm-version", modelos_rm_control(c->stack, c->client, c->subdevice,
         NV2080_CTRL_CMD_GR_GET_INFO, &info, sizeof(info)));
-    pr_info("MODELOS_NVTEST gpu=0x%x sm_version=0x%x classes=c96f,cfc0,c661\n", c->gpu_id, gr.data);
+    pr_info("MODELOS_NVTEST gpu=0x%x sm_version=0x%x classes=c96f,%x,c661\n", c->gpu_id, gr.data, compute_class);
     /* RM's internal 10.4 SASS target is CUDA sm_120, as in the NV reference. */
     if (gr.data != 0xa04) { ret = -EOPNOTSUPP; goto fail; }
     *sass_version = ((gr.data & 0xf00) >> 4) | (gr.data & 0xf);
@@ -244,7 +248,8 @@ static int make_channel(struct modelos_nv *c)
     fifo.engineType = 0;
     /* hVASpace=0 inherits the explicitly RM-owned TSG VA, no UVM registration. */
     RM_TRY("gpfifo", alloc(c, c->group, &c->channel, MODELOS_BLACKWELL_GPFIFO, &fifo, sizeof(fifo)));
-    RM_TRY("compute", alloc(c, c->channel, &c->compute, MODELOS_BLACKWELL_COMPUTE_B, NULL, 0));
+    RM_TRY("compute", alloc(c, c->channel, &c->compute,
+        c->compute_class ?: MODELOS_BLACKWELL_COMPUTE_B, NULL, 0));
     RM_TRY("schedule", modelos_rm_control(c->stack, c->client, c->group,
         NVA06C_CTRL_CMD_GPFIFO_SCHEDULE, &schedule, sizeof(schedule)));
     RM_TRY("work-token", modelos_rm_control(c->stack, c->client, c->channel,
@@ -546,6 +551,100 @@ out:
     mutex_unlock(&test_lock);
     return ret;
 }
+
+#ifdef MODELOS_CAPTURE_PRODUCER
+#include <linux/modelos_m3.h>
+#include "producer-arena.h"
+#include "native-context.h"
+static struct modelos_nv *capture_context;
+static NV_STATUS capture_allocate(void *context, NvHandle parent, NvHandle *handle,
+                                  unsigned cls, void *params, unsigned bytes)
+{
+    return alloc(context, parent, handle, cls, params, bytes);
+}
+static u64 capture_physical(void *cpu)
+{
+    return is_vmalloc_addr(cpu) ? ((u64)vmalloc_to_pfn(cpu) << PAGE_SHIFT) |
+                                  offset_in_page(cpu) : virt_to_phys(cpu);
+}
+
+/* Build-machine input producer only. No cubin, QMD or pushbuffer is loaded,
+ * and no channel work is posted. RM owns every returned arena and channel
+ * until the producer guest exits; only its paired recording enters ModelOS.
+ */
+int modelos_nv_capture_run(unsigned int gpu_index)
+{
+    struct modelos_nv *c = NULL;
+    NvU32 *ids = NULL, count = 0, sass = 0;
+    struct m3_native_context context = {0};
+    int ret = 0;
+    mutex_lock(&test_lock);
+    if (capture_context || quarantined) { ret = -EBUSY; goto out; }
+    wait_for_device_probe();
+    if (!nvidia_get_gpuid_list(NULL, &count) || gpu_index >= count) {
+        ret = -ENODEV; goto out;
+    }
+    ids = kcalloc(count, sizeof(*ids), GFP_KERNEL);
+    c = kzalloc(sizeof(*c), GFP_KERNEL);
+    if (!ids || !c) { ret = -ENOMEM; goto cleanup; }
+    if (!nvidia_get_gpuid_list(ids, &count) || gpu_index >= count) {
+        ret = -ENODEV; goto cleanup;
+    }
+    /* CEC0 is the qualified SM120 compute class, checked against this GPU's
+     * actual advertised class list before creating its channel object. */
+    c->compute_class = BLACKWELL_COMPUTE_B;
+    ret = open_gpu(c, ids[gpu_index]); if (ret) goto cleanup;
+    ret = require_blackwell(c, &sass); if (ret) goto cleanup;
+    ret = memory_create(c, &c->arena, ARENA_VA, ARENA_SIZE); if (ret) goto cleanup;
+    ret = memory_create(c, &c->error, ARENA_VA+ARENA_SIZE, 4096); if (ret) goto cleanup;
+    ret = make_channel(c); if (ret) goto cleanup;
+    {
+        const struct m3_owner_allocator allocator = {
+            c->client, c->device, c->vaspace, c->channel, c, capture_allocate
+        };
+        ret = rm_status("owner-arenas", m3_reserve_owner_arena(&allocator));
+        if (ret) goto cleanup;
+    }
+    if (READ_ONCE(*(u32 *)(c->arena.cpu+USERD_OFF+offsetof(AmpereAControlGPFifo,GPPut)))) {
+        ret = -EBUSY; goto cleanup;
+    }
+    context.version = M3_NATIVE_CONTEXT_VERSION;
+    context.client = c->client; context.device = c->device;
+    context.subdevice = c->subdevice; context.vas = c->vaspace;
+    context.channel = c->channel; context.compute_class = c->compute_class;
+    context.token = c->token;
+    context.arena_va = c->arena.va; context.arena_bytes = c->arena.size;
+    for (unsigned i=0; i<ARRAY_SIZE(context.arena_pages); i++)
+        context.arena_pages[i] = capture_physical((u8 *)c->arena.cpu+i*PAGE_SIZE);
+    context.fifo_offset = 0; context.fifo_entries = FIFO_ENTRIES;
+    context.userd_offset = USERD_OFF;
+    context.error_va = c->error.va; context.error_bytes = c->error.size;
+    context.error_physical = capture_physical(c->error.cpu);
+    context.doorbell_physical = capture_physical(c->doorbell);
+    context.doorbell_bytes = 0x10000;
+    l2_record(42, 0, &context, sizeof(context));
+    modelos_m3_snapshot_inputs();
+    l2_record(11, 0, "ready-to-submit", 15);
+    pr_info("MODELOS_NATIVE_CONTEXT_READY channel=%x class=%x token=%x put=0 launches=0\n",
+            c->channel, c->compute_class, c->token);
+    capture_context = c;
+    c = NULL;
+    l2_counts_dump();
+cleanup:
+    if (c) {
+        int cleanup = close_gpu(c);
+        if (cleanup) {
+            quarantined = c;
+            c = NULL;
+            pr_err("MODELOS_NATIVE_CONTEXT_QUARANTINED status=%d\n", cleanup);
+        }
+    }
+    kfree(c); kfree(ids);
+out:
+    mutex_unlock(&test_lock);
+    return ret;
+}
+#endif
 
 static int __init test_param(char *s) { return kstrtobool(s, &boot_test); }
 static int __init gpu_param(char *s) { return kstrtouint(s, 0, &boot_gpu); }

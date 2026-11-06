@@ -109,7 +109,9 @@ $(foreach _module, $(NV_KERNEL_MODULES), \
  $(eval include $(src)/$(_module)/$(_module).Kbuild))
 
 
-ccflags-y += -I$(obj)
+# conftest.sh changes into its source directory. Its generated headers still
+# belong to this kernel's output directory, including a built-in capture build.
+ccflags-y += -I$(abspath $(obj))
 ccflags-y += -I$(src)/common/inc
 ccflags-y += -I$(src)
 ccflags-y += -Wall $(DEFINES) $(INCLUDES) -Wno-cast-qual -Wno-format-extra-args
