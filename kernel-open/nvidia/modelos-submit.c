@@ -6,6 +6,7 @@
 #include "class/cl0000.h"
 #include "class/cl0080.h"
 #include "class/cl2080.h"
+#include "class/cl2080_notification.h"
 #include "class/cl0070.h"
 #include "class/cl90f1.h"
 #include "class/cla06c.h"
@@ -143,7 +144,7 @@ static int open_gpu(struct modelos_nv *c, NvU32 gpu_id)
     vm.limit = (1ULL << 47) - 1;
     RM_TRY("virtual-memory", alloc(c, c->device, &c->virtual_memory, NV01_MEMORY_VIRTUAL, &vm, sizeof(vm)));
     group.hVASpace = c->vaspace;
-    group.engineType = 0; /* NV2080_ENGINE_TYPE_GRAPHICS */
+    group.engineType = NV2080_ENGINE_TYPE_GRAPHICS;
     RM_TRY("channel-group", alloc(c, c->device, &c->group, KEPLER_CHANNEL_GROUP_A, &group, sizeof(group)));
     share.hVASpace = c->vaspace;
     share.flags = NV_CTXSHARE_ALLOCATION_FLAGS_SUBCONTEXT_ASYNC;
@@ -245,7 +246,7 @@ static int make_channel(struct modelos_nv *c)
     fifo.hContextShare = c->ctxshare;
     fifo.hUserdMemory[c->subindex] = c->arena.handle;
     fifo.userdOffset[c->subindex] = USERD_OFF;
-    fifo.engineType = 0;
+    fifo.engineType = NV2080_ENGINE_TYPE_GRAPHICS;
     /* hVASpace=0 inherits the explicitly RM-owned TSG VA, no UVM registration. */
     RM_TRY("gpfifo", alloc(c, c->group, &c->channel, MODELOS_BLACKWELL_GPFIFO, &fifo, sizeof(fifo)));
     RM_TRY("compute", alloc(c, c->channel, &c->compute,
